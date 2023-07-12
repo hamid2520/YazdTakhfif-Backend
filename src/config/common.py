@@ -114,7 +114,7 @@ DATABASES = {
 
 # General
 APPEND_SLASH = True
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tehran'
 LANGUAGE_CODE = 'en-us'
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.

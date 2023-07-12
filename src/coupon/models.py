@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from django.utils.text import slugify
 
 from src.business.models import Business
@@ -27,6 +28,8 @@ class Coupon(models.Model):
     title = models.CharField(max_length=128)
     slug = models.SlugField(max_length=256, db_index=True, allow_unicode=True, editable=False, blank=True)
     business = models.ForeignKey(to=Business, on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
+    expire_date = models.DateTimeField(default=timezone.now())
     category = models.ManyToManyField(to=Category)
     description = models.TextField(blank=True, null=True)
     terms_of_use = models.TextField(blank=True, null=True)
