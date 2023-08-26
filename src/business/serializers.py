@@ -6,6 +6,4 @@ from .models import Business
 class BusinessSerializer(serializers.ModelSerializer):
     class Meta:
         model = Business
-        fields = ("title", "user", "description", "address")
-        read_only_fields = ["user", ]
-
+        fields = ("title", "admin", "description", "address")

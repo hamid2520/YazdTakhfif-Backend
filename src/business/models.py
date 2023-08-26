@@ -7,7 +7,7 @@ from src.users.models import User
 class Business(models.Model):
     title = models.CharField(max_length=128, unique=True)
     slug = models.SlugField(max_length=256, db_index=True, allow_unicode=True, editable=False, blank=True)
-    user = models.OneToOneField(to=User, on_delete=models.CASCADE)
+    admin = models.OneToOneField(to=User, on_delete=models.CASCADE)
     description = models.TextField(blank=True, null=True)
     address = models.TextField(blank=True, null=True)
 

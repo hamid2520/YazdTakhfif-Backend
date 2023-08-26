@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import BusinessListApiView, BusinessDetailApiView
+from rest_framework.routers import SimpleRouter
 
-urlpatterns = [
-    path("list/", BusinessListApiView.as_view(), name="business_list"),
-    path("detail/<slug:slug>/", BusinessDetailApiView.as_view(), name="business_detail"),
-]
+from .views import BusinessViewSet
+
+router = SimpleRouter()
+router.register(prefix="", viewset=BusinessViewSet, basename="business")
+urlpatterns = router.urls
