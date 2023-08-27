@@ -1,12 +1,19 @@
 from rest_framework import serializers
+
+from .models import Category, Coupon, LineCoupon
 from src.business.serializers import BusinessSerializer
-from .models import Category, Coupon, LineCoupon, LineCouponDetail
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ("title", "slug", "parent", "level")
+        fields = ("id", "title", "slug", "parent", "level")
+
+
+class LineCouponSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LineCoupon
+        fields = "__all__"
 
 
 class CouponSerializer(serializers.ModelSerializer):
@@ -15,18 +22,11 @@ class CouponSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Coupon
-        fields = ("title", "slug", "business", "created", "expire_date", "category", "description", "terms_of_use")
+        fields = (
+            "id", "title", "slug", "business", "created", "expire_date", "category", "description", "terms_of_use")
 
 
-class LineCouponDetailSerializer(serializers.ModelSerializer):
+class CouponCreateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = LineCouponDetail
-        fields = ("price", "discount_percent", "sell_count")
-
-
-class LineCouponSerializer(serializers.ModelSerializer):
-    detail = LineCouponDetailSerializer()
-
-    class Meta:
-        model = LineCoupon
-        fields = ("title", "detail", "is_main", "coupon")
+        model = Coupon
+        fields = ("title", "business", "expire_date", "category", "description", "terms_of_use")
