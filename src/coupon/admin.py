@@ -1,4 +1,3 @@
-from django.forms import Form
 from django.contrib import admin
 
 from src.coupon.models import Category, Coupon, LineCoupon
@@ -18,14 +17,8 @@ class CouponAdmin(admin.ModelAdmin):
 class LineCouponAdmin(admin.ModelAdmin):
     list_display = ["title", "coupon", "is_main", "discount_percent", "price", "final_price"]
     list_filter = ["coupon", "is_main"]
-    list_editable = ["discount_percent", "price"]
+    list_editable = ["discount_percent", "is_main", "price"]
     readonly_fields = ["final_price", ]
-
-    def save_model(self, request, obj, form: Form, change):
-        queryset = LineCoupon.objects.filter(coupon=form.cleaned_data.get("coupon"), is_main=True)
-        if queryset.exists():
-            raise ValueError("Only one Line coupon can be active!")
-        return super().save_model(request, obj, form, change)
 
 
 admin.site.register(Category, CategoryAdmin)
