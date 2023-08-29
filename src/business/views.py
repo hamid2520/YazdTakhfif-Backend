@@ -1,3 +1,11 @@
-from django.shortcuts import render
+from rest_framework.viewsets import ModelViewSet
 
-# Create your views here.
+from .models import Business
+from .serializers import BusinessSerializer
+
+
+class BusinessViewSet(ModelViewSet):
+    queryset = Business.objects.all()
+    serializer_class = BusinessSerializer
+    lookup_field = "slug"
+    lookup_url_kwarg = "slug"
