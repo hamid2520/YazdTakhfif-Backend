@@ -1,5 +1,5 @@
-from django.core.exceptions import ValidationError
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from src.users.models import User
@@ -8,11 +8,12 @@ from src.coupon.models import LineCoupon
 
 class BasketDetail(models.Model):
     line_coupon = models.ForeignKey(LineCoupon, on_delete=models.DO_NOTHING)
-    count = models.SmallIntegerField(blank=True, default=1, validators=[MinValueValidator(1), ])
-    payment_price = models.IntegerField(blank=True, null=True, validators=[MinValueValidator(0), ])
-    payment_offer_price = (models.SmallIntegerField(blank=True, null=True,
-                                                    validators=[MinValueValidator(1), MaxValueValidator(100)]))
-    payment_price_with_offer = models.IntegerField(blank=True, null=True, validators=[MinValueValidator(0), ])
+    count = models.PositiveSmallIntegerField(blank=True, default=0)
+    payment_price = models.PositiveIntegerField(blank=True, null=True)
+    payment_offer_percent = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(100), ])
+    payment_price_with_offer = models.PositiveIntegerField(blank=True, null=True)
+    final_price = models.PositiveIntegerField(blank=True, null=True)
+    final_price_with_offer = models.PositiveIntegerField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.line_coupon}({self.id})"
@@ -28,11 +29,10 @@ class Basket(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     payment_datetime = models.DateTimeField(blank=True, null=True)
     is_paid = models.BooleanField(default=False)
-    count = models.SmallIntegerField(blank=True, null=True, validators=[MinValueValidator(1), ])
-    total_price = models.IntegerField(blank=True, null=True, validators=[MinValueValidator(0), ])
-    total_offer_price = models.SmallIntegerField(blank=True, null=True,
-                                                 validators=[MinValueValidator(1), MaxValueValidator(100), ])
-    total_price_with_offer = models.IntegerField(blank=True, null=True, validators=[MinValueValidator(0), ])
+    count = models.PositiveSmallIntegerField(blank=True, default=0)
+    total_price = models.PositiveIntegerField(blank=True, null=True)
+    total_offer_percent = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(100), ])
+    total_price_with_offer = models.PositiveIntegerField(blank=True, null=True)
 
     def validate_unique(self, exclude=None):
         if not self.is_paid:
