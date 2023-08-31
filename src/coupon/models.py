@@ -60,7 +60,7 @@ class LineCoupon(models.Model):
         return super().validate_unique(exclude)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.final_price = (self.price * (100 - self.offer_percent))
+        self.final_price = self.price - (self.price * (self.offer_percent / 100))
         self.full_clean(exclude=None, validate_unique=True)
         return super().save(force_insert=False, force_update=False, using=None, update_fields=None)
 
