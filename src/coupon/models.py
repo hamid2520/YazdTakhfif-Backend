@@ -22,6 +22,23 @@ class Category(models.Model):
         return f"{self.title}({self.level})"
 
 
+class FAQ(models.Model):
+    category = models.ForeignKey(to=Category, on_delete=models.CASCADE)
+    title = models.CharField(max_length=1000)
+    answer = models.CharField(max_length=1000)
+
+    def clean(self):
+        if not self.category.level == 1:
+            raise ValidationError({"category": "Category must be at 1 level!"})
+
+    def __str__(self):
+        return f"{self.title[0:15]}({self.category})"
+
+    class Meta:
+        verbose_name = "FAQ"
+        verbose_name_plural = "FAQs"
+
+
 class Coupon(models.Model):
     title = models.CharField(max_length=128)
     slug = models.SlugField(max_length=256, db_index=True, allow_unicode=True, editable=False, blank=True)
