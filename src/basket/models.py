@@ -11,7 +11,7 @@ from src.coupon.models import LineCoupon
 class BasketDetail(models.Model):
     slug = models.SlugField(db_index=True, blank=True, default=uuid.uuid4, editable=False, unique=True)
     line_coupon = models.ForeignKey(LineCoupon, on_delete=models.DO_NOTHING)
-    count = models.PositiveSmallIntegerField(blank=True, default=0)
+    count = models.PositiveSmallIntegerField(default=1)
     payment_price = models.PositiveIntegerField(blank=True, null=True)
     payment_offer_percent = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(100), ])
     payment_price_with_offer = models.PositiveIntegerField(blank=True, null=True)
@@ -50,7 +50,7 @@ class Basket(models.Model):
         if not self.is_paid:
             baskets = Basket.objects.filter(user=self.user, is_paid=False)
             if baskets.exists():
-                if not baskets.first() == self:
+                if baskets.first() != self:
                     raise ValidationError({"is_paid": "Only one basket can be not paid!"})
         return super().validate_unique(exclude)
 
