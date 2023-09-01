@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Sum
 
 from .models import Basket, BasketDetail
 
@@ -8,6 +9,12 @@ class BasketAdmin(admin.ModelAdmin):
     list_editable = ["is_paid", ]
     list_filter = ["created_at", "is_paid", "payment_datetime", ]
     readonly_fields = ["count", "total_price", "total_offer_percent", "total_price_with_offer", "payment_datetime", ]
+
+    def save_model(self, request, obj, form, change):
+        form.save()
+        count = obj.product.all().aggregate(Sum("count"))
+        obj.count = count.get("count__sum")
+        obj.save()
 
 
 class BasketDetailAdmin(admin.ModelAdmin):

@@ -11,7 +11,7 @@ from src.coupon.models import LineCoupon
 class BasketDetail(models.Model):
     slug = models.SlugField(db_index=True, blank=True, default=uuid.uuid4, editable=False, unique=True)
     line_coupon = models.ForeignKey(LineCoupon, on_delete=models.DO_NOTHING)
-    count = models.PositiveSmallIntegerField(blank=True, default=0)
+    count = models.PositiveSmallIntegerField()
     payment_price = models.PositiveIntegerField(blank=True, null=True)
     payment_offer_percent = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(100), ])
     payment_price_with_offer = models.PositiveIntegerField(blank=True, null=True)
@@ -20,8 +20,7 @@ class BasketDetail(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
-        basket_detail = BasketDetail.objects.filter(id=self.id)
-        if not basket_detail.exists():
+        if self.slug is None:
             self.slug = f"{self.__class__.__name__.lower()}-{self.slug}"
         return super().save(force_insert, force_update, using,
                             update_fields)
@@ -50,14 +49,15 @@ class Basket(models.Model):
         if not self.is_paid:
             baskets = Basket.objects.filter(user=self.user, is_paid=False)
             if baskets.exists():
-                if not baskets.first() == self:
+                if baskets.first() != self:
                     raise ValidationError({"is_paid": "Only one basket can be not paid!"})
         return super().validate_unique(exclude)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        basket = Basket.objects.filter(id=self.id)
-        if not basket.exists():
+        if self.slug is None:
             self.slug = f"{self.__class__.__name__.lower()}-{self.slug}"
+        # build user for validate_unique
+        super().save(force_insert, force_update, using, update_fields)
         self.full_clean()
         return super().save(force_insert, force_update, using,
                             update_fields)

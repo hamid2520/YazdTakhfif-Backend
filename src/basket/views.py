@@ -19,24 +19,16 @@ class BasketViewSet(ModelViewSet):
 
     @action(detail=True, methods=["GET"])
     def get_basket_count(self, request, slug):
-        count = self.get_queryset().get(slug=slug).count
+        count = self.get_object().product.all().count()
         return Response(data={"count": count}, status=status.HTTP_200_OK)
 
 
 class BasketDetailViewSet(ModelViewSet):
     queryset = BasketDetail.objects.all()
     serializer_class = BasketDetailSerializer
-    lookup_field = "slug"
-    lookup_url_kwarg = "slug"
 
-    def list(self, request, *args, **kwargs):
-        basket = get_object_or_404(Basket, slug=self.kwargs.get("slug"))
-        queryset = basket.product.all()
-        queryset = self.filter_queryset(queryset)
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+    def get_queryset(self):
+        return Basket.objects.get(slug=self.kwargs.get("slug")).product.all()
 
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+    def get_object(self):
+        return BasketDetail.objects.get(slug=self.kwargs.get("slug"))
