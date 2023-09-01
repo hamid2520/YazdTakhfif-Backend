@@ -7,13 +7,8 @@ from src.business.serializers import BusinessSerializer
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ("id", "title", "slug", "parent", "level")
-
-
-class LineCouponSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LineCoupon
-        fields = "__all__"
+        fields = ["title", "slug", "parent", "level"]
+        read_only_fields = ["slug", ]
 
 
 class CouponSerializer(serializers.ModelSerializer):
@@ -22,11 +17,18 @@ class CouponSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Coupon
-        fields = (
-            "id", "title", "slug", "business", "created", "expire_date", "category", "description", "terms_of_use")
+        fields = [
+            "title", "slug", "business", "created", "expire_date", "category", "description", "terms_of_use"]
 
 
 class CouponCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coupon
-        fields = ("title", "business", "expire_date", "category", "description", "terms_of_use")
+        fields = ["title", "business", "expire_date", "category", "description", "terms_of_use"]
+
+
+class LineCouponSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LineCoupon
+        fields = "__all__"
+        read_only_fields = ["id", "final_price", "bought_count"]

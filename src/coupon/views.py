@@ -18,7 +18,7 @@ class CouponViewSet(ModelViewSet):
     lookup_url_kwarg = "slug"
 
     def get_serializer_class(self):
-        if self.action == "list":
+        if self.action == ("list" or "retrieve"):
             return CouponSerializer
         return CouponCreateSerializer
 
