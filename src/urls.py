@@ -13,7 +13,6 @@ from drf_yasg.views import get_schema_view
 
 from src.files.urls import files_router
 from src.users.urls import users_router
-from src.social.views import exchange_token, complete_twitter_login
 
 schema_view = get_schema_view(
     openapi.Info(title="Pastebin API", default_version='v1'),
@@ -45,8 +44,6 @@ urlpatterns = [
                   path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
                   # social login
                   url('', include('social_django.urls', namespace='social')),
-                  url(r'^complete/twitter/', complete_twitter_login),
-                  url(r'^api/v1/social/(?P<backend>[^/]+)/$', exchange_token),
                   # swagger docs
                   url(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0),
                       name='schema-json'),
