@@ -1,12 +1,17 @@
 from django.contrib import admin
 
-from src.coupon.models import Category, Coupon, LineCoupon
+from src.coupon.models import Category, Coupon, LineCoupon, FAQ
 
 
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ["title", "parent", "level"]
     list_filter = ["parent", "level"]
     list_editable = ["parent", "level"]
+
+
+class FAQAdmin(admin.ModelAdmin):
+    list_display = ["title", "category",]
+    list_filter = ["category"]
 
 
 class CouponAdmin(admin.ModelAdmin):
@@ -23,5 +28,6 @@ class LineCouponAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Category, CategoryAdmin)
+admin.site.register(FAQ, FAQAdmin)
 admin.site.register(Coupon, CouponAdmin)
 admin.site.register(LineCoupon, LineCouponAdmin)
