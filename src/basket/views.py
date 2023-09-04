@@ -19,7 +19,7 @@ class BasketViewSet(ModelViewSet):
 
     @action(detail=True, methods=["GET"])
     def get_basket_count(self, request, slug):
-        count = self.get_object().product.all().count()
+        count = self.get_object().count
         return Response(data={"count": count}, status=status.HTTP_200_OK)
 
 

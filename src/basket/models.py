@@ -3,6 +3,7 @@ import uuid
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models import Sum, Avg
 
 from src.users.models import User
 from src.coupon.models import LineCoupon
@@ -15,13 +16,19 @@ class BasketDetail(models.Model):
     payment_price = models.PositiveIntegerField(blank=True, null=True)
     payment_offer_percent = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(100), ])
     payment_price_with_offer = models.PositiveIntegerField(blank=True, null=True)
-    final_price = models.PositiveIntegerField(blank=True, null=True)
-    final_price_with_offer = models.PositiveIntegerField(blank=True, null=True)
+    total_price = models.PositiveIntegerField(blank=True, null=True)
+    total_price_with_offer = models.PositiveIntegerField(blank=True, null=True)
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         if self.slug is None:
             self.slug = f"{self.__class__.__name__.lower()}-{self.slug}"
+        if self.payment_price:
+            self.total_price = self.payment_price * self.count
+            self.total_price_with_offer = self.payment_price_with_offer * self.count
+        else:
+            self.total_price = self.line_coupon.price * self.count
+            self.total_price_with_offer = self.line_coupon.price_with_offer * self.count
         return super().save(force_insert, force_update, using,
                             update_fields)
 
@@ -56,8 +63,14 @@ class Basket(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.slug is None:
             self.slug = f"{self.__class__.__name__.lower()}-{self.slug}"
-        # build user for validate_unique
+        if not self.is_paid:
+            self.total_price = self.product.all().aggregate(Sum("total_price"))["total_price__sum"]
+            self.total_price_with_offer = self.product.all().aggregate(Sum("total_price_with_offer"))[
+                "total_price_with_offer__sum"]
+            self.total_offer_percent = 100 - (self.total_price_with_offer * 100 / self.total_price)
+        # build user,modify product for validate_unique, count calculating
         super().save(force_insert, force_update, using, update_fields)
+        self.count = self.product.all().count()
         self.full_clean()
         return super().save(force_insert, force_update, using,
                             update_fields)
