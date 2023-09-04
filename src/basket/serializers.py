@@ -23,6 +23,6 @@ class BasketDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = BasketDetail
         fields = ["slug", "line_coupon", "count", "payment_price", "payment_offer_percent", "payment_price_with_offer",
-                  "final_price", "final_price_with_offer", ]
-        read_only_fields = ["slug", "payment_price", "payment_offer_percent", "payment_price_with_offer", "final_price",
-                            "final_price_with_offer", ]
+                  "total_price", "total_price_with_offer", ]
+        read_only_fields = ["slug", "payment_price", "payment_offer_percent", "payment_price_with_offer", "total_price",
+                            "total_price_with_offer", ]

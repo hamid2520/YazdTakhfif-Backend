@@ -24,7 +24,6 @@ class BasketViewSet(ModelViewSet):
 
 
 class BasketDetailViewSet(ModelViewSet):
-    queryset = BasketDetail.objects.all()
     serializer_class = BasketDetailSerializer
     lookup_url_kwarg = "slug"
 

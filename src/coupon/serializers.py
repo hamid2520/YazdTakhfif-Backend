@@ -30,5 +30,6 @@ class CouponCreateSerializer(serializers.ModelSerializer):
 class LineCouponSerializer(serializers.ModelSerializer):
     class Meta:
         model = LineCoupon
-        fields = "__all__"
-        read_only_fields = ["id", "final_price", "bought_count"]
+        fields = ["slug", "title", "coupon", "is_main", "count", "price", "offer_percent", "price_with_offer",
+                  "sell_count", "rate"]
+        read_only_fields = ["slug", "price_with_offer", "sell_count"]

@@ -1,16 +1,16 @@
 import uuid
 
 from django.db import models
+from django.db.models import Sum
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db.models import Sum, Avg
+from django.core.validators import MaxValueValidator
 
 from src.users.models import User
 from src.coupon.models import LineCoupon
 
 
 class BasketDetail(models.Model):
-    slug = models.SlugField(db_index=True, blank=True, default=uuid.uuid4, editable=False, unique=True)
+    slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
     line_coupon = models.ForeignKey(LineCoupon, on_delete=models.DO_NOTHING)
     count = models.PositiveSmallIntegerField()
     payment_price = models.PositiveIntegerField(blank=True, null=True)
@@ -22,7 +22,7 @@ class BasketDetail(models.Model):
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         if self.slug is None:
-            self.slug = f"{self.__class__.__name__.lower()}-{self.slug}"
+            self.slug = f"{self.__class__.__name__.lower()}-{uuid.uuid4()}"
         if self.payment_price:
             self.total_price = self.payment_price * self.count
             self.total_price_with_offer = self.payment_price_with_offer * self.count
@@ -41,7 +41,7 @@ class BasketDetail(models.Model):
 
 
 class Basket(models.Model):
-    slug = models.SlugField(db_index=True, blank=True, default=uuid.uuid4, editable=False, unique=True)
+    slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ManyToManyField(BasketDetail, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -62,7 +62,7 @@ class Basket(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.slug is None:
-            self.slug = f"{self.__class__.__name__.lower()}-{self.slug}"
+            self.slug = f"{self.__class__.__name__.lower()}-{uuid.uuid4()}"
         if not self.is_paid:
             self.total_price = self.product.all().aggregate(Sum("total_price"))["total_price__sum"]
             self.total_price_with_offer = self.product.all().aggregate(Sum("total_price_with_offer"))[

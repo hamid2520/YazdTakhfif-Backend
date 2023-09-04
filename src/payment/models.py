@@ -24,7 +24,7 @@ def payment_done(instance, basket_id):
 
 
 class Payment(models.Model):
-    slug = models.SlugField(blank=True, null=True, unique=True, db_index=True, editable=False)
+    slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     basket = models.ForeignKey(Basket, on_delete=models.CASCADE)
     total_price = models.PositiveIntegerField(blank=True, null=True)
