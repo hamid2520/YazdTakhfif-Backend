@@ -21,9 +21,6 @@ def payment_done(instance, basket_id):
     basket.is_paid = True
     basket.payment_datetime = instance.created_at
     basket.save()
-    instance.total_price = basket.total_price
-    instance.total_price_with_offer = basket.total_price_with_offer
-    instance.save()
 
 
 class Payment(models.Model):
@@ -39,8 +36,9 @@ class Payment(models.Model):
         if self.slug is None:
             self.slug = f"{self.__class__.__name__.lower()}-{uuid.uuid4()}"
         # task when payment created
-        # super().save(force_insert, force_update, using, update_fields)
         payment_done(self, self.basket_id)
+        self.total_price = self.basket.total_price
+        self.total_price_with_offer = self.basket.total_price_with_offer
         return super().save(force_insert, force_update, using,
                             update_fields)
 
