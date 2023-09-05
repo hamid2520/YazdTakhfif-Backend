@@ -24,16 +24,11 @@ class CouponViewSet(ModelViewSet):
 
 
 class LineCouponViewSet(ModelViewSet):
-    queryset = LineCoupon.objects.all()
     serializer_class = LineCouponSerializer
+    lookup_url_kwarg = "slug"
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.queryset.filter(coupon__slug=self.kwargs.get("slug"))
-        queryset = self.filter_queryset(queryset)
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+    def get_queryset(self):
+        return Coupon.objects.get(slug=self.kwargs.get("slug")).linecoupon_set.all()
 
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+    def get_object(self):
+        return LineCoupon.objects.get(slug=self.kwargs.get("slug"))

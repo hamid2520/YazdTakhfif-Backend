@@ -29,6 +29,7 @@ urlpatterns = [
                   path('business/', include('src.business.urls')),
                   path('coupon/', include('src.coupon.urls')),
                   path('basket/', include('src.basket.urls')),
+                  path('payment/', include('src.payment.urls')),
                   # admin panel
                   path('admin/', admin.site.urls),
                   url(r'^jet/', include('jet.urls', 'jet')),  # Django JET URLS

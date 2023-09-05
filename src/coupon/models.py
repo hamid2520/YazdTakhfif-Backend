@@ -1,3 +1,4 @@
+import uuid
 from datetime import timedelta, datetime
 
 from django.db import models
@@ -58,14 +59,15 @@ class Coupon(models.Model):
 
 
 class LineCoupon(models.Model):
+    slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
     title = models.CharField(max_length=128)
     coupon = models.ForeignKey(to=Coupon, on_delete=models.CASCADE)
     is_main = models.BooleanField(default=False)
     count = models.PositiveIntegerField()
     price = models.PositiveIntegerField()
     offer_percent = models.PositiveSmallIntegerField()
-    final_price = models.PositiveIntegerField(blank=True, null=True)
-    bought_count = models.PositiveIntegerField(blank=True, default=0)
+    price_with_offer = models.PositiveIntegerField(blank=True, null=True)
+    sell_count = models.PositiveIntegerField(blank=True, default=0)
     rate = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(10), ])
 
     def validate_unique(self, exclude=None):
@@ -77,9 +79,11 @@ class LineCoupon(models.Model):
         return super().validate_unique(exclude)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.final_price = self.price - (self.price * (self.offer_percent / 100))
+        if self.slug is None:
+            self.slug = f"{self.__class__.__name__.lower()}-{uuid.uuid4()}"
+        self.price_with_offer = self.price - (self.price * (self.offer_percent / 100))
         self.full_clean(exclude=None, validate_unique=True)
-        return super().save(force_insert=False, force_update=False, using=None, update_fields=None)
+        return super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return f"{self.coupon}({self.title})"

@@ -17,7 +17,6 @@ if not TESTING:
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SITE_URL = os.getenv('SITE_URL', 'http://localhost:8000')
-
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -52,6 +51,7 @@ INSTALLED_APPS = (
     'src.common',
     'src.business',
     'src.coupon',
+    'src.payment',
     'src.basket',
     # Third party optional apps
     # app must be placed somewhere after all the apps that are going to be generating activities

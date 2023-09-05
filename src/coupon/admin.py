@@ -10,7 +10,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 class FAQAdmin(admin.ModelAdmin):
-    list_display = ["title", "category",]
+    list_display = ["title", "category", ]
     list_filter = ["category"]
 
 
@@ -20,11 +20,11 @@ class CouponAdmin(admin.ModelAdmin):
 
 
 class LineCouponAdmin(admin.ModelAdmin):
-    list_display = ["title", "coupon", "is_main", "offer_percent", "price", "final_price", "count", "bought_count",
+    list_display = ["title", "coupon", "is_main", "offer_percent", "price", "price_with_offer", "count", "sell_count",
                     "rate"]
     list_filter = ["coupon", "is_main"]
     list_editable = ["offer_percent", "is_main", "price", "count", "rate"]
-    readonly_fields = ["final_price", "bought_count", ]
+    readonly_fields = ["price_with_offer", "sell_count", ]
 
 
 admin.site.register(Category, CategoryAdmin)
