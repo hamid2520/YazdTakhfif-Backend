@@ -47,7 +47,7 @@ class Basket(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     payment_datetime = models.DateTimeField(blank=True, null=True)
     is_paid = models.BooleanField(default=False)
-    count = models.PositiveSmallIntegerField(blank=True, default=0)
+    count = models.PositiveSmallIntegerField(blank=True, null=True)
     total_price = models.PositiveIntegerField(blank=True, null=True)
     total_offer_percent = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(100), ])
     total_price_with_offer = models.PositiveIntegerField(blank=True, null=True)
@@ -63,13 +63,14 @@ class Basket(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.slug is None:
             self.slug = f"{self.__class__.__name__.lower()}-{uuid.uuid4()}"
-        if not self.is_paid:
-            self.total_price = self.product.all().aggregate(Sum("total_price"))["total_price__sum"]
-            self.total_price_with_offer = self.product.all().aggregate(Sum("total_price_with_offer"))[
-                "total_price_with_offer__sum"]
-            self.total_offer_percent = 100 - (self.total_price_with_offer * 100 / self.total_price)
         # build user,modify product for validate_unique, count calculating
         super().save(force_insert, force_update, using, update_fields)
+        if not self.is_paid:
+            if self.product.all().count() >= 1:
+                self.total_price = self.product.all().aggregate(Sum("total_price"))["total_price__sum"]
+                self.total_price_with_offer = self.product.all().aggregate(Sum("total_price_with_offer"))[
+                    "total_price_with_offer__sum"]
+                self.total_offer_percent = (100 - (self.total_price_with_offer * 100 / self.total_price))
         self.count = self.product.all().count()
         self.full_clean()
         return super().save(force_insert, force_update, using,

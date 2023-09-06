@@ -45,13 +45,15 @@ class Coupon(models.Model):
     slug = models.SlugField(max_length=256, db_index=True, allow_unicode=True, editable=False, blank=True)
     business = models.ForeignKey(to=Business, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
-    expire_date = models.DateTimeField(default=(datetime.now() + timedelta(days=10)), blank=True)
+    expire_date = models.DateTimeField(null=True, blank=True)
     category = models.ManyToManyField(to=Category)
     description = models.CharField(max_length=1000, blank=True, null=True)
     terms_of_use = models.TextField(blank=True, null=True)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.title, allow_unicode=True)
+        if not self.expire_date:
+            self.expire_date = self.created + timedelta(days=10)
         super().save(force_insert=False, force_update=False, using=None, update_fields=None)
 
     def __str__(self):
