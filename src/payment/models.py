@@ -38,8 +38,8 @@ class Payment(models.Model):
             self.slug = f"{self.__class__.__name__.lower()}-{uuid.uuid4()}"
         # task when payment created
         payment_done(self, self.basket_id)
-        self.total_price = self.total_price
-        self.total_price_with_offer = self.total_price_with_offer
+        self.total_price = self.basket.total_price
+        self.total_price_with_offer = self.basket.total_price_with_offer
         return super().save(force_insert, force_update, using,
                             update_fields)
 
