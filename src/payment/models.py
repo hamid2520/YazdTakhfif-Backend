@@ -10,19 +10,18 @@ def payment_done(instance, basket_id):
     basket = Basket.objects.get(id=basket_id)
     # Basket Detail fields
     for product in basket.product.all():
-        product.payment_price = product.line_coupon.price
-        product.payment_offer_percent = product.line_coupon.offer_percent
-        product.payment_price_with_offer = product.line_coupon.price_with_offer
+        line_coupon = product.line_coupon
+        product.payment_price = line_coupon.price
+        product.payment_offer_percent = line_coupon.offer_percent
+        product.payment_price_with_offer = line_coupon.price_with_offer
         product.save()
         # Line Coupon sell_count adding
-        product.line_coupon.sell_count += product.count
-        product.line_coupon.save()
+        line_coupon.sell_count += product.count
+        line_coupon.save()
     # Basket fields
     basket.is_paid = True
     basket.payment_datetime = instance.created_at
     basket.save()
-    instance.total_price = basket.total_price
-    instance.total_price_with_offer = basket.total_price_with_offer
 
 
 class Payment(models.Model):
@@ -39,6 +38,8 @@ class Payment(models.Model):
             self.slug = f"{self.__class__.__name__.lower()}-{uuid.uuid4()}"
         # task when payment created
         payment_done(self, self.basket_id)
+        self.total_price = self.total_price
+        self.total_price_with_offer = self.total_price_with_offer
         return super().save(force_insert, force_update, using,
                             update_fields)
 
