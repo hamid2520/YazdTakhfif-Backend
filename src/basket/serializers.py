@@ -13,9 +13,11 @@ class BasketSerializer(serializers.ModelSerializer):
                             "total_offer_percent", "total_price_with_offer", ]
 
     def save(self, **kwargs):
+        user = self.validated_data.get("user")
+        basket = Basket.objects.filter(user_id=user.id, is_paid=False)
+        if basket.exists():
+            self.instance = basket.first()
         super().save(**kwargs)
-        count = self.instance.product.all().aggregate(Sum("count"))
-        self.instance.count = count.get("count__sum")
         return self.instance
 
 

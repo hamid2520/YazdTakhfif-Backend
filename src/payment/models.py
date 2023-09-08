@@ -10,13 +10,14 @@ def payment_done(instance, basket_id):
     basket = Basket.objects.get(id=basket_id)
     # Basket Detail fields
     for product in basket.product.all():
-        product.payment_price = product.line_coupon.price
-        product.payment_offer_percent = product.line_coupon.offer_percent
-        product.payment_price_with_offer = product.line_coupon.price_with_offer
+        line_coupon = product.line_coupon
+        product.payment_price = line_coupon.price
+        product.payment_offer_percent = line_coupon.offer_percent
+        product.payment_price_with_offer = line_coupon.price_with_offer
         product.save()
         # Line Coupon sell_count adding
-        product.line_coupon.sell_count += product.count
-        product.line_coupon.save()
+        line_coupon.sell_count += product.count
+        line_coupon.save()
     # Basket fields
     basket.is_paid = True
     basket.payment_datetime = instance.created_at

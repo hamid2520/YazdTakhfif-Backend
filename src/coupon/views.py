@@ -1,7 +1,8 @@
-from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.settings import api_settings
 
 from .models import Category, Coupon, LineCoupon
+from .filters import IsOwnerOrSuperUserCoupon, IsOwnerOrSuperUserLineCoupon
 from .serializers import CategorySerializer, CouponSerializer, CouponCreateSerializer, LineCouponSerializer
 
 
@@ -16,6 +17,7 @@ class CouponViewSet(ModelViewSet):
     queryset = Coupon.objects.all()
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
+    filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserCoupon, ]
 
     def get_serializer_class(self):
         if self.action == ("list" or "retrieve"):
@@ -24,11 +26,10 @@ class CouponViewSet(ModelViewSet):
 
 
 class LineCouponViewSet(ModelViewSet):
+    queryset = LineCoupon.objects.all()
     serializer_class = LineCouponSerializer
+    lookup_field = "slug"
     lookup_url_kwarg = "slug"
+    filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserLineCoupon, ]
 
-    def get_queryset(self):
-        return Coupon.objects.get(slug=self.kwargs.get("slug")).linecoupon_set.all()
-
-    def get_object(self):
-        return LineCoupon.objects.get(slug=self.kwargs.get("slug"))
+    # todo : action for get a coupon's lines
