@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from src.coupon.models import Category, Coupon, LineCoupon, FAQ
+from src.coupon.models import Category, Coupon, LineCoupon, FAQ, Rate
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -27,7 +27,13 @@ class LineCouponAdmin(admin.ModelAdmin):
     readonly_fields = ["price_with_offer", "sell_count", ]
 
 
+class RateAdmin(admin.ModelAdmin):
+    list_display = ["__str__", "coupon", "user", "rate"]
+    list_filter = ["user", "coupon"]
+
+
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(FAQ, FAQAdmin)
 admin.site.register(Coupon, CouponAdmin)
 admin.site.register(LineCoupon, LineCouponAdmin)
+admin.site.register(Rate, RateAdmin)

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Category, Coupon, LineCoupon
+from .models import Category, Coupon, LineCoupon, Rate
 from src.business.serializers import BusinessSerializer
 
 
@@ -33,3 +33,10 @@ class LineCouponSerializer(serializers.ModelSerializer):
         fields = ["slug", "title", "coupon", "is_main", "count", "price", "offer_percent", "price_with_offer",
                   "sell_count", "rate"]
         read_only_fields = ["slug", "price_with_offer", "sell_count"]
+
+
+class RateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rate.objects.all()
+        fields = "__all__"
+        read_only_fields = ["user", ]

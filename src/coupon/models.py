@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from src.business.models import Business
+from src.users.models import User
 
 
 class Category(models.Model):
@@ -89,3 +90,26 @@ class LineCoupon(models.Model):
 
     def __str__(self):
         return f"{self.coupon}({self.title})"
+
+
+class Rate(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE)
+    rate = models.PositiveIntegerField(validators=[MaxValueValidator(5), ])
+
+    # def clean(self):
+    #     if not 0 <= self.rate <= 5:
+    #         raise ValidationError({"rate": "Rate value must be between 0 and 5!"})
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        self.full_clean()
+        return super().save(force_insert, force_update, using,
+                            update_fields)
+
+    def __str__(self):
+        return f"{self.coupon}({self.user})"
+
+    class Meta:
+        verbose_name = "Rate"
+        verbose_name_plural = "Rates"
