@@ -18,7 +18,8 @@ class CouponSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coupon
         fields = [
-            "title", "slug", "business", "created", "expire_date", "category", "description", "terms_of_use"]
+            "title", "slug", "business", "created", "expire_date", "category", "description", "terms_of_use", "rate",
+            "rate_count"]
 
 
 class CouponCreateSerializer(serializers.ModelSerializer):
@@ -31,12 +32,9 @@ class LineCouponSerializer(serializers.ModelSerializer):
     class Meta:
         model = LineCoupon
         fields = ["slug", "title", "coupon", "is_main", "count", "price", "offer_percent", "price_with_offer",
-                  "sell_count", "rate"]
+                  "sell_count"]
         read_only_fields = ["slug", "price_with_offer", "sell_count"]
 
 
-class RateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Rate.objects.all()
-        fields = "__all__"
-        read_only_fields = ["user", ]
+class RateSerializer(serializers.Serializer):
+    rate = serializers.IntegerField(min_value=1, max_value=5)

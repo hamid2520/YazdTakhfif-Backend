@@ -2,6 +2,7 @@ import uuid
 from datetime import timedelta, datetime
 
 from django.db import models
+from django.db.models import Avg
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -50,6 +51,8 @@ class Coupon(models.Model):
     category = models.ManyToManyField(to=Category)
     description = models.CharField(max_length=1000, blank=True, null=True)
     terms_of_use = models.TextField(blank=True, null=True)
+    coupon_rate = models.DecimalField(blank=True, null=True, max_digits=10, decimal_places=1)
+    rate_count = models.PositiveIntegerField(null=True, blank=True)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.title, allow_unicode=True)
@@ -71,7 +74,6 @@ class LineCoupon(models.Model):
     offer_percent = models.PositiveSmallIntegerField()
     price_with_offer = models.PositiveIntegerField(blank=True, null=True)
     sell_count = models.PositiveIntegerField(blank=True, default=0)
-    rate = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(10), ])
 
     def validate_unique(self, exclude=None):
         if self.is_main:
@@ -95,15 +97,14 @@ class LineCoupon(models.Model):
 class Rate(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE)
-    rate = models.PositiveIntegerField(validators=[MaxValueValidator(5), ])
-
-    # def clean(self):
-    #     if not 0 <= self.rate <= 5:
-    #         raise ValidationError({"rate": "Rate value must be between 0 and 5!"})
+    rate = models.SmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
-        self.full_clean()
+        super().save(force_insert, force_update, using, update_fields)
+        self.coupon.coupon_rate = self.coupon.rate_set.all().aggregate(Avg("rate"))["rate__avg"]
+        self.coupon.rate_count = self.coupon.rate_set.all().count()
+        self.coupon.save()
         return super().save(force_insert, force_update, using,
                             update_fields)
 

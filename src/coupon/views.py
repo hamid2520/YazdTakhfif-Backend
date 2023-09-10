@@ -29,35 +29,22 @@ class CouponViewSet(ModelViewSet):
             return CouponSerializer
         return CouponCreateSerializer
 
-    @action(detail=True, methods=["GET", "POST"])
+    @action(detail=True, methods=["POST", ], serializer_class=RateSerializer)
     def rate_coupon(self, request, slug):
         coupon = self.get_object()
-        try:
-            rate_object = Rate.objects.get(user_id=request.user.id, coupon_id=coupon.id)
-            serializer = RateSerializer(instance=rate_object, data=request.data)
-        except ObjectDoesNotExist:
-            serializer = RateSerializer(data=request.data)
-        finally:
-            if serializer.is_valid():
-                serializer.validated_data["user"] = request.user.id
-                serializer.save()
+        serializer = RateSerializer(data=request.data)
+        if serializer.is_valid():
+            data = serializer.validated_data
+            rate = Rate.objects.filter(coupon_id=coupon.id, user_id=request.user.id)
+            if rate.exists():
+                rate = rate.first()
+                rate.rate = data.get("rate")
+                rate.save()
                 return Response(data=serializer.data, status=status.HTTP_200_OK)
-            return Response(data=serializer.errors, status=status.HTTP_200_OK)
-
-        # coupon = self.get_object()
-        # rate_object = Rate.objects.filter(user_id=request.user.id, coupon_id=coupon.id)
-        # rate_object = rate_object.first()
-        # print(rate_object)
-        # if rate_object:
-        #     print(rate_object)
-        #     serializer = RateSerializer(instance=rate_object, data=request.data)
-        # else:
-        #     serializer = RateSerializer(data=request.data)
-        # if serializer.is_valid():
-        #     serializer.validated_data["user"] = request.user.id
-        #     serializer.save()
-        #     return Response(data=serializer.data, status=status.HTTP_200_OK)
-        # return Response(data=serializer.errors, status=status.HTTP_200_OK)
+            new_rate = Rate.objects.create(coupon_id=coupon.id, user_id=request.user.id, rate=data.get("rate"))
+            new_rate.save()
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LineCouponViewSet(ModelViewSet):

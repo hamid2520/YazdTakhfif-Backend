@@ -20,10 +20,9 @@ class CouponAdmin(admin.ModelAdmin):
 
 
 class LineCouponAdmin(admin.ModelAdmin):
-    list_display = ["title", "coupon", "is_main", "offer_percent", "price", "price_with_offer", "count", "sell_count",
-                    "rate"]
+    list_display = ["title", "coupon", "is_main", "offer_percent", "price", "price_with_offer", "count", "sell_count"]
     list_filter = ["coupon", "is_main"]
-    list_editable = ["offer_percent", "is_main", "price", "count", "rate"]
+    list_editable = ["offer_percent", "is_main", "price", "count"]
     readonly_fields = ["price_with_offer", "sell_count", ]
 
 
