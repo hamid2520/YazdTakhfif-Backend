@@ -4,10 +4,10 @@ from rest_framework.decorators import action
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 
+from src.coupon.models import LineCoupon
 from .models import Basket, BasketDetail
 from .filters import IsOwnerOrSuperUserBasket, IsOwnerOrSuperUserBasketDetail
 from .serializers import BasketSerializer, BasketDetailSerializer, AddToBasketSerializer
-from ..coupon.models import LineCoupon
 
 
 class BasketViewSet(ModelViewSet):
@@ -49,12 +49,11 @@ class BasketViewSet(ModelViewSet):
             return Response(data={"line_coupon": ["Not found!", ]}, status=status.HTTP_404_NOT_FOUND)
         return Response(data=add_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=["GET"], url_path="delete-from-basket", url_name="delete_from_basket", )
+    @action(detail=True, methods=["DELETE"], url_path="delete-from-basket", url_name="delete_from_basket", )
     def delete_from_basket(self, request, slug):
         basket_product = BasketDetail.objects.get(slug=slug)
         basket_product.delete()
-        serializer = BasketDetailSerializer(instance=basket_product)
-        return Response(data=serializer.data, status=status.HTTP_204_NO_CONTENT)
+        return Response(data={}, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["GET"])
     def get_basket_count(self, request, slug):
