@@ -37,4 +37,4 @@ class LineCouponSerializer(serializers.ModelSerializer):
 
 
 class RateSerializer(serializers.Serializer):
-    rate = serializers.IntegerField(min_value=1, max_value=5)
+    rate = serializers.IntegerField(min_value=0, max_value=5)

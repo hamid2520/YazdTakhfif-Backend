@@ -2,8 +2,8 @@ import uuid
 from datetime import timedelta, datetime
 
 from django.db import models
-from django.db.models import Avg
 from django.utils.text import slugify
+from django.db.models import Avg, Count
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 
@@ -51,7 +51,7 @@ class Coupon(models.Model):
     category = models.ManyToManyField(to=Category)
     description = models.CharField(max_length=1000, blank=True, null=True)
     terms_of_use = models.TextField(blank=True, null=True)
-    coupon_rate = models.DecimalField(blank=True, null=True, max_digits=10, decimal_places=1)
+    coupon_rate = models.DecimalField(blank=True, null=True, max_digits=2, decimal_places=1)
     rate_count = models.PositiveIntegerField(null=True, blank=True)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
@@ -97,13 +97,14 @@ class LineCoupon(models.Model):
 class Rate(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE)
-    rate = models.SmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    rate = models.PositiveSmallIntegerField(validators=[MaxValueValidator(5), ])
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         super().save(force_insert, force_update, using, update_fields)
-        self.coupon.coupon_rate = self.coupon.rate_set.all().aggregate(Avg("rate"))["rate__avg"]
-        self.coupon.rate_count = self.coupon.rate_set.all().count()
+        detail = self.coupon.rate_set.all().aggregate(Avg("rate"), Count("id"))
+        self.coupon.coupon_rate = detail["rate__avg"]
+        self.coupon.rate_count = detail["id__count"]
         self.coupon.save()
         return super().save(force_insert, force_update, using,
                             update_fields)
