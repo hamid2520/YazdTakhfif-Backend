@@ -28,3 +28,8 @@ class BasketDetailSerializer(serializers.ModelSerializer):
                   "total_price", "total_price_with_offer", ]
         read_only_fields = ["slug", "payment_price", "payment_offer_percent", "payment_price_with_offer", "total_price",
                             "total_price_with_offer", ]
+
+
+class AddToBasketSerializer(serializers.Serializer):
+    line_coupon_slug = serializers.SlugField()
+    basket_detail_count = serializers.IntegerField(min_value=1)

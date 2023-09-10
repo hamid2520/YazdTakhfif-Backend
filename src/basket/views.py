@@ -1,4 +1,3 @@
-from rest_framework.request import HttpRequest
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -6,8 +5,8 @@ from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 
 from .models import Basket, BasketDetail
-from .serializers import BasketSerializer, BasketDetailSerializer
 from .filters import IsOwnerOrSuperUserBasket, IsOwnerOrSuperUserBasketDetail
+from .serializers import BasketSerializer, BasketDetailSerializer, AddToBasketSerializer
 from ..coupon.models import LineCoupon
 
 
@@ -24,26 +23,31 @@ class BasketViewSet(ModelViewSet):
         serializer = BasketDetailSerializer(instance=basket_products, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=["GET"], url_path="add-to-basket", url_name="add_to_basket", )
+    @action(detail=True, methods=["POST", ], url_path="add-to-basket", url_name="add_to_basket",
+            serializer_class=AddToBasketSerializer)
     def add_to_basket(self, request, slug):
-        line_coupon_slug = request.query_params.get("line_coupon_slug")
-        line_coupon_id = LineCoupon.objects.get(slug=line_coupon_slug).id
-        basket_product_count = int(request.query_params.get("product_count", 1))
-        basket_product = Basket.objects.get(slug=slug).product.filter(line_coupon_id=line_coupon_id)
-        if basket_product.exists():
-            basket_product = basket_product.first()
-            basket_product.count = basket_product_count
-            basket_product.save()
-            serializer = BasketDetailSerializer(instance=basket_product)
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
-        else:
-            basket_products = Basket.objects.get(slug=slug)
-            basket_product = BasketDetail.objects.create(line_coupon_id=line_coupon_id, count=basket_product_count)
-            basket_product.save()
-            basket_products.product.add(basket_product)
-            basket_products.save()
-            serializer = BasketDetailSerializer(instance=basket_product)
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        add_serializer = AddToBasketSerializer(data=request.data)
+        if add_serializer.is_valid():
+            data = add_serializer.validated_data
+            line_coupon_slug = data.get("line_coupon_slug")
+            line_coupon = LineCoupon.objects.filter(slug=line_coupon_slug)
+            if line_coupon.exists():
+                line_coupon = line_coupon.first()
+                basket = Basket.objects.get(slug=slug)
+                product = basket.product.filter(line_coupon_id=line_coupon.id)
+                product_count = data.get("basket_detail_count")
+                if product.exists():
+                    product = product.first()
+                    product.count = product_count
+                    product.save()
+                else:
+                    product = BasketDetail.objects.create(line_coupon_id=line_coupon.id, count=product_count)
+                    product.save()
+                    basket.product.add(product)
+                    basket.save()
+                return Response(data=add_serializer.data, status=status.HTTP_200_OK)
+            return Response(data={"line_coupon": ["Not found!", ]}, status=status.HTTP_404_NOT_FOUND)
+        return Response(data=add_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=["GET"], url_path="delete-from-basket", url_name="delete_from_basket", )
     def delete_from_basket(self, request, slug):
