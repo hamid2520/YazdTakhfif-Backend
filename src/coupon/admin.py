@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from src.coupon.models import Category, Coupon, LineCoupon, FAQ
+from src.coupon.models import Category, Coupon, LineCoupon, FAQ, Rate
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -20,14 +20,19 @@ class CouponAdmin(admin.ModelAdmin):
 
 
 class LineCouponAdmin(admin.ModelAdmin):
-    list_display = ["title", "coupon", "is_main", "offer_percent", "price", "price_with_offer", "count", "sell_count",
-                    "rate"]
+    list_display = ["title", "coupon", "is_main", "offer_percent", "price", "price_with_offer", "count", "sell_count"]
     list_filter = ["coupon", "is_main"]
-    list_editable = ["offer_percent", "is_main", "price", "count", "rate"]
+    list_editable = ["offer_percent", "is_main", "price", "count"]
     readonly_fields = ["price_with_offer", "sell_count", ]
+
+
+class RateAdmin(admin.ModelAdmin):
+    list_display = ["__str__", "coupon", "user", "rate"]
+    list_filter = ["user", "coupon"]
 
 
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(FAQ, FAQAdmin)
 admin.site.register(Coupon, CouponAdmin)
 admin.site.register(LineCoupon, LineCouponAdmin)
+admin.site.register(Rate, RateAdmin)

@@ -3,10 +3,12 @@ from datetime import timedelta, datetime
 
 from django.db import models
 from django.utils.text import slugify
+from django.db.models import Avg, Count
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from src.business.models import Business
+from src.users.models import User
 
 
 class Category(models.Model):
@@ -49,6 +51,8 @@ class Coupon(models.Model):
     category = models.ManyToManyField(to=Category)
     description = models.CharField(max_length=1000, blank=True, null=True)
     terms_of_use = models.TextField(blank=True, null=True)
+    coupon_rate = models.DecimalField(blank=True, null=True, max_digits=2, decimal_places=1)
+    rate_count = models.PositiveIntegerField(null=True, blank=True)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.title, allow_unicode=True)
@@ -70,7 +74,6 @@ class LineCoupon(models.Model):
     offer_percent = models.PositiveSmallIntegerField()
     price_with_offer = models.PositiveIntegerField(blank=True, null=True)
     sell_count = models.PositiveIntegerField(blank=True, default=0)
-    rate = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(10), ])
 
     def validate_unique(self, exclude=None):
         if self.is_main:
@@ -89,3 +92,26 @@ class LineCoupon(models.Model):
 
     def __str__(self):
         return f"{self.coupon}({self.title})"
+
+
+class Rate(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE)
+    rate = models.PositiveSmallIntegerField(validators=[MaxValueValidator(5), ])
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        super().save(force_insert, force_update, using, update_fields)
+        detail = self.coupon.rate_set.all().aggregate(Avg("rate"), Count("id"))
+        self.coupon.coupon_rate = detail["rate__avg"]
+        self.coupon.rate_count = detail["id__count"]
+        self.coupon.save()
+        return super().save(force_insert, force_update, using,
+                            update_fields)
+
+    def __str__(self):
+        return f"{self.coupon}({self.user})"
+
+    class Meta:
+        verbose_name = "Rate"
+        verbose_name_plural = "Rates"
