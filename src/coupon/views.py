@@ -1,6 +1,8 @@
 from rest_framework import status
-from rest_framework.response import Response
+
 from rest_framework.decorators import action
+from rest_framework.response import Response
+
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.settings import api_settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -29,6 +31,7 @@ class CouponViewSet(ModelViewSet):
             return CouponSerializer
         return CouponCreateSerializer
 
+
     @action(detail=True, methods=["POST", ], serializer_class=RateSerializer)
     def rate_coupon(self, request, slug):
         coupon = self.get_object()
@@ -45,6 +48,13 @@ class CouponViewSet(ModelViewSet):
             new_rate.save()
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=["GET"], url_path="line-coupons-list", url_name="line_coupons_list", )
+    def get_products_list(self, request, slug):
+        line_coupons = self.get_object().linecoupon_set.all()
+        serializer = LineCouponSerializer(instance=line_coupons, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
 
 
 class LineCouponViewSet(ModelViewSet):
