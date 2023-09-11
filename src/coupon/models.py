@@ -24,6 +24,10 @@ class Category(models.Model):
     def __str__(self):
         return f"{self.title}({self.level})"
 
+    class Meta:
+        verbose_name = "Category"
+        verbose_name_plural = "Categories"
+
 
 class FAQ(models.Model):
     category = models.ForeignKey(to=Category, on_delete=models.CASCADE)
@@ -63,6 +67,10 @@ class Coupon(models.Model):
     def __str__(self):
         return f"{self.title}({self.business})"
 
+    class Meta:
+        verbose_name = "Coupon"
+        verbose_name_plural = "Coupons"
+
 
 class LineCoupon(models.Model):
     slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
@@ -93,6 +101,10 @@ class LineCoupon(models.Model):
     def __str__(self):
         return f"{self.coupon}({self.title})"
 
+    class Meta:
+        verbose_name = "Line Coupon"
+        verbose_name_plural = "Line Coupons"
+
 
 class Rate(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -115,3 +127,18 @@ class Rate(models.Model):
     class Meta:
         verbose_name = "Rate"
         verbose_name_plural = "Rates"
+
+
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE)
+    parent = models.ForeignKey("Comment", on_delete=models.CASCADE, blank=True, null=True)
+    text = models.CharField(max_length=1200)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.coupon}({self.user})-is sub comment({bool(self.parent)})"
+
+    class Meta:
+        verbose_name = "Comment"
+        verbose_name_plural = "Comments"
