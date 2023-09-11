@@ -41,7 +41,7 @@ class BasketDetail(models.Model):
 class Basket(models.Model):
     slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    product = models.ManyToManyField(BasketDetail)
+    product = models.ManyToManyField(BasketDetail,blank=True,null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     payment_datetime = models.DateTimeField(blank=True, null=True)
     is_paid = models.BooleanField(default=False)
