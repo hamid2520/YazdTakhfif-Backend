@@ -1,5 +1,4 @@
 from rest_framework import status
-
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -51,11 +50,8 @@ class CouponViewSet(ModelViewSet):
     @action(detail=True, methods=["POST", ], serializer_class=CommentSerializer, url_path="add-comment",
             url_name="add_comment", )
     def add_comment(self, request, slug):
-        coupon = self.get_object()
-        serializer = CommentSerializer(data=request.data)
+        serializer = CommentSerializer(data=request.data, context={"request": request, "kwargs": self.kwargs})
         if serializer.is_valid():
-            serializer.validated_data["user"] = request.user
-            serializer.validated_data["coupon"] = coupon
             serializer.save()
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
