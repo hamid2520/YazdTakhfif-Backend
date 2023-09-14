@@ -17,3 +17,7 @@ class Business(models.Model):
 
     def __str__(self):
         return self.title.capitalize()
+
+    class Meta:
+        verbose_name = "Business"
+        verbose_name_plural = "Businesses"
