@@ -1,6 +1,7 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
-from .models import Category, Coupon, LineCoupon, Rate
+from .models import Category, Coupon, LineCoupon, Rate, Comment
 from src.business.serializers import BusinessSerializer
 
 
@@ -18,8 +19,8 @@ class CouponSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coupon
         fields = [
-            "title", "slug", "business", "created", "expire_date", "category", "description", "terms_of_use", "rate",
-            "rate_count"]
+            "title", "slug", "business", "created", "expire_date", "category", "description", "terms_of_use",
+            "coupon_rate", "rate_count"]
 
 
 class CouponCreateSerializer(serializers.ModelSerializer):
@@ -38,3 +39,29 @@ class LineCouponSerializer(serializers.ModelSerializer):
 
 class RateSerializer(serializers.Serializer):
     rate = serializers.IntegerField(min_value=0, max_value=5)
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    def validate_user(self, value):
+        request = self.context["request"]
+        return request.user
+
+    def validate_coupon(self, value):
+        slug = self.context["kwargs"].get("slug")
+        coupon = Coupon.objects.filter(slug=slug)
+        if coupon.exists():
+            return coupon.first()
+        raise ValidationError("Coupon does not exists!")
+
+    class Meta:
+        model = Comment
+        fields = "__all__"
+        read_only_fields = ["id", "created_at"]
+        extra_kwargs = {
+            "user": {
+                "required": False
+            },
+            "coupon": {
+                "required": False
+            }
+        }

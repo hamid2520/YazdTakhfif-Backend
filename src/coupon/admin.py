@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from src.coupon.models import Category, Coupon, LineCoupon, FAQ, Rate
+from .models import Category, Coupon, LineCoupon, FAQ, Rate, Comment
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -31,8 +31,14 @@ class RateAdmin(admin.ModelAdmin):
     list_filter = ["user", "coupon"]
 
 
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ["coupon", "user", "parent", "created_at"]
+    list_filter = ["coupon", "user", "parent", "created_at"]
+
+
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(FAQ, FAQAdmin)
 admin.site.register(Coupon, CouponAdmin)
 admin.site.register(LineCoupon, LineCouponAdmin)
 admin.site.register(Rate, RateAdmin)
+admin.site.register(Comment, CommentAdmin)
