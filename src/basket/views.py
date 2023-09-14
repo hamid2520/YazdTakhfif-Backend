@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 
@@ -67,5 +68,3 @@ class BasketDetailViewSet(ModelViewSet):
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserBasketDetail, ]
-
-    # todo : add an action that returns a basket's products

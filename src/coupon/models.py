@@ -64,6 +64,9 @@ class Coupon(models.Model):
             self.expire_date = self.created + timedelta(days=10)
         super().save(force_insert=False, force_update=False, using=None, update_fields=None)
 
+    def get_main_line_coupon(self):
+        return self.linecoupon_set.filter(is_main=True).first()
+
     def __str__(self):
         return f"{self.title}({self.business})"
 
