@@ -21,11 +21,11 @@ class PriceFilter(filters.BaseFilterBackend):
         max_price = request.query_params.get("max_price")
         min_price = request.query_params.get("min_price")
         if max_price and min_price:
-            return queryset.filter(Q(linecoupon__price__gte=min_price) & Q(linecoupon__price__lte=max_price))
+            return queryset.filter(Q(linecoupon__price__gte=min_price) & Q(linecoupon__price__lte=max_price)).distinct()
         elif max_price:
-            return queryset.filter(linecoupon__price__lte=max_price)
+            return queryset.filter(linecoupon__price__lte=max_price).distinct()
         elif min_price:
-            return queryset.filter(linecoupon__price__gte=min_price)
+            return queryset.filter(linecoupon__price__gte=min_price).distinct()
         return queryset
 
 
@@ -41,5 +41,5 @@ class OfferFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         offer = request.query_params.get("offer")
         if offer:
-            return queryset.filter(linecoupon__offer_percent__gte=offer)
+            return queryset.filter(linecoupon__offer_percent__gte=offer).distinct()
         return queryset
