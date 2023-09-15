@@ -1,6 +1,8 @@
 from django.db.models import Q
 from rest_framework import filters
 
+from .models import Business, Category
+
 
 class IsOwnerOrSuperUserCoupon(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
@@ -42,4 +44,28 @@ class OfferFilter(filters.BaseFilterBackend):
         offer = request.query_params.get("offer")
         if offer:
             return queryset.filter(linecoupon__offer_percent__gte=offer).distinct()
+        return queryset
+
+
+class BusinessFilter(filters.BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        business_slug = request.query_params.get("business")
+        if business_slug:
+            business = Business.objects.filter(slug=business_slug)
+            if business.exists():
+                business = business.first()
+                return queryset.filter(business_id=business.id)
+            return queryset.filter(business_id=None)
+        return queryset
+
+
+class CategoryFilter(filters.BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        category_slug = request.query_params.get("category")
+        if category_slug:
+            category = Category.objects.filter(slug=category_slug)
+            if category.exists():
+                category = category.first()
+                return queryset.filter(category=category)
+            return queryset.filter(category=None)
         return queryset

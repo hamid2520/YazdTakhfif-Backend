@@ -1,7 +1,9 @@
 from django.db.models import Sum
 from rest_framework import serializers
+from django.core.exceptions import ValidationError
 
 from .models import Basket, BasketDetail
+from src.coupon.models import LineCoupon
 
 
 class BasketSerializer(serializers.ModelSerializer):
@@ -33,3 +35,14 @@ class BasketDetailSerializer(serializers.ModelSerializer):
 class AddToBasketSerializer(serializers.Serializer):
     line_coupon_slug = serializers.SlugField()
     basket_detail_count = serializers.IntegerField(min_value=1)
+
+    def validate(self, attrs):
+        data = self.initial_data
+        line_coupon = LineCoupon.objects.filter(slug=data.get("line_coupon_slug"))
+        if line_coupon.exists():
+            line_coupon = line_coupon.first()
+            if (data.get("basket_detail_count") + line_coupon.sell_count) > line_coupon.count:
+                raise ValidationError({"basket_detail_count": "There is no more line coupons available!"})
+            return super().validate(attrs)
+        else:
+            raise ValidationError({"line_coupon_slug": "Line coupon does not exists!"})

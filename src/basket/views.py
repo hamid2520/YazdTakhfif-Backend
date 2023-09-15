@@ -1,6 +1,8 @@
 from rest_framework import status
+from django.http import HttpResponseNotFound
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.filters import SearchFilter
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
@@ -18,23 +20,24 @@ class BasketViewSet(ModelViewSet):
     lookup_url_kwarg = "slug"
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserBasket, ]
 
+    @swagger_auto_schema(responses={200: BasketDetailSerializer(many=True), })
     @action(detail=True, methods=["GET"], url_path="products-list", url_name="products_list", )
     def get_products_list(self, request, slug):
         basket_products = self.get_object().product.all()
         serializer = BasketDetailSerializer(instance=basket_products, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(request_body=AddToBasketSerializer, responses={200: AddToBasketSerializer(), })
     @action(detail=True, methods=["POST", ], url_path="add-to-basket", url_name="add_to_basket",
             serializer_class=AddToBasketSerializer)
     def add_to_basket(self, request, slug):
-        add_serializer = AddToBasketSerializer(data=request.data)
-        if add_serializer.is_valid():
-            data = add_serializer.validated_data
-            line_coupon_slug = data.get("line_coupon_slug")
-            line_coupon = LineCoupon.objects.filter(slug=line_coupon_slug)
-            if line_coupon.exists():
-                line_coupon = line_coupon.first()
-                basket = Basket.objects.get(slug=slug)
+        basket = Basket.objects.filter(slug=slug)
+        if basket.exists():
+            basket = basket.first()
+            add_serializer = AddToBasketSerializer(data=request.data)
+            if add_serializer.is_valid():
+                data = add_serializer.validated_data
+                line_coupon = LineCoupon.objects.get(slug=data.get("line_coupon_slug"))
                 product = basket.product.filter(line_coupon_id=line_coupon.id)
                 product_count = data.get("basket_detail_count")
                 if product.exists():
@@ -47,19 +50,21 @@ class BasketViewSet(ModelViewSet):
                     basket.product.add(product)
                     basket.save()
                 return Response(data=add_serializer.data, status=status.HTTP_200_OK)
-            return Response(data={"line_coupon": ["Not found!", ]}, status=status.HTTP_404_NOT_FOUND)
-        return Response(data=add_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data=add_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return HttpResponseNotFound("Basket not found!")
 
-    @action(detail=True, methods=["DELETE"], url_path="delete-from-basket", url_name="delete_from_basket", )
-    def delete_from_basket(self, request, slug):
-        basket_product = BasketDetail.objects.get(slug=slug)
-        basket_product.delete()
-        return Response(data={}, status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=["GET"])
-    def get_basket_count(self, request, slug):
-        count = self.get_object().count
-        return Response(data={"count": count}, status=status.HTTP_200_OK)
+@action(detail=True, methods=["DELETE"], url_path="delete-from-basket", url_name="delete_from_basket", )
+def delete_from_basket(self, request, slug):
+    basket_product = BasketDetail.objects.get(slug=slug)
+    basket_product.delete()
+    return Response(data={}, status=status.HTTP_204_NO_CONTENT)
+
+
+@action(detail=True, methods=["GET"], url_path="get-basket-count", url_name="get_basket_count", )
+def get_basket_count(self, request, slug):
+    count = self.get_object().count
+    return Response(data={"count": count}, status=status.HTTP_200_OK)
 
 
 class BasketDetailViewSet(ModelViewSet):
