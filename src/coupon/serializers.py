@@ -37,11 +37,15 @@ class LineCouponSerializer(serializers.ModelSerializer):
         read_only_fields = ["slug", "price_with_offer", "sell_count"]
 
 
-class RateSerializer(serializers.Serializer):
-    rate = serializers.IntegerField(min_value=0, max_value=5)
+class RateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rate
+        fields = "__all__"
+        read_only_fields = ["user", "coupon"]
 
 
 class CommentSerializer(serializers.ModelSerializer):
+
     def validate_user(self, value):
         request = self.context["request"]
         return request.user
@@ -56,10 +60,10 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = "__all__"
-        read_only_fields = ["id", "created_at"]
+        read_only_fields = ["id", "user", "coupon", "created_at"]
         extra_kwargs = {
             "user": {
-                "required": False
+                "required": False,
             },
             "coupon": {
                 "required": False
