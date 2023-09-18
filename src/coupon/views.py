@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
@@ -7,11 +8,12 @@ from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.settings import api_settings
 
-from .models import Category, Coupon, LineCoupon, Rate
+from .models import Category, Coupon, LineCoupon, Rate, Comment
 from .filters import IsOwnerOrSuperUserCoupon, IsOwnerOrSuperUserLineCoupon, PriceFilter, OfferFilter, RateFilter, \
     BusinessFilter, CategoryFilter
 from .serializers import CategorySerializer, CouponSerializer, CouponCreateSerializer, LineCouponSerializer, \
     RateSerializer, CommentSerializer
+from .permissions import IsSuperUser
 
 
 class CategoryViewSet(ModelViewSet):
@@ -27,8 +29,9 @@ class CouponViewSet(ModelViewSet):
     queryset = Coupon.objects.all()
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
+    permission_classes = [IsAuthenticated, ]
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserCoupon, SearchFilter, PriceFilter,
-                                                              OfferFilter, RateFilter,BusinessFilter,CategoryFilter ]
+                                                              OfferFilter, RateFilter, BusinessFilter, CategoryFilter]
     search_fields = ['title', "linecoupon__title"]
 
     def get_serializer_class(self):
@@ -64,6 +67,16 @@ class CouponViewSet(ModelViewSet):
             serializer.save()
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=["DELETE", ], permission_classes=[IsSuperUser, ], url_path="delete-comment",
+            url_name="delete_comment",lookup_url_kwarg="pk" )
+    def delete_comment(self, request, slug):
+        comment = Comment.objects.filter(id=slug)
+        if comment.exists():
+            comment = comment.first()
+            comment.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(data={"Error": "Comment not found!"}, status=status.HTTP_404_NOT_FOUND)
 
     @swagger_auto_schema(responses={200: LineCouponSerializer(), })
     @action(detail=True, methods=["GET"], url_path="line-coupons-list", url_name="line_coupons_list", )
