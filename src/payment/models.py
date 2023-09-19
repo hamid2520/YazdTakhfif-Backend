@@ -1,7 +1,10 @@
 import uuid
 
 from django.db import models
+from django.core.validators import MaxValueValidator
+from django.utils import timezone
 
+from src.business.models import Business
 from src.users.models import User
 from src.basket.models import Basket
 
@@ -49,3 +52,19 @@ class Payment(models.Model):
     class Meta:
         verbose_name = "Payment"
         verbose_name_plural = "Payments"
+
+
+class Offer(models.Model):
+    offer_code = models.CharField(max_length=8, unique=True, db_index=True)
+    percent = models.PositiveIntegerField(validators=[MaxValueValidator(100), ])
+    Start_date = models.DateTimeField(default=timezone.now, blank=True)
+    Expire_date = models.DateTimeField()
+    Limited_businesses = models.ManyToManyField(to=Business, blank=True)
+    maximum_offer_price = models.PositiveIntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.offer_code}({self.percent})"
+
+    class Meta:
+        verbose_name = "Offer"
+        verbose_name_plural = "Offer"
