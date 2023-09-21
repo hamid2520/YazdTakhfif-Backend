@@ -31,6 +31,7 @@ urlpatterns = [
                   path('basket/', include('src.basket.urls')),
                   path('payment/', include('src.payment.urls')),
                   path('offer/', include('src.offer.urls')),
+                  path('advertise/', include('src.advertise.urls')),
                   # admin panel
                   path('admin/', admin.site.urls),
                   url(r'^jet/', include('jet.urls', 'jet')),  # Django JET URLS
@@ -55,3 +56,4 @@ urlpatterns = [
                   # the 'api-root' from django rest-frameworks default router
                   re_path(r'^$', RedirectView.as_view(url=reverse_lazy('api-root'), permanent=False)),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
