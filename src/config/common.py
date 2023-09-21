@@ -53,6 +53,7 @@ INSTALLED_APPS = (
     'src.coupon',
     'src.payment',
     'src.basket',
+    'src.offer',
     # Third party optional apps
     # app must be placed somewhere after all the apps that are going to be generating activities
     # 'actstream',                  # activity stream
