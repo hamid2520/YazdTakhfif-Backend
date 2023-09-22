@@ -9,11 +9,9 @@ class OfferSerializer(serializers.ModelSerializer):
     def validate_limited_businesses(self, value):
         user = self.context.get("request").user
         if not user.is_superuser:
-            business = Business.objects.filter(admin__id=user.id)
-            if not business.exists():
-                raise ValidationError("You have no business!")
-            business = business.first()
-            value = [business.id, ]
+            for business in value:
+                if business.admin.id != user.id:
+                    raise ValidationError("You must choose only your own businesses!")
         return value
 
     class Meta:
