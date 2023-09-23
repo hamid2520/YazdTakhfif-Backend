@@ -13,7 +13,7 @@ from .filters import IsOwnerOrSuperUserCoupon, IsOwnerOrSuperUserLineCoupon, Pri
     BusinessFilter, CategoryFilter
 from .serializers import CategorySerializer, CouponSerializer, CouponCreateSerializer, LineCouponSerializer, \
     RateSerializer, CommentSerializer
-from .permissions import IsSuperUser
+from .permissions import IsSuperUserOrOwner
 
 
 class CategoryViewSet(ModelViewSet):
@@ -68,12 +68,13 @@ class CouponViewSet(ModelViewSet):
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=["DELETE", ], permission_classes=[IsSuperUser, ], url_path="delete-comment",
-            url_name="delete_comment",lookup_url_kwarg="pk" )
+    @action(detail=True, methods=["DELETE", ], permission_classes=[IsSuperUserOrOwner, ], url_path="delete-comment",
+            url_name="delete_comment", lookup_url_kwarg="pk")
     def delete_comment(self, request, slug):
         comment = Comment.objects.filter(id=slug)
         if comment.exists():
             comment = comment.first()
+            self.check_object_permissions(request, comment)
             comment.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(data={"Error": "Comment not found!"}, status=status.HTTP_404_NOT_FOUND)
