@@ -4,6 +4,7 @@ from django.db import models
 
 from src.users.models import User
 from src.basket.models import Basket
+from src.business.models import Business
 
 
 def payment_done(instance, basket_id):
@@ -49,3 +50,5 @@ class Payment(models.Model):
     class Meta:
         verbose_name = "Payment"
         verbose_name_plural = "Payments"
+
+
