@@ -2,6 +2,7 @@ import uuid
 from datetime import timedelta, datetime
 
 from django.db import models
+from django.utils import timezone
 from django.utils.text import slugify
 from django.db.models import Avg, Count
 from django.core.exceptions import ValidationError
@@ -61,7 +62,7 @@ class Coupon(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.title, allow_unicode=True)
         if not self.expire_date:
-            self.expire_date = self.created + timedelta(days=10)
+            self.expire_date = timezone.now() + timedelta(days=10)
         super().save(force_insert=False, force_update=False, using=None, update_fields=None)
 
     def get_main_line_coupon(self):

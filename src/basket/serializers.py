@@ -2,7 +2,7 @@ from django.db.models import Sum
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 
-from .models import Basket, BasketDetail
+from .models import Basket, BasketDetail, ClosedBasket
 from src.coupon.models import LineCoupon
 
 
@@ -46,3 +46,14 @@ class AddToBasketSerializer(serializers.Serializer):
             return super().validate(attrs)
         else:
             raise ValidationError({"line_coupon_slug": "Line coupon does not exists!"})
+
+
+class ClosedBasketSerializer(serializers.ModelSerializer):
+    product = BasketDetailSerializer(many=True)
+
+    class Meta:
+        model = ClosedBasket
+        fields = ["slug", "user", "product", "created_at", "payment_datetime", "is_paid", "count", "total_price",
+                  "total_offer_percent", "total_price_with_offer"]
+        # read_only_fields = ["slug", "created_at", "payment_datetime", "is_paid", "count", "total_price",
+        #                     "total_offer_percent", "total_price_with_offer", ]
