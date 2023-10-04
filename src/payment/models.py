@@ -37,8 +37,7 @@ def payment_done(closed_basket_id):
 class Payment(models.Model):
     slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    basket = models.ForeignKey(Basket, on_delete=models.SET_NULL, null=True, blank=True)
-    closed_basket = models.ForeignKey(ClosedBasket, on_delete=models.CASCADE, null=True, blank=True)
+    basket = models.ForeignKey(ClosedBasket, on_delete=models.CASCADE, null=True, blank=True)
     total_price = models.PositiveIntegerField(blank=True, null=True)
     total_price_with_offer = models.PositiveIntegerField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -47,28 +46,18 @@ class Payment(models.Model):
              update_fields=None):
         if self.slug is None:
             self.slug = f"{self.__class__.__name__.lower()}-{uuid.uuid4()}"
-        # create closed basket
-        kwargs = get_instance_values(self.basket)
-        closed_basket = ClosedBasket.objects.create(**kwargs)
-        for product in self.basket.product.all():
-            kwargs = get_instance_values(product)
-            closed_basket_product = ClosedBasketDetail.objects.create(**kwargs)
-            closed_basket_product.save()
-            closed_basket.product.add(closed_basket_product)
-        closed_basket.save()
+
         # task when payment created
-        payment_done(closed_basket_id=closed_basket.id)
+        payment_done(closed_basket_id=self.basket_id)
         # set closed basket and price fields
-        self.closed_basket_id = closed_basket.id
-        self.total_price = closed_basket.total_price
-        self.total_price_with_offer = closed_basket.total_price_with_offer
+        self.closed_basket_id = self.basket_id
+        self.total_price = self.basket.total_price
+        self.total_price_with_offer = self.basket.total_price_with_offer
         return super().save(force_insert, force_update, using,
                             update_fields)
 
     def __str__(self):
-        if self.basket_id:
-            return f"{self.basket}({self.user})"
-        return f"{self.closed_basket}({self.user})"
+        return f"{self.basket}({self.user})"
 
     class Meta:
         verbose_name = "Payment"
