@@ -1,6 +1,6 @@
 from django.db.models import Sum
 from django.dispatch import receiver
-from django.db.models.signals import m2m_changed, post_save
+from django.db.models.signals import m2m_changed, post_save, pre_delete
 
 from .models import Basket, BasketDetail
 
@@ -26,7 +26,7 @@ def basket_products_price_updater(sender, **kwargs):
 @receiver(post_save, sender=BasketDetail)
 def basket_products_price_updater(sender, **kwargs):
     basket: Basket = kwargs["instance"].basket_set.first()
-    if basket:  # todo
+    if basket:
         if not basket.is_paid:
             details = basket.product.all().aggregate(Sum("count"), Sum("total_price"), Sum("total_price_with_offer"))
             basket_count = details["count__sum"]
@@ -40,3 +40,9 @@ def basket_products_price_updater(sender, **kwargs):
                     100 - (basket.total_price_with_offer * 100 / basket.total_price)) if basket.total_price else 0
 
         basket.save()
+
+
+@receiver(pre_delete, sender=Basket)
+def basket_products_remover(sender, **kwargs):
+    basket: Basket = kwargs["instance"]
+    basket.product.all().delete()

@@ -1,16 +1,25 @@
 import uuid
 
 from django.db import models
+from django.utils import timezone
 
 from src.users.models import User
-from src.basket.models import Basket
+from src.basket.models import Basket, ClosedBasket, ClosedBasketDetail
 from src.business.models import Business
 
 
-def payment_done(instance, basket_id):
-    basket = Basket.objects.get(id=basket_id)
-    # Basket Detail fields
-    for product in basket.product.all():
+def get_instance_values(instance):
+    kwargs = instance.__dict__.copy()
+    remove_keys = ("_state", "id", "slug")
+    for key in remove_keys:
+        del kwargs[key]
+    return kwargs
+
+
+def payment_done(closed_basket_id):
+    closed_basket = ClosedBasket.objects.get(id=closed_basket_id)
+    # Closed Basket Detail fields
+    for product in closed_basket.product.all():
         line_coupon = product.line_coupon
         product.payment_price = line_coupon.price
         product.payment_offer_percent = line_coupon.offer_percent
@@ -19,16 +28,16 @@ def payment_done(instance, basket_id):
         # Line Coupon sell_count adding
         line_coupon.sell_count += product.count
         line_coupon.save()
-    # Basket fields
-    basket.is_paid = True
-    basket.payment_datetime = instance.created_at
-    basket.save()
+    # Closed Basket fields
+    closed_basket.is_paid = True
+    closed_basket.payment_datetime = timezone.now()
+    closed_basket.save()
 
 
 class Payment(models.Model):
     slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    basket = models.ForeignKey(Basket, on_delete=models.CASCADE)
+    basket = models.ForeignKey(ClosedBasket, on_delete=models.CASCADE, null=True, blank=True)
     total_price = models.PositiveIntegerField(blank=True, null=True)
     total_price_with_offer = models.PositiveIntegerField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -37,8 +46,11 @@ class Payment(models.Model):
              update_fields=None):
         if self.slug is None:
             self.slug = f"{self.__class__.__name__.lower()}-{uuid.uuid4()}"
+
         # task when payment created
-        payment_done(self, self.basket_id)
+        payment_done(closed_basket_id=self.basket_id)
+        # set closed basket and price fields
+        self.closed_basket_id = self.basket_id
         self.total_price = self.basket.total_price
         self.total_price_with_offer = self.basket.total_price_with_offer
         return super().save(force_insert, force_update, using,
@@ -50,5 +62,3 @@ class Payment(models.Model):
     class Meta:
         verbose_name = "Payment"
         verbose_name_plural = "Payments"
-
-

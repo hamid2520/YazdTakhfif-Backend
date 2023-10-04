@@ -6,11 +6,12 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.filters import SearchFilter
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
+from src.utils.custom_api_views import ListRetrieveAPIView
 
 from src.coupon.models import LineCoupon
-from .models import Basket, BasketDetail
+from .models import Basket, BasketDetail, ClosedBasket
 from .filters import IsOwnerOrSuperUserBasket, IsOwnerOrSuperUserBasketDetail
-from .serializers import BasketSerializer, BasketDetailSerializer, AddToBasketSerializer
+from .serializers import BasketSerializer, BasketDetailSerializer, AddToBasketSerializer, ClosedBasketSerializer
 
 
 class BasketViewSet(ModelViewSet):
@@ -73,3 +74,17 @@ class BasketDetailViewSet(ModelViewSet):
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserBasketDetail, ]
+
+
+class ClosedBasketAPIView(ListRetrieveAPIView):
+    queryset = ClosedBasket.objects.all()
+    serializer_class = ClosedBasketSerializer
+    lookup_field = "slug"
+    lookup_url_kwarg = "slug"
+    filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserBasket, SearchFilter]
+    search_fields = ["product__line_coupon__title", ]
+
+    def get(self, request, *args, **kwargs):
+        if self.kwargs.get("slug"):
+            return self.retrieve(request, *args, **kwargs)
+        return self.list(request, *args, **kwargs)

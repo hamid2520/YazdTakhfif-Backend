@@ -1,8 +1,7 @@
 from rest_framework.generics import ListAPIView
 from rest_framework.filters import SearchFilter
 from rest_framework.settings import api_settings
-from rest_framework.mixins import RetrieveModelMixin
-
+from src.utils.custom_api_views import ListRetrieveAPIView
 from .models import Category, Coupon, LineCoupon
 from .serializers import CategorySerializer, CouponSerializer, LineCouponSerializer
 from .filters import PriceFilter, OfferFilter, RateFilter, BusinessFilter, CategoryFilter
@@ -15,7 +14,7 @@ class CategoryAPIView(ListAPIView):
     search_fields = ['title', ]
 
 
-class CouponAPIView(RetrieveModelMixin, ListAPIView):
+class CouponAPIView(ListRetrieveAPIView):
     queryset = Coupon.objects.all()
     serializer_class = CouponSerializer
     lookup_field = "slug"

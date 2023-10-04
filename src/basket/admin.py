@@ -1,7 +1,6 @@
 from django.contrib import admin
-from django.db.models import Sum
 
-from .models import Basket, BasketDetail
+from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail
 
 
 class BasketAdmin(admin.ModelAdmin):
@@ -18,5 +17,15 @@ class BasketDetailAdmin(admin.ModelAdmin):
                        "total_price_with_offer", ]
 
 
+class ClosedBasketAdmin(BasketAdmin):
+    pass
+
+
+class ClosedBasketDetailAdmin(admin.ModelAdmin):
+    pass
+
+
 admin.site.register(Basket, BasketAdmin)
 admin.site.register(BasketDetail, BasketDetailAdmin)
+admin.site.register(ClosedBasket, ClosedBasketAdmin)
+admin.site.register(ClosedBasketDetail, ClosedBasketDetailAdmin)
