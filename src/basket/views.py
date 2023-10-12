@@ -1,17 +1,22 @@
+from django.db.models import Q
 from rest_framework import status
-from django.http import HttpResponseNotFound
+from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.http import HttpResponseNotFound
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.filters import SearchFilter
+from rest_framework.generics import ListAPIView
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 from src.utils.custom_api_views import ListRetrieveAPIView
 
+from .permissions import IsSuperUser
 from src.coupon.models import LineCoupon
-from .models import Basket, BasketDetail, ClosedBasket
+from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail
 from .filters import IsOwnerOrSuperUserBasket, IsOwnerOrSuperUserBasketDetail
-from .serializers import BasketSerializer, BasketDetailSerializer, AddToBasketSerializer, ClosedBasketSerializer
+from .serializers import BasketSerializer, BasketDetailSerializer, AddToBasketSerializer, ClosedBasketSerializer, \
+    ClosedBasketDetailSerializer,ClosedBasketDetailValidatorSerializer
 
 
 class BasketViewSet(ModelViewSet):
@@ -88,3 +93,36 @@ class ClosedBasketAPIView(ListRetrieveAPIView):
         if self.kwargs.get("slug"):
             return self.retrieve(request, *args, **kwargs)
         return self.list(request, *args, **kwargs)
+
+
+class PaidClosedBasketListAPIView(ListAPIView):
+    queryset = ClosedBasket.objects.filter(status=2)
+    serializer_class = ClosedBasketSerializer
+    permission_classes = [IsSuperUser, ]
+
+
+class PaidClosedBasketDetailListAPIView(ListAPIView):
+    queryset = ClosedBasketDetail.objects.filter(status=1)
+    serializer_class = ClosedBasketDetailSerializer
+    permission_classes = [IsSuperUser, ]
+
+
+class ClosedBasketDetailValidatorAPIView(APIView):
+    def post(self, request,slug):
+        basket_product = ClosedBasketDetail.objects.filter(slug=slug)
+        if basket_product.exists():
+            basket_product = basket_product.first()
+            serializer = ClosedBasketDetailValidatorSerializer(data=request.data)
+            if serializer.is_valid():
+                data = serializer.validated_data
+                basket_product.status = data.get("status")
+                basket_product.save()
+                # basket = basket_product.closedbasket_set.first()
+                # not_verified_products = basket.product.filter(status=1)
+                # if not not_verified_products.exists():
+                #
+                #
+                # print(not_verified_products)
+                return Response(data=serializer.data,status=status.HTTP_200_OK)
+            return Response(data=serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_404_NOT_FOUND)

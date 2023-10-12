@@ -1,7 +1,8 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 
-from .views import BasketViewSet, BasketDetailViewSet, ClosedBasketAPIView
+from .views import BasketViewSet, BasketDetailViewSet, ClosedBasketAPIView, PaidClosedBasketListAPIView, \
+    PaidClosedBasketDetailListAPIView, ClosedBasketDetailValidatorAPIView
 
 router = SimpleRouter()
 router.register(prefix="baskets", viewset=BasketViewSet, basename="basket", )
@@ -9,4 +10,9 @@ router.register(prefix="basket-details", viewset=BasketDetailViewSet, basename="
 urlpatterns = [
                   path("closed-baskets/<slug:slug>/", ClosedBasketAPIView.as_view(), name="closed_basket_detail"),
                   path("closed-baskets/", ClosedBasketAPIView.as_view(), name="closed_basket_list"),
+                  path("paid-closed-baskets/", PaidClosedBasketListAPIView.as_view(), name="paid_closed_basket_list"),
+                  path("paid-closed-basket-details/<slug:slug>/", PaidClosedBasketDetailListAPIView.as_view(),
+                       name="paid_closed_basket_details_list"),
+                  path("paid-closed-basket-detail-validator/<slug:slug>/", ClosedBasketDetailValidatorAPIView.as_view(),
+                       name="paid_closed_basket_detail_validator")
               ] + router.urls
