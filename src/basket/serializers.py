@@ -2,7 +2,7 @@ from django.db.models import Sum
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 
-from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail
+from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, ProductValidationCode
 from src.coupon.models import LineCoupon
 
 
@@ -27,7 +27,7 @@ class BasketDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = BasketDetail
         fields = ["slug", "line_coupon", "count", "payment_price", "payment_offer_percent", "payment_price_with_offer",
-                  "total_price", "total_price_with_offer", "status"]
+                  "total_price", "total_price_with_offer"]
         read_only_fields = ["slug", "payment_price", "payment_offer_percent", "payment_price_with_offer", "total_price",
                             "total_price_with_offer", ]
 
@@ -48,15 +48,6 @@ class AddToBasketSerializer(serializers.Serializer):
             raise ValidationError({"line_coupon_slug": "Line coupon does not exists!"})
 
 
-class ClosedBasketSerializer(serializers.ModelSerializer):
-    product = BasketDetailSerializer(many=True)
-
-    class Meta:
-        model = ClosedBasket
-        fields = ["slug", "user", "product", "created_at", "payment_datetime", "status", "count", "total_price",
-                  "total_offer_percent", "total_price_with_offer"]
-
-
 class ClosedBasketDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClosedBasketDetail
@@ -65,9 +56,41 @@ class ClosedBasketDetailSerializer(serializers.ModelSerializer):
                   "status"]
 
 
+class ClosedBasketSerializer(serializers.ModelSerializer):
+    product = ClosedBasketDetailSerializer(many=True)
+
+    class Meta:
+        model = ClosedBasket
+        fields = ["slug", "user", "product", "created_at", "payment_datetime", "status", "count", "total_price",
+                  "total_offer_percent", "total_price_with_offer"]
+
+
 class ClosedBasketDetailValidatorSerializer(serializers.Serializer):
     status_choices = (
         (2, "Verified"),
         (3, "Canceled"),
     )
     status = serializers.ChoiceField(choices=status_choices)
+
+
+# class BytesField(serializers.Field):
+#     # def to_representation(self, value):
+#     #     return value.
+
+class BytesField(serializers.Field):
+    def to_internal_value(self, data):
+        # Convert the string representation back to bytes
+        try:
+            byte_data = bytes.fromhex(data)
+            return byte_data
+        except ValueError:
+            raise serializers.ValidationError("Invalid hexadecimal representation")
+
+    def to_representation(self, obj):
+        # Convert bytes to a hexadecimal string for serialization
+        return obj.hex()
+
+
+class QRCodeSerializer(serializers.Serializer):
+    code = BytesField()
+    used = serializers.BooleanField()
