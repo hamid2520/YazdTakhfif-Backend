@@ -7,7 +7,6 @@ from django.utils.text import slugify
 from django.db.models import Avg, Count
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
-
 from src.business.models import Business
 from src.users.models import User
 
@@ -48,6 +47,12 @@ class FAQ(models.Model):
 
 
 class Coupon(models.Model):
+    class CouponStatusChoices(models.TextChoices):
+        created = 'created', 'ایجاد شده'
+        confirmed = 'confirmed', 'تایید شده'
+        rejected = 'rejected', 'رد شده'
+
+
     title = models.CharField(max_length=128)
     slug = models.SlugField(max_length=256, db_index=True, allow_unicode=True, editable=False, blank=True)
     business = models.ForeignKey(to=Business, on_delete=models.CASCADE)
@@ -58,6 +63,7 @@ class Coupon(models.Model):
     terms_of_use = models.TextField(blank=True, null=True)
     coupon_rate = models.DecimalField(blank=True, null=True, max_digits=2, decimal_places=1)
     rate_count = models.PositiveIntegerField(null=True, blank=True)
+    status = models.CharField(max_length=50,null=True,blank=True,choices=CouponStatusChoices.choices, default="created")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.title, allow_unicode=True)

@@ -1,7 +1,6 @@
 from django.db.models import Count, Q
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-
 from src.business.serializers import BusinessSerializer
 from .models import Category, Coupon, LineCoupon, Rate, Comment
 
@@ -22,7 +21,7 @@ class CouponSerializer(serializers.ModelSerializer):
         model = Coupon
         fields = [
             "title", "slug", "business", "created", "expire_date", "category", "description", "terms_of_use",
-            "coupon_rate", "rate_count", "rates_list"]
+            "coupon_rate", "rate_count", "rates_list","status"]
 
     def get_rates_list(self, obj: Coupon):
         rates_list: dict = obj.rate_set.all().aggregate(rate_1=Count("rate", filter=Q(rate=1)),
@@ -45,6 +44,12 @@ class CouponCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coupon
         fields = ["title", "business", "expire_date", "category", "description", "terms_of_use"]
+
+
+class CouponUpdateStatusSerializer(serializers.ModelSerializer):
+    class Meta :
+        model = Coupon
+        fields = ['status']
 
 
 class LineCouponSerializer(serializers.ModelSerializer):
