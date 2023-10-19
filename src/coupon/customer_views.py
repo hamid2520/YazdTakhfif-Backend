@@ -15,7 +15,7 @@ class CategoryAPIView(ListAPIView):
 
 
 class CouponAPIView(ListRetrieveAPIView):
-    queryset = Coupon.objects.filter(status='confirmed')
+    queryset = Coupon.objects.filter(status='confirmed').all()
     serializer_class = CouponSerializer
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
