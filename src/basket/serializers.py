@@ -41,7 +41,7 @@ class AddToBasketSerializer(serializers.Serializer):
         line_coupon = LineCoupon.objects.filter(slug=data.get("line_coupon_slug"))
         if line_coupon.exists():
             line_coupon = line_coupon.first()
-            if (data.get("basket_detail_count") + line_coupon.sell_count) > line_coupon.count:
+            if (int(data.get("basket_detail_count")) + line_coupon.sell_count) > line_coupon.count:
                 raise ValidationError({"basket_detail_count": "There is no more line coupons available!"})
             return super().validate(attrs)
         else:
