@@ -13,9 +13,9 @@ class SearchEngineListApiView(APIView):
 
     def get(self, request: Request, text):
         try:
-            category_search_date = Category.objects.filter(title__contains=text).values('title')
-            coupon_search_date = Coupon.objects.filter(title__contains=text).values('title')
-            line_coupon_search_date = LineCoupon.objects.filter(title__contains=text).values('title')
+            category_search_date = Category.objects.filter(title__contains=text).values('title','slug')
+            coupon_search_date = Coupon.objects.filter(title__contains=text).values('title','slug')
+            line_coupon_search_date = LineCoupon.objects.filter(title__contains=text).values('title', 'slug')
 
             category_search_date = category_search_date.annotate(model_name=Value('category', output_field=CharField()))
             coupon_search_date = coupon_search_date.annotate(model_name=Value('coupon', output_field=CharField()))
