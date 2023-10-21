@@ -24,6 +24,15 @@ class BasketSerializer(serializers.ModelSerializer):
 
 
 class BasketDetailSerializer(serializers.ModelSerializer):
+    def validate(self, attrs):
+        super().validate(attrs)
+        data = self.initial_data
+        line_coupon = LineCoupon.objects.get(id=data.get("line_coupon"))
+        print(line_coupon.count)
+        if (int(data.get("count")) + line_coupon.sell_count) > line_coupon.count:
+            raise ValidationError({"basket_detail_count": "There is no more line coupons available!"})
+        return attrs
+
     class Meta:
         model = BasketDetail
         fields = ["slug", "line_coupon", "count", "payment_price", "payment_offer_percent", "payment_price_with_offer",
@@ -36,16 +45,16 @@ class AddToBasketSerializer(serializers.Serializer):
     line_coupon_slug = serializers.SlugField()
     basket_detail_count = serializers.IntegerField(min_value=1)
 
-    # def validate(self, attrs):
-    #     data = self.initial_data
-    #     line_coupon = LineCoupon.objects.filter(slug=data.get("line_coupon_slug"))
-    #     if line_coupon.exists():
-    #         line_coupon = line_coupon.first()
-    #         if (int(data.get("basket_detail_count")) + line_coupon.sell_count) > line_coupon.count:
-    #             raise ValidationError({"basket_detail_count": "There is no more line coupons available!"})
-    #         return super().validate(attrs)
-    #     else:
-    #         raise ValidationError({"line_coupon_slug": "Line coupon does not exists!"})
+    def validate(self, attrs):
+        data = self.initial_data
+        line_coupon = LineCoupon.objects.filter(slug=data.get("line_coupon_slug"))
+        if line_coupon.exists():
+            line_coupon = line_coupon.first()
+            if (int(data.get("basket_detail_count")) + line_coupon.sell_count) > line_coupon.count:
+                raise ValidationError({"basket_detail_count": "There is no more line coupons available!"})
+            return super().validate(attrs)
+        else:
+            raise ValidationError({"line_coupon_slug": "Line coupon does not exists!"})
 
 
 class ClosedBasketSerializer(serializers.ModelSerializer):

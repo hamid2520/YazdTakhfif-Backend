@@ -19,16 +19,10 @@ class BaseBasketDetail(models.Model):
     total_price = models.PositiveIntegerField(blank=True, null=True)
     total_price_with_offer = models.PositiveIntegerField(blank=True, null=True)
 
-    def clean(self):
-        if self.count + self.line_coupon.sell_count > self.line_coupon.count:
-            raise ValidationError("There is no more line coupons available!")
-        return super().clean()
-
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         if self.slug is None:
             self.slug = f"{self.__class__.__name__.lower()}-{uuid.uuid4()}"
-        self.full_clean(exclude=None, validate_unique=True)
         return super().save(force_insert, force_update, using,
                             update_fields)
 
