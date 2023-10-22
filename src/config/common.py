@@ -55,6 +55,7 @@ INSTALLED_APPS = (
     'src.basket',
     'src.offer',
     'src.advertise',
+    'src.search_engine'
     # Third party optional apps
     # app must be placed somewhere after all the apps that are going to be generating activities
     # 'actstream',                  # activity stream
