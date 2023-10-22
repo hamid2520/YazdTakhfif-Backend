@@ -48,9 +48,9 @@ class FAQ(models.Model):
 
 class Coupon(models.Model):
     class CouponStatusChoices(models.TextChoices):
-        created = 'created', 'ایجاد شده'
-        confirmed = 'confirmed', 'تایید شده'
-        rejected = 'rejected', 'رد شده'
+        created = 0, 'ایجاد شده'
+        confirmed = 1, 'تایید شده'
+        rejected = -1, 'رد شده'
 
 
     title = models.CharField(max_length=128)

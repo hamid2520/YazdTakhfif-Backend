@@ -49,7 +49,13 @@ class CouponCreateSerializer(serializers.ModelSerializer):
 class CouponUpdateStatusSerializer(serializers.ModelSerializer):
     class Meta :
         model = Coupon
-        fields = ['status']
+        fields = [
+            "title", "slug", "business", "created", "expire_date", "category", "description", "status"
+            ]
+        
+        read_only_fields = [
+            "title", "slug", "business", "created", "expire_date", "category", "description"
+        ]
 
 
 class LineCouponSerializer(serializers.ModelSerializer):

@@ -6,7 +6,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.settings import api_settings
-from rest_framework.decorators import api_view
+from rest_framework import generics
 from rest_framework.request import Request
 from .models import Category, Coupon, LineCoupon, Rate, Comment
 from .filters import IsOwnerOrSuperUserCoupon, IsOwnerOrSuperUserLineCoupon, PriceFilter, OfferFilter, RateFilter, \
@@ -93,7 +93,7 @@ class CouponViewSet(ModelViewSet):
         coupon_comments = coupon.comment_set.all()
         serializer = CommentSerializer(instance=coupon_comments, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
-        
+    
 
 class LineCouponViewSet(ModelViewSet):
     queryset = LineCoupon.objects.all()
@@ -104,18 +104,7 @@ class LineCouponViewSet(ModelViewSet):
     search_fields = ['title', "coupon__title"]
 
 
-@api_view(["PUT",'GET'])
-def coupon_status_update(request:Request, slug):
-    try:
-        coupon = Coupon.objects.get(slug=slug)
-    except Coupon.DoesNotExist:
-        return Response(None, status.HTTP_404_NOT_FOUND)
-    if request.method == 'GET':
-        serializer = CouponUpdateStatusSerializer(coupon)
-        return Response(serializer.data, status.HTTP_200_OK)
-    elif request.method == 'PUT':
-        serializer = CouponUpdateStatusSerializer(coupon, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status.HTTP_202_ACCEPTED)
-    return Response(serializer.data, status.HTTP_400_BAD_REQUEST)
+class CouponStatusUpdate(generics.RetrieveUpdateAPIView):
+    queryset = Coupon.objects.all()
+    lookup_field = 'slug'
+    serializer_class = CouponUpdateStatusSerializer

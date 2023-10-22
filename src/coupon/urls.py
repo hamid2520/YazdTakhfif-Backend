@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
-from .views import CategoryViewSet, CouponViewSet, LineCouponViewSet, coupon_status_update
+from .views import CategoryViewSet, CouponViewSet, LineCouponViewSet, CouponStatusUpdate
 from .customer_views import CategoryAPIView, CouponAPIView, LineCouponAPIView
 
 router = SimpleRouter()
@@ -10,7 +10,7 @@ router.register(prefix="admin-line-coupons", viewset=LineCouponViewSet, basename
 urlpatterns = [
                   path("categories/", CategoryAPIView.as_view(), name="category_list"),
                   path("coupons/detail/<slug:slug>/", CouponAPIView.as_view(), name="coupon_detail"),
-                  path("coupons/update-status/<slug:slug>", coupon_status_update, name="coupon-update-status"),
+                  path("coupons/update-status/<slug:slug>", CouponStatusUpdate.as_view(), name="coupon-update-status"),
                   path("coupons/", CouponAPIView.as_view(), name="coupon_list"),
                   path("line-coupons/<slug:coupon_slug>/", LineCouponAPIView.as_view(), name="line_coupon_list"),
               ] + router.urls
