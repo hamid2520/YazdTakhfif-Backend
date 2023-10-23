@@ -3,41 +3,64 @@ import logging
 from azbankgateways.exceptions import AZBankGatewaysException
 from azbankgateways import bankfactories, models as bank_models, default_settings as settings
 from django.apps import apps
+from django.db import models
 from django.http import Http404
 from django.shortcuts import redirect, render
+from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.reverse import reverse
+from rest_framework.views import APIView
 
-from .models import OnlinePayment
+from .models import OnlinePayment, Gateway
 from src.payment.models import Payment
 from src.wallet.models import Account, Transaction
 from src.wallet import account
 from src.payment.serializers import PaymentSerializer
+from django.core.exceptions import ObjectDoesNotExist
+
+from ..basket.models import Basket
 
 GATEWAY_STATUS_TOKEN_INVALID = 1
 GATEWAY_STATUS_PROBLEM_CONNECT_GATEWAY = 2
 GATEWAY_STATUS_SUCCESS = 3
 GATEWAY_STATUS_NOT_SUCCESS = 4
 GATEWAY_STATUS_NOT_SUCCESS_PAYMENT = 5
+GATEWAY_NOT_VALID = 6
 GATEWAY_ERRORS = {
     GATEWAY_STATUS_TOKEN_INVALID: "توکن نا معتبر است!",
     GATEWAY_STATUS_PROBLEM_CONNECT_GATEWAY: "مشکل در اتصال به درگاه پرداخت!",
     GATEWAY_STATUS_SUCCESS: "پرداخت موفق",
     GATEWAY_STATUS_NOT_SUCCESS: "پرداخت ناموفق!",
     GATEWAY_STATUS_NOT_SUCCESS_PAYMENT: """پرداخت موفق نبوده است.
-     اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت."""
+     اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.""",
+    GATEWAY_NOT_VALID: "درگاه وارد شده معتبر نیست!"
 }
 
 
-def go_to_gateway_view_v2(request, token):
-    op = OnlinePayment.objects.filter(token=token).first()
+def go_to_gateway_view_v2(request, basket_slug):
+    try:
+        basket = Basket.objects.get(slug=basket_slug)
+    except ObjectDoesNotExist:
+        raise Http404
+    basket_count_validation_status = basket.final_count_validation()
+    if basket_count_validation_status:
+        return redirect(
+            reverse('final_count_validation', args=[basket.slug, ]))
+    gateway_name = request.GET.get("gateway")
+    try:
+        gateway = Gateway.objects.get(gateway=gateway_name,active=True)
+    except ObjectDoesNotExist:
+        return redirect(reverse('payment_result', args=["00000000-0000-0000-0000-000000000000", GATEWAY_NOT_VALID]))
+    op = OnlinePayment.objects.create(user=request.user, gateway=gateway, payment=basket)
+    op.save()
     if op.status != 1:
-        return redirect(reverse('payment_result', args=[token, GATEWAY_STATUS_TOKEN_INVALID]))
+        return redirect(reverse('payment_result', args=[op.token, GATEWAY_STATUS_TOKEN_INVALID]))
     amount = int(op.payment.total_price_with_offer)
     user_mobile_number = +989138528929
-    client_callback_url = reverse('callback-gateway-v2', args=[token])
+    client_callback_url = reverse('callback-gateway-v2', args=[op.token])
     factory = bankfactories.BankFactory()
     try:
-        bank = factory.create()
+        bank = factory.create(bank_type=op.gateway.gateway)
         bank.set_request(request)
         bank.set_amount(amount)
         bank.set_client_callback_url(client_callback_url)
@@ -46,12 +69,15 @@ def go_to_gateway_view_v2(request, token):
         return bank.redirect_gateway()
     except AZBankGatewaysException as e:
         logging.critical(e)
-        redirect(reverse("payment_result", args=[token, GATEWAY_STATUS_PROBLEM_CONNECT_GATEWAY]))
+        redirect(reverse("payment_result", args=[op.token, GATEWAY_STATUS_PROBLEM_CONNECT_GATEWAY]))
         raise e
 
 
 def callback_gateway_view_v2(request, token):
-    op = OnlinePayment.objects.filter(token=token).first()
+    try:
+        op = OnlinePayment.objects.get(token=token)
+    except ObjectDoesNotExist:
+        raise Http404
     tracking_code = request.GET.get(settings.TRACKING_CODE_QUERY_PARAM)
     if not tracking_code:
         logging.debug("این لینک معتبر نیست.")
@@ -179,8 +205,23 @@ def payment_result(request, token, status):
             if payment_serializer.is_valid():
                 payment_serializer.save()
             else:
-                print(payment_serializer.errors)
                 context["status"] = GATEWAY_STATUS_NOT_SUCCESS
                 context["message"] = "پرداخت شما نهایی نشده است. لطفا با پشتیبانی تماس بگیرید!"
         return render(request, "payment_gateway/payment-result.html", context)
-    raise Http404
+    context = {
+        "message": GATEWAY_ERRORS[status],
+    }
+    return render(request, "payment_gateway/payment-result.html", context)
+
+
+class BasketCountValidationAPIView(APIView):
+    def get(self, request, basket_slug):
+        try:
+            basket = Basket.objects.get(slug=basket_slug)
+            basket_count_status = basket.final_count_validation()
+            data = {
+                "product": basket_count_status
+            }
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        except ObjectDoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)

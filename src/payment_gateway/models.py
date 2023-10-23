@@ -26,7 +26,7 @@ class Gateway(models.Model):
     gateway = models.CharField(max_length=10, choices=GATEWAY_CHOICES)
     # put merchant_id or anything else in data
     data = models.JSONField(default=dict, null=True, blank=True)
-    active = models.BooleanField(default=True)
+    active = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.name}({self.gateway})"
@@ -67,7 +67,7 @@ class OnlinePayment(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     status = models.PositiveSmallIntegerField(default=STATUS_NEW, verbose_name='وضعیت', choices=STATUS_CHOICES)
-    token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, verbose_name='توکن')
+    token = models.UUIDField(default=uuid.uuid4, unique=True, verbose_name='توکن', editable=False)
     gateway = models.ForeignKey(Gateway, on_delete=models.CASCADE)
     # جواب هنگام ارسال به درگاه پرداخت
     extra_data = models.JSONField(default=dict, null=True, blank=True)
@@ -75,7 +75,7 @@ class OnlinePayment(models.Model):
     # {pre_confirm={}, post_confirm={}}
     response = models.JSONField(default=dict, null=True, blank=True)
     ref_id = models.CharField(max_length=64, blank=True, null=True, default=None)
-    payment = models.ForeignKey(Basket, on_delete=models.CASCADE)
+    payment = models.ForeignKey(Basket, on_delete=models.SET_NULL, null=True)
     paid_at = models.DateTimeField(null=True, blank=True, default=None)
 
     def __str__(self):
@@ -84,6 +84,8 @@ class OnlinePayment(models.Model):
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         if self.status != self.STATUS_NEW:
+            if self.status == self.STATUS_SUCCESS:
+                self.paid_at = timezone.now()
             self.ref_id = self.response["post_confirm"]["RefID"]
         return super().save(force_insert, force_update, using,
                             update_fields)

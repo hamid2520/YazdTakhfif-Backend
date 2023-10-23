@@ -368,7 +368,7 @@ AZ_IRANIAN_BANK_GATEWAYS = {
             'PASSWORD': '<YOUR PASSWORD>',
         },
         'ZIBAL': {
-            'MERCHANT_CODE': '<YOUR MERCHANT CODE>',
+            'MERCHANT_CODE': 'zibal',
         },
         'BAHAMTA': {
             'MERCHANT_CODE': '<YOUR MERCHANT CODE>',

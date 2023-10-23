@@ -82,6 +82,18 @@ class BaseBasket(models.Model):
 class Basket(BaseBasket):
     product = models.ManyToManyField(BasketDetail, blank=True, null=True)
 
+    def final_count_validation(self):
+        errors = []
+        if self.product.exists():
+            for product in self.product.all():
+                if product.count + product.line_coupon.sell_count > product.line_coupon.count:
+                    errors.append(f"{product.line_coupon.title}`s count is more than available count!")
+        else:
+            errors.append("There is no products in basket!")
+        if len(errors) > 0:
+            return errors
+        return None
+
     class Meta:
         verbose_name = "Basket"
         verbose_name_plural = "Baskets"
