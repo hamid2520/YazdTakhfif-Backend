@@ -9,8 +9,7 @@ from src.coupon.models import LineCoupon
 class BasketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Basket
-        fields = ["slug", "user", "product", "created_at", "payment_datetime", "status", "count", "total_price",
-                  "total_offer_percent", "total_price_with_offer"]
+        exclude = ["id", ]
         read_only_fields = ["slug", "created_at", "payment_datetime", "is_paid", "count", "total_price",
                             "total_offer_percent", "total_price_with_offer", ]
 
@@ -26,8 +25,7 @@ class BasketSerializer(serializers.ModelSerializer):
 class BasketDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = BasketDetail
-        fields = ["slug", "line_coupon", "count", "payment_price", "payment_offer_percent", "payment_price_with_offer",
-                  "total_price", "total_price_with_offer", "status"]
+        exclude = ["id", ]
         read_only_fields = ["slug", "payment_price", "payment_offer_percent", "payment_price_with_offer", "total_price",
                             "total_price_with_offer", ]
 
@@ -53,16 +51,13 @@ class ClosedBasketSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClosedBasket
-        fields = ["slug", "user", "product", "created_at", "payment_datetime", "status", "count", "total_price",
-                  "total_offer_percent", "total_price_with_offer"]
+        exclude = ["id", ]
 
 
 class ClosedBasketDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClosedBasketDetail
-        fields = ["slug", "line_coupon", "count", "payment_price", "payment_offer_percent", "payment_price_with_offer",
-                  "total_price", "total_price_with_offer",
-                  "status"]
+        exclude = ["id", ]
 
 
 class ClosedBasketDetailValidatorSerializer(serializers.Serializer):
