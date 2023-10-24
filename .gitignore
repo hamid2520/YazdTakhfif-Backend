@@ -113,7 +113,3 @@ media/*
 
 # pycharm
 .idea/
-
-# docker
-docker-compose.yml
-Dockerfile
