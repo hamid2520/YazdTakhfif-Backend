@@ -105,9 +105,29 @@ class ClosedBasket(BaseBasket):
     product = models.ManyToManyField(ClosedBasketDetail, blank=True, null=True)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        self.status = 2
+        if self.status == 1:
+            self.status = 2
         return super().save(force_insert=False, force_update=False, using=None, update_fields=None)
 
     class Meta:
         verbose_name = "ClosedBasket"
         verbose_name_plural = "ClosedBaskets"
+
+
+class ProductValidationCode(models.Model):
+    product = models.ForeignKey(ClosedBasketDetail, on_delete=models.CASCADE)
+    code = models.CharField(max_length=128, unique=True, blank=True, null=True)
+    used = models.BooleanField(default=False)
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        if not self.code:
+            self.code = f"yazdtakhfif-{uuid.uuid4()}"
+        return super().save(force_insert, force_update, using, update_fields)
+
+    def __str__(self):
+        return f"{self.product.line_coupon.title}({self.pk})"
+
+    class Meta:
+        verbose_name = "Coupon Code"
+        verbose_name_plural = "Coupon Codes"

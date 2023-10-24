@@ -2,7 +2,7 @@ from django.db.models import Sum
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 
-from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail
+from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, ProductValidationCode
 from src.coupon.models import LineCoupon
 
 
@@ -66,3 +66,22 @@ class ClosedBasketDetailValidatorSerializer(serializers.Serializer):
         (3, "Canceled"),
     )
     status = serializers.ChoiceField(choices=status_choices)
+
+
+class BytesField(serializers.Field):
+    def to_internal_value(self, data):
+        # Convert the string representation back to bytes
+        try:
+            byte_data = bytes.fromhex(data)
+            return byte_data
+        except ValueError:
+            raise serializers.ValidationError("Invalid hexadecimal representation")
+
+    def to_representation(self, obj):
+        # Convert bytes to a hexadecimal string for serialization
+        return obj.hex()
+
+
+class QRCodeSerializer(serializers.Serializer):
+    code = BytesField()
+    used = serializers.BooleanField()
