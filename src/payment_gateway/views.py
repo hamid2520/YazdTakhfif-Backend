@@ -53,10 +53,12 @@ def go_to_gateway_view_v2(request, basket_slug):
             gateway = Gateway.objects.get(gateway=gateway_name, active=True)
         except ObjectDoesNotExist:
             return redirect(reverse('payment_result', args=["00000000-0000-0000-0000-000000000000", GATEWAY_NOT_VALID]))
-        op = OnlinePayment.objects.create(user=request.user, gateway=gateway, payment=basket)
-        op.save()
-        if op.status != 1:
-            return redirect(reverse('payment_result', args=[op.token, GATEWAY_STATUS_TOKEN_INVALID]))
+        op = OnlinePayment.objects.exclude(payment_id=basket.id,gateway_id=gateway.id,status=3)
+        if op.exists():
+            op = op.first()
+        else:
+            op = OnlinePayment.objects.create(user=request.user, gateway=gateway, payment=basket)
+            op.save()
         amount = int(op.payment.total_price_with_offer)
         user_mobile_number = +989138528929
         client_callback_url = reverse('callback-gateway-v2', args=[op.token])
