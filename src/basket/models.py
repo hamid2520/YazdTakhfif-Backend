@@ -51,6 +51,13 @@ class BasketDetail(BaseBasketDetail):
 
 
 class ClosedBasketDetail(BaseBasketDetail):
+    status_choices = (
+        (1, "Created"),
+        (2, "Verified"),
+        (3, "Canceled"),
+    )
+    status = models.PositiveIntegerField(choices=status_choices, default=1, blank=True)
+
     class Meta:
         verbose_name = "Closed Basket Detail"
         verbose_name_plural = "Closed Basket Details"
@@ -58,6 +65,12 @@ class ClosedBasketDetail(BaseBasketDetail):
 
 # Basket
 class BaseBasket(models.Model):
+    status_choices = (
+        (1, "Created"),
+        (2, "Paid"),
+        (3, "Verified"),
+        (4, "Canceled"),
+    )
     slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -67,6 +80,7 @@ class BaseBasket(models.Model):
     total_price = models.PositiveIntegerField(blank=True, null=True)
     total_offer_percent = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(100), ])
     total_price_with_offer = models.PositiveIntegerField(blank=True, null=True)
+    status = models.PositiveIntegerField(choices=status_choices, default=1, blank=True)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.slug is None:
@@ -103,6 +117,30 @@ class Basket(BaseBasket):
 class ClosedBasket(BaseBasket):
     product = models.ManyToManyField(ClosedBasketDetail, blank=True, null=True)
 
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if self.status == 1:
+            self.status = 2
+        return super().save(force_insert=False, force_update=False, using=None, update_fields=None)
+
     class Meta:
         verbose_name = "ClosedBasket"
         verbose_name_plural = "ClosedBaskets"
+
+
+class ProductValidationCode(models.Model):
+    product = models.ForeignKey(ClosedBasketDetail, on_delete=models.CASCADE)
+    code = models.CharField(max_length=128, unique=True, blank=True, null=True)
+    used = models.BooleanField(default=False)
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        if not self.code:
+            self.code = f"yazdtakhfif-{uuid.uuid4()}"
+        return super().save(force_insert, force_update, using, update_fields)
+
+    def __str__(self):
+        return f"{self.product.line_coupon.title}({self.pk})"
+
+    class Meta:
+        verbose_name = "Coupon Code"
+        verbose_name_plural = "Coupon Codes"
