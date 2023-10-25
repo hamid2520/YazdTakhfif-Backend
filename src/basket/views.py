@@ -151,9 +151,6 @@ class GetQRCode(APIView):
                     request.build_absolute_uri(reverse("verify_qrcode", args=[code.code, ]))),
                     "used": code.used} for code in coupon_codes]
             serializer = QRCodeSerializer(instance=codes_list, many=True)
-            # print(request.get_host())
-            # print(request.build_absolute_uri(reverse("verify_qrcode", args=[slug, ])))
-            print(codes_list[-1])
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_404_NOT_FOUND)
 
