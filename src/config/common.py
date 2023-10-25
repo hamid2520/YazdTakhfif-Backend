@@ -44,6 +44,7 @@ INSTALLED_APPS = (
     'health_check.storage',
     'health_check.contrib.migrations',
     'health_check.contrib.celery_ping',  # requires celery
+    'azbankgateways',
     # Your apps
     'src.notifications',
     'src.users',
@@ -55,6 +56,8 @@ INSTALLED_APPS = (
     'src.basket',
     'src.offer',
     'src.advertise',
+    'src.payment_gateway',
+    'src.wallet',
     # Third party optional apps
     # app must be placed somewhere after all the apps that are going to be generating activities
     # 'actstream',                  # activity stream
@@ -338,3 +341,50 @@ SUMMERNOTE_CONFIG = {
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+AZ_IRANIAN_BANK_GATEWAYS = {
+    'GATEWAYS': {
+        'BMI': {
+            'MERCHANT_CODE': '<YOUR MERCHANT CODE>',
+            'TERMINAL_CODE': '<YOUR TERMINAL CODE>',
+            'SECRET_KEY': '<YOUR SECRET CODE>',
+        },
+        'SEP': {
+            'MERCHANT_CODE': '<YOUR MERCHANT CODE>',
+            'TERMINAL_CODE': '<YOUR TERMINAL CODE>',
+        },
+        'ZARINPAL': {
+            'MERCHANT_CODE': '111111111111111111111111111111111111',
+            'SANDBOX': 1,  # 0 disable, 1 active
+        },
+        'IDPAY': {
+            'MERCHANT_CODE': '11f5e4e5-6711-45a8-81fe-59dd08481794',
+            'METHOD': 'POST',  # GET or POST
+            'X_SANDBOX': 1,  # 0 disable, 1 active
+        },
+        'MELLAT': {
+            'TERMINAL_CODE': '<YOUR TERMINAL CODE>',
+            'USERNAME': '<YOUR USERNAME>',
+            'PASSWORD': '<YOUR PASSWORD>',
+        },
+        'ZIBAL': {
+            'MERCHANT_CODE': 'zibal',
+        },
+        'BAHAMTA': {
+            'MERCHANT_CODE': '<YOUR MERCHANT CODE>',
+        },
+        'PAYV1': {
+            'MERCHANT_CODE': '<YOUR MERCHANT CODE>',
+            'X_SANDBOX': 0,  # 0 disable, 1 active
+        },
+    },
+    'IS_SAMPLE_FORM_ENABLE': False,  # اختیاری و پیش فرض غیر فعال است
+    'DEFAULT': 'IDPAY',
+    'CURRENCY': 'IRR',  # اختیاری
+    'TRACKING_CODE_QUERY_PARAM': 'tc',  # اختیاری
+    'TRACKING_CODE_LENGTH': 16,  # اختیاری
+    'SETTING_VALUE_READER_CLASS': 'azbankgateways.readers.DefaultReader',  # اختیاری
+    'BANK_PRIORITIES': [],  # اختیاری
+    'IS_SAFE_GET_GATEWAY_PAYMENT': False,  # اختیاری، بهتر است True بزارید.
+    'CUSTOM_APP': None,  # اختیاری
+}
