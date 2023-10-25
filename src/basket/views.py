@@ -1,25 +1,26 @@
-from django.core.files.base import ContentFile
-from django.db.models import Q, Sum
-from src.utils.qrcode_generator import text_to_qrcode
+from rest_framework.permissions import IsAuthenticated
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.response import Response
 from django.http import HttpResponseNotFound
+from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
+from src.utils.qrcode_generator import text_to_qrcode
 from src.utils.custom_api_views import ListRetrieveAPIView
 
 from .permissions import IsSuperUser
 from src.coupon.models import LineCoupon
+from .permissions import IsOwnerOrSuperUser
 from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, ProductValidationCode
-from .filters import IsOwnerOrSuperUserBasket, IsOwnerOrSuperUserBasketDetail
+from .filters import IsOwnerOrSuperUserBasket, IsOwnerOrSuperUserBasketDetail, IsOwnerOrSuperUserClosedBasket
 from .serializers import BasketSerializer, BasketDetailSerializer, AddToBasketSerializer, ClosedBasketSerializer, \
-    ClosedBasketDetailSerializer, ClosedBasketDetailValidatorSerializer, QRCodeSerializer
+    ClosedBasketDetailSerializer, ClosedBasketDetailValidatorSerializer, VerifyQRCodeSerializer, GetQRCodeSerializer
 
 
 class BasketViewSet(ModelViewSet):
@@ -89,7 +90,7 @@ class ClosedBasketAPIView(ListRetrieveAPIView):
     serializer_class = ClosedBasketSerializer
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
-    filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserBasket, SearchFilter]
+    filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserClosedBasket, SearchFilter]
     search_fields = ["product__line_coupon__title", ]
 
     def get(self, request, *args, **kwargs):
@@ -141,27 +142,32 @@ class ClosedBasketDetailValidatorAPIView(APIView):
 
 
 class GetQRCode(APIView):
+    permission_classes = [IsOwnerOrSuperUser, ]
+
     def get(self, request, slug):
         product = ClosedBasketDetail.objects.filter(slug=slug)
         if product.exists():
             product = product.first()
+            self.check_object_permissions(request, product)
             coupon_codes = product.productvalidationcode_set.all()
             codes_list = [
                 {"code": text_to_qrcode(
                     request.build_absolute_uri(reverse("verify_qrcode", args=[code.code, ]))),
                     "used": code.used} for code in coupon_codes]
-            serializer = QRCodeSerializer(instance=codes_list, many=True)
+            serializer = GetQRCodeSerializer(instance=codes_list, many=True)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class VerifyQRCode(APIView):
+    permission_classes = [IsAuthenticated, ]
+
     def get(self, request, slug):
         code = ProductValidationCode.objects.filter(code=slug)
         if code.exists():
             code = code.first()
             if not code.used:
-                serializer = QRCodeSerializer(instance=code)
+                serializer = VerifyQRCodeSerializer(instance=code)
                 code.used = True
                 code.save()
                 return Response(data=serializer.data, status=status.HTTP_200_OK)

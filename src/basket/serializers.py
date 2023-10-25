@@ -89,6 +89,11 @@ class BytesField(serializers.Field):
         return obj.hex()
 
 
-class QRCodeSerializer(serializers.Serializer):
+class GetQRCodeSerializer(serializers.Serializer):
     code = BytesField()
+    used = serializers.BooleanField()
+
+
+class VerifyQRCodeSerializer(serializers.Serializer):
+    code = serializers.CharField()
     used = serializers.BooleanField()
