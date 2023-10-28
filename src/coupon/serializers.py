@@ -4,6 +4,8 @@ from rest_framework.exceptions import ValidationError
 
 from src.business.serializers import BusinessSerializer
 from .models import Category, Coupon, LineCoupon, Rate, Comment
+from ..business.models import Business
+from ..users.models import User
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -14,8 +16,8 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class CouponSerializer(serializers.ModelSerializer):
-    business = BusinessSerializer()
-    category = CategorySerializer(many=True)
+    business = serializers.SlugRelatedField(slug_field="slug", queryset=Business.objects.all())
+    category = serializers.SlugRelatedField(slug_field="slug", queryset=Category.objects.all(), many=True)
     rates_list = serializers.SerializerMethodField()
 
     class Meta:
@@ -25,29 +27,36 @@ class CouponSerializer(serializers.ModelSerializer):
             "coupon_rate", "rate_count", "rates_list"]
 
     def get_rates_list(self, obj: Coupon):
-        rates_list: dict = obj.rate_set.all().aggregate(rate_1=Count("rate", filter=Q(rate=1)),
-                                                        rate_2=Count("rate", filter=Q(rate=2)),
-                                                        rate_3=Count("rate", filter=Q(rate=3)),
-                                                        rate_4=Count("rate", filter=Q(rate=4)),
-                                                        rate_5=Count("rate", filter=Q(rate=5)))
+        if obj.rate_set.count() > 0:
+            rates_list: dict = obj.rate_set.all().aggregate(rate_1=Count("rate", filter=Q(rate=1)),
+                                                            rate_2=Count("rate", filter=Q(rate=2)),
+                                                            rate_3=Count("rate", filter=Q(rate=3)),
+                                                            rate_4=Count("rate", filter=Q(rate=4)),
+                                                            rate_5=Count("rate", filter=Q(rate=5)))
 
-        rate_count = obj.rate_count
-        for key, value in rates_list.items():
-            rate_percent = round((value * 100) / rate_count)
-            rates_list[key] = {
-                "count": value,
-                "percent": rate_percent
-            }
-        return rates_list
+            rate_count = obj.rate_count
+            for key, value in rates_list.items():
+                rate_percent = round((value * 100) / rate_count)
+                rates_list[key] = {
+                    "count": value,
+                    "percent": rate_percent
+                }
+            return rates_list
+        return None
 
 
 class CouponCreateSerializer(serializers.ModelSerializer):
+    business = serializers.SlugRelatedField(slug_field="slug", queryset=Business.objects.all())
+    category = serializers.SlugRelatedField(slug_field="slug", queryset=Category.objects.all(), many=True)
+
     class Meta:
         model = Coupon
         fields = ["title", "business", "expire_date", "category", "description", "terms_of_use"]
 
 
 class LineCouponSerializer(serializers.ModelSerializer):
+    coupon = serializers.SlugRelatedField(slug_field="slug", queryset=Coupon.objects.all())
+
     class Meta:
         model = LineCoupon
         fields = ["slug", "title", "coupon", "is_main", "count", "price", "offer_percent", "price_with_offer",
@@ -56,6 +65,8 @@ class LineCouponSerializer(serializers.ModelSerializer):
 
 
 class RateSerializer(serializers.ModelSerializer):
+    coupon = serializers.SlugRelatedField(slug_field="slug", read_only=True)
+
     class Meta:
         model = Rate
         fields = "__all__"
@@ -63,6 +74,7 @@ class RateSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    coupon = serializers.SlugRelatedField(slug_field="slug", queryset=Coupon.objects.all())
 
     def validate_user(self, value):
         request = self.context["request"]

@@ -7,6 +7,8 @@ from src.coupon.models import LineCoupon
 
 
 class BasketSerializer(serializers.ModelSerializer):
+    product = serializers.SlugRelatedField(slug_field="slug", queryset=BasketDetail.objects.all(), many=True)
+
     class Meta:
         model = Basket
         fields = ["slug", "user", "product", "created_at", "payment_datetime", "is_paid", "count", "total_price",
@@ -24,6 +26,8 @@ class BasketSerializer(serializers.ModelSerializer):
 
 
 class BasketDetailSerializer(serializers.ModelSerializer):
+    line_coupon = serializers.SlugRelatedField(slug_field="slug", queryset=LineCoupon.objects.all())
+
     def validate(self, attrs):
         data = super().validate(attrs)
         line_coupon = LineCoupon.objects.get(id=data.get("line_coupon").id)
@@ -60,7 +64,51 @@ class ClosedBasketSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClosedBasket
+<<<<<<< Updated upstream
         fields = ["slug", "user", "product", "created_at", "payment_datetime", "is_paid", "count", "total_price",
                   "total_offer_percent", "total_price_with_offer"]
         # read_only_fields = ["slug", "created_at", "payment_datetime", "is_paid", "count", "total_price",
         #                     "total_offer_percent", "total_price_with_offer", ]
+=======
+        exclude = ["id", ]
+
+
+class ClosedBasketDetailSerializer(serializers.ModelSerializer):
+    line_coupon = serializers.SlugRelatedField(slug_field="slug", queryset=LineCoupon.objects.all())
+
+    class Meta:
+        model = ClosedBasketDetail
+        exclude = ["id", ]
+
+
+class ClosedBasketDetailValidatorSerializer(serializers.Serializer):
+    status_choices = (
+        (2, "Verified"),
+        (3, "Canceled"),
+    )
+    status = serializers.ChoiceField(choices=status_choices)
+
+
+class BytesField(serializers.Field):
+    def to_internal_value(self, data):
+        # Convert the string representation back to bytes
+        try:
+            byte_data = bytes.fromhex(data)
+            return byte_data
+        except ValueError:
+            raise serializers.ValidationError("Invalid hexadecimal representation")
+
+    def to_representation(self, obj):
+        # Convert bytes to a hexadecimal string for serialization
+        return obj.hex()
+
+
+class GetQRCodeSerializer(serializers.Serializer):
+    code = BytesField()
+    used = serializers.BooleanField()
+
+
+class VerifyQRCodeSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    used = serializers.BooleanField()
+>>>>>>> Stashed changes

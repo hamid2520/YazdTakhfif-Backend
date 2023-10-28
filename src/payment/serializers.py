@@ -6,10 +6,10 @@ from src.basket.models import Basket, BasketDetail, ClosedBasket, ClosedBasketDe
 
 
 class PaymentSerializer(serializers.ModelSerializer):
-    basket_id = serializers.IntegerField()
+    basket_slug = serializers.SlugField()
 
-    def validate_basket_id(self, value):
-        basket = Basket.objects.filter(id=value)
+    def validate_basket_slug(self, value):
+        basket = Basket.objects.filter(slug=value)
         if basket.exists():
             basket = basket.first()
             errors = []
@@ -27,7 +27,7 @@ class PaymentSerializer(serializers.ModelSerializer):
     def save(self, **kwargs):
         if not self.instance:
             data = self.validated_data
-            basket = Basket.objects.get(id=data.get("basket_id"))
+            basket = Basket.objects.get(slug=data.get("basket_slug"))
             # create closed basket
             kwargs = get_instance_values(basket)
             closed_basket = ClosedBasket.objects.create(**kwargs)
@@ -40,7 +40,7 @@ class PaymentSerializer(serializers.ModelSerializer):
             # delete basket and it's products
             basket.delete()
             # value field basket and create model payment
-            del self.validated_data["basket_id"]
+            del self.validated_data["basket_slug"]
             self.validated_data["basket"] = closed_basket
             self.instance = self.create(self.validated_data)
         return self.instance

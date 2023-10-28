@@ -7,6 +7,8 @@ from ..business.models import Business
 
 
 class OfferSerializer(serializers.ModelSerializer):
+    limited_businesses = serializers.SlugRelatedField(slug_field="slug", queryset=Business.objects.all(), many=True)
+
     def validate_limited_businesses(self, value):
         user = self.context.get("request").user
         if not user.is_superuser:
