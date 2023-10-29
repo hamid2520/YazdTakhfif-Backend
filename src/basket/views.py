@@ -7,7 +7,8 @@ from rest_framework.filters import SearchFilter
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 from src.utils.custom_api_views import ListRetrieveAPIView
-
+from rest_framework import generics
+from django.http import HttpRequest
 from src.coupon.models import LineCoupon
 from .models import Basket, BasketDetail, ClosedBasket
 from .filters import IsOwnerOrSuperUserBasket, IsOwnerOrSuperUserBasketDetail
@@ -88,3 +89,4 @@ class ClosedBasketAPIView(ListRetrieveAPIView):
         if self.kwargs.get("slug"):
             return self.retrieve(request, *args, **kwargs)
         return self.list(request, *args, **kwargs)
+
