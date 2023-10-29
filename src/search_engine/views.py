@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.decorators import APIView
 from rest_framework.response import Response
-from itertools import chain
+from itertools import chain, count
 from src.coupon.models import Category, Coupon, LineCoupon
 
 
@@ -19,7 +19,7 @@ class SearchEngineListApiView(APIView):
         line_coupon_search_data = LineCoupon.objects.filter(title__icontains=text).values('title', 'slug').annotate(
             model_name=Value('line_coupon', output_field=CharField()))
 
-        if (len(category_search_data) < 0) and (len(coupon_search_data) < 0) and (len(line_coupon_search_data) < 0):
+        if (count(category_search_data) == 0) and (count(coupon_search_data) == 0) and (count(line_coupon_search_data) == 0):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         result_queryset = chain(category_search_data, coupon_search_data, line_coupon_search_data)
