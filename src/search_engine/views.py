@@ -19,7 +19,7 @@ class SearchEngineListApiView(APIView):
         line_coupon_search_data = LineCoupon.objects.filter(title__icontains=text).values('title', 'slug').annotate(
             model_name=Value('line_coupon', output_field=CharField()))
 
-        if (count(category_search_data) == 0) and (count(coupon_search_data) == 0) and (count(line_coupon_search_data) == 0):
+        if (category_search_data.count() == 0) and (coupon_search_data.count() == 0) and (line_coupon_search_data.count() == 0):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         result_queryset = chain(category_search_data, coupon_search_data, line_coupon_search_data)
