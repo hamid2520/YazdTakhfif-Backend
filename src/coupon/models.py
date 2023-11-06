@@ -23,7 +23,16 @@ class Category(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.title, allow_unicode=True)
-        super().save(force_insert=False, force_update=False, using=None, update_fields=None)
+        if not self.parent:
+            self.level = 1
+        else:
+            if self.parent.parent:
+                self.level = 3
+            else:
+                self.level = 2
+        for sub_category in self.category_set.all():
+            sub_category.save()
+        return super().save(force_insert=False, force_update=False, using=None, update_fields=None)
 
     def __str__(self):
         return f"{self.title}({self.level})"
