@@ -13,6 +13,8 @@ class AdvertiseViewSet(ModelViewSet):
 
 
 class AdvertiseSliderApiView(generics.ListAPIView):
-    queryset = Advertise.objects.filter(is_slider=True)
+    queryset = Advertise.objects.all()
     serializer_class = AdvertiseSerializer
-    permission_classes = [IsSuperUserOrReadOnly, ]
+
+    def get_object(self):
+        return self.get_queryset().filter(is_slider=self.kwargs["param"])

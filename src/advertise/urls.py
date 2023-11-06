@@ -7,5 +7,5 @@ router = SimpleRouter()
 router.register(prefix="advertises", viewset=AdvertiseViewSet, basename="advertise")
 
 urlpatterns = [
-    path("slider/", AdvertiseSliderApiView.as_view(), name="list_slider_api"),
+    path("slider/<param>/", AdvertiseSliderApiView.as_view(), name="list_slider_api"),
 ] + router.urls
