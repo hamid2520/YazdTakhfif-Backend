@@ -1,3 +1,5 @@
+import random
+import string
 import uuid
 
 from django.db import models
@@ -5,6 +7,11 @@ from django.core.validators import MaxValueValidator
 
 from src.users.models import User
 from src.coupon.models import LineCoupon
+
+
+def generate_random_string(prefix="", length=8):
+    characters = list(string.ascii_letters + string.digits)
+    return prefix + "".join(random.choice(characters) for _ in range(length))
 
 
 # Basket Products
@@ -115,18 +122,13 @@ class ClosedBasket(BaseBasket):
 
 
 class ProductValidationCode(models.Model):
-    product = models.ForeignKey(ClosedBasketDetail, on_delete=models.CASCADE)
-    code = models.CharField(max_length=128, unique=True, blank=True, null=True)
+    product = models.ForeignKey(LineCoupon, on_delete=models.CASCADE)
+    code = models.CharField(max_length=128, unique=True, blank=True, default=generate_random_string)
     used = models.BooleanField(default=False)
-
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        if not self.code:
-            self.code = f"yazdtakhfif-{uuid.uuid4()}"
-        return super().save(force_insert, force_update, using, update_fields)
+    closed_basket = models.ForeignKey(ClosedBasket, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.product.line_coupon.title}({self.pk})"
+        return f"{self.product.title}({self.pk})"
 
     class Meta:
         verbose_name = "Coupon Code"
