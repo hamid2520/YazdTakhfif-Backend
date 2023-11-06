@@ -19,7 +19,7 @@ from src.coupon.models import LineCoupon
 from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, ProductValidationCode
 from .filters import IsOwnerOrSuperUserBasket, IsOwnerOrSuperUserBasketDetail
 from .serializers import BasketSerializer, BasketDetailSerializer, AddToBasketSerializer, ClosedBasketSerializer, \
-    ClosedBasketDetailSerializer, ClosedBasketDetailValidatorSerializer, QRCodeSerializer
+    ClosedBasketDetailSerializer, ClosedBasketDetailValidatorSerializer, QRCodeSerializer, QRCodeGetSerializer
 
 
 class BasketViewSet(ModelViewSet):
@@ -130,10 +130,17 @@ class ClosedBasketDetailValidatorAPIView(APIView):
                         basket.status = 4
                     else:
                         basket.status = 3
-                    for product in basket.product.all():
-                        for i in range(0, product.count):
-                            coupon_code = ProductValidationCode.objects.create(product_id=product.id)
-                            coupon_code.save()
+                        for product in basket.product.all():
+                            product_codes = ProductValidationCode.objects.filter(used=False).order_by("id").values(
+                                "id")[
+                                            :product.count]
+                            ProductValidationCode.objects.bulk_update(
+                                (ProductValidationCode(id=item["id"], closed_basket_id=basket.id) for item in
+                                 product_codes),
+                                fields=["closed_basket_id", ])
+                        # for i in range(0, product.count):
+                        #     coupon_code = ProductValidationCode.objects.create(product_id=product.id)
+                        #     coupon_code.save()
                 basket.save()
                 return Response(data=serializer.data, status=status.HTTP_200_OK)
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -142,10 +149,11 @@ class ClosedBasketDetailValidatorAPIView(APIView):
 
 class GetQRCode(APIView):
     def get(self, request, slug):
-        product = ClosedBasketDetail.objects.filter(slug=slug)
+        product = ClosedBasketDetail.objects.filter(slug=slug, status=2)
         if product.exists():
             product = product.first()
-            coupon_codes = product.line_coupon.productvalidationcode_set.all()
+            closed_basket = product.closedbasket_set.first()
+            coupon_codes = product.line_coupon.productvalidationcode_set.filter(closed_basket_id=closed_basket.id)
             codes_list = [
                 {"code": text_to_qrcode(
                     request.build_absolute_uri(reverse("verify_qrcode", args=[code.code, ]))),
@@ -161,7 +169,7 @@ class VerifyQRCode(APIView):
         if code.exists():
             code = code.first()
             if not code.used:
-                serializer = QRCodeSerializer(instance=code)
+                serializer = QRCodeGetSerializer(instance=code)
                 code.used = True
                 code.save()
                 return Response(data=serializer.data, status=status.HTTP_200_OK)

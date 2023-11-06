@@ -114,6 +114,7 @@ class ClosedBasket(BaseBasket):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.status == 1:
             self.status = 2
+        self.is_paid = True
         return super().save(force_insert=False, force_update=False, using=None, update_fields=None)
 
     class Meta:
@@ -123,7 +124,7 @@ class ClosedBasket(BaseBasket):
 
 class ProductValidationCode(models.Model):
     product = models.ForeignKey(LineCoupon, on_delete=models.CASCADE)
-    code = models.CharField(max_length=128, unique=True, blank=True, default=generate_random_string)
+    code = models.CharField(max_length=128, db_index=True, unique=True, blank=True, default=generate_random_string)
     used = models.BooleanField(default=False)
     closed_basket = models.ForeignKey(ClosedBasket, on_delete=models.SET_NULL, null=True, blank=True)
 

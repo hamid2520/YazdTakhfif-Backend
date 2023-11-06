@@ -30,7 +30,7 @@ class ClosedBasketDetailAdmin(admin.ModelAdmin):
 
 
 class ProductValidationCodeAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "code", "used"]
+    list_display = ["__str__", "code", "used", "closed_basket"]
     list_editable = ["used"]
     readonly_fields = ["code"]
 
@@ -39,4 +39,4 @@ admin.site.register(Basket, BasketAdmin)
 admin.site.register(BasketDetail, BasketDetailAdmin)
 admin.site.register(ClosedBasket, ClosedBasketAdmin)
 admin.site.register(ClosedBasketDetail, ClosedBasketDetailAdmin)
-admin.site.register(ProductValidationCode,ProductValidationCodeAdmin)
+admin.site.register(ProductValidationCode, ProductValidationCodeAdmin)

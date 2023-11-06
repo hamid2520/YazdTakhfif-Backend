@@ -68,6 +68,15 @@ class ClosedBasketDetailValidatorSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=status_choices)
 
 
+class ProductValidationCodeSerializer(serializers.ModelSerializer):
+    product = serializers.SlugRelatedField("slug", read_only=True)
+    closed_basket = serializers.SlugRelatedField("slug", read_only=True)
+
+    class Meta:
+        model = ProductValidationCode
+        fields = "__all__"
+
+
 class BytesField(serializers.Field):
     def to_internal_value(self, data):
         # Convert the string representation back to bytes
@@ -84,4 +93,9 @@ class BytesField(serializers.Field):
 
 class QRCodeSerializer(serializers.Serializer):
     code = BytesField()
+    used = serializers.BooleanField()
+
+
+class QRCodeGetSerializer(serializers.Serializer):
+    code = serializers.CharField()
     used = serializers.BooleanField()
