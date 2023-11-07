@@ -23,10 +23,9 @@ class SearchEngineListApiView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         
         result_queryset = chain(category_search_data, coupon_search_data, line_coupon_search_data)
-        serializer = SearchEngineApiSerializer
-        data = serializer(instance=result_queryset, many=True)
+        data = SearchEngineApiSerializer(instance=result_queryset, many=True)
         
-        return Response(serializer.data, status.HTTP_200_OK)
+        return Response(data.data, status.HTTP_200_OK)
 
         
 '''
