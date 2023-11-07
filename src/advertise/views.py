@@ -15,6 +15,15 @@ class AdvertiseViewSet(ModelViewSet):
 class AdvertiseSliderApiView(generics.ListAPIView):
     queryset = Advertise.objects.all()
     serializer_class = AdvertiseSerializer
-
-    def get_object(self):
-        return self.get_queryset().filter(is_slider=self.kwargs["param"])
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.kwargs["param"].lower() == 'true':
+            queryset = Advertise.objects.filter(is_slider=True)
+            return queryset
+        elif self.kwargs["param"].lower() == 'false' : 
+            queryset = Advertise.objects.filter(is_slider=False)
+            return queryset
+        else :
+            queryset = Advertise.objects.all()
+            return queryset
