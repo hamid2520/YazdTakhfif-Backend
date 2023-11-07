@@ -18,12 +18,6 @@ class AdvertiseSliderApiView(generics.ListAPIView):
     
     def get_queryset(self):
         queryset = super().get_queryset()
-        if self.kwargs["param"].lower() == 'true':
-            queryset = Advertise.objects.filter(is_slider=True)
-            return queryset
-        elif self.kwargs["param"].lower() == 'false' : 
-            queryset = Advertise.objects.filter(is_slider=False)
-            return queryset
-        else :
-            queryset = Advertise.objects.all()
-            return queryset
+        is_slider = self.request.GET.get('is_slider', True)
+        queryset = Advertise.objects.filter(is_slider=is_slider)
+        return queryset
