@@ -92,9 +92,6 @@ class ClosedBasketAPIView(ListRetrieveAPIView):
 
 class UserBasketProductCount(APIView):
     def get(self, request):
-        try:
-            current_user = self.request.user.id
-            product_count = Basket.objects.filter(user=current_user).first().product.all()
-            return Response(data={'product_count' : len(product_count)}, status=status.HTTP_200_OK)
-        except :
-            return Response(data={'product_count' : 0}, status=status.HTTP_404_NOT_FOUND)
+        current_user = self.request.user.id
+        product_count = Basket.objects.filter(user=current_user).first().product.all().count()
+        return Response(data={'product_count' : product_count}, status=status.HTTP_200_OK)
