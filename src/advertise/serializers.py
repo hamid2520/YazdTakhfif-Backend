@@ -6,4 +6,4 @@ from .models import Advertise
 class AdvertiseSerializer(ModelSerializer):
     class Meta:
         model = Advertise
-        fields = ["file", "link", ]
+        fields = ["file", "link", "is_slider"]
