@@ -5,7 +5,7 @@ from rest_framework.decorators import APIView
 from rest_framework.response import Response
 from itertools import chain, count
 from src.coupon.models import Category, Coupon, LineCoupon
-
+from .serializers import SearchEngineApiSerializer
 
 # Create your views here.
 
@@ -21,10 +21,12 @@ class SearchEngineListApiView(APIView):
 
         if (category_search_data.count() == 0) and (coupon_search_data.count() == 0) and (line_coupon_search_data.count() == 0):
             return Response(status=status.HTTP_404_NOT_FOUND)
-
+        
         result_queryset = chain(category_search_data, coupon_search_data, line_coupon_search_data)
-        data = list(result_queryset)
-        return Response(data, status.HTTP_200_OK)
+        serializer = SearchEngineApiSerializer
+        data = serializer(instance=result_queryset, many=True)
+        
+        return Response(serializer.data, status.HTTP_200_OK)
 
         
 '''
