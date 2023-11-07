@@ -1,8 +1,10 @@
 from rest_framework.routers import SimpleRouter
-
-from .views import OfferViewSet
+from django.urls import path
+from .views import OfferViewSet, html_to_pdf
 
 router = SimpleRouter()
 router.register(prefix="offers", viewset=OfferViewSet, basename="offers")
 
-urlpatterns = router.urls
+urlpatterns = [
+                  path("pdf/<slug:slug>/", html_to_pdf)
+              ] + router.urls

@@ -19,19 +19,9 @@ class Category(models.Model):
     title = models.CharField(max_length=128, unique=True)
     slug = models.SlugField(max_length=256, db_index=True, allow_unicode=True, editable=False, blank=True)
     parent = models.ForeignKey(to="Category", on_delete=models.CASCADE, null=True, blank=True)
-    level = models.SmallIntegerField(default=1, validators=[MaxValueValidator(3), MinValueValidator(1)])
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.title, allow_unicode=True)
-        if not self.parent:
-            self.level = 1
-        else:
-            if self.parent.parent:
-                self.level = 3
-            else:
-                self.level = 2
-        for sub_category in self.category_set.all():
-            sub_category.save()
         return super().save(force_insert=False, force_update=False, using=None, update_fields=None)
 
     def __str__(self):

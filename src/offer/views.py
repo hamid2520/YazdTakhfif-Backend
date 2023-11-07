@@ -3,11 +3,16 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
+from django.shortcuts import render
 
 from .models import Offer
-from ..basket.models import Basket
+from ..basket.models import Basket, ClosedBasket
 from .filters import IsSuperUserOrOwner
 from .serializers import OfferSerializer, OfferValidatorSerializer
+
+from django.http import HttpResponse
+from django.template.loader import get_template, render_to_string
+from weasyprint import HTML
 
 
 class OfferViewSet(ModelViewSet):
@@ -34,3 +39,39 @@ class OfferViewSet(ModelViewSet):
             }
             return Response(data=data, status=status.HTTP_200_OK)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def html_to_pdf(request, slug):
+    basket = ClosedBasket.objects.prefetch_related("product").get(slug=slug)
+    basket_products = basket.product.all()
+    html_content = render_to_string(template_name="offer/pdf.html", context={"basket": basket,
+                                                                             "basket_products": basket_products})
+    # Get the HTML content from a template
+    # template = get_template('offer/pdf.html')
+    # html_content = template.render()
+
+    # Generate PDF from the HTML content
+    pdf_file = HTML(string=html_content,).write_pdf()
+
+
+    # Create an HTTP response with PDF content and a 'Content-Type' header
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="output.pdf"'
+    return response
+# def html_to_pdf(request, slug):
+#     basket = ClosedBasket.objects.prefetch_related("product").get(slug=slug)
+#     basket_products = basket.product.all()
+#     # html_content = render_to_string(template_name="offer/pdf.html", context={"basket": basket,
+#     #                                                                          "basket_products": basket_products})
+#     # Get the HTML content from a template
+#     # template = get_template('offer/pdf.html')
+#     # html_content = template.render()
+#
+#     # Generate PDF from the HTML content
+#     # pdf_file = HTML(string=html_content).write_pdf()
+#
+#     # Create an HTTP response with PDF content and a 'Content-Type' header
+#     # response = HttpResponse(pdf_file, content_type='application/pdf')
+#     # response['Content-Disposition'] = 'attachment; filename="output.pdf"'
+#     return render(request, "offer/pdf.html", context={"basket": basket,
+#                                                       "basket_products": basket_products})
