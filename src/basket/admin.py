@@ -31,7 +31,7 @@ class ClosedBasketDetailAdmin(admin.ModelAdmin):
 
 class ProductValidationCodeAdmin(admin.ModelAdmin):
     list_display = ["__str__", "code", "used", "closed_basket"]
-    list_editable = ["used"]
+    list_editable = ["used", "closed_basket"]
     readonly_fields = ["code"]
 
 

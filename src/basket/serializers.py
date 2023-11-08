@@ -46,17 +46,17 @@ class AddToBasketSerializer(serializers.Serializer):
             raise ValidationError({"line_coupon_slug": "Line coupon does not exists!"})
 
 
-class ClosedBasketSerializer(serializers.ModelSerializer):
-    product = BasketDetailSerializer(many=True)
-
-    class Meta:
-        model = ClosedBasket
-        exclude = ["id", ]
-
-
 class ClosedBasketDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClosedBasketDetail
+        exclude = ["id", ]
+
+
+class ClosedBasketSerializer(serializers.ModelSerializer):
+    product = ClosedBasketDetailSerializer(many=True)
+
+    class Meta:
+        model = ClosedBasket
         exclude = ["id", ]
 
 

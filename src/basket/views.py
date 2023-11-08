@@ -131,16 +131,22 @@ class ClosedBasketDetailValidatorAPIView(APIView):
                     else:
                         basket.status = 3
                         for product in basket.product.all():
-                            product_codes = ProductValidationCode.objects.filter(used=False).order_by("id").values(
-                                "id")[
-                                            :product.count]
+                            product_codes = ProductValidationCode.objects.filter(product_id=product.line_coupon.id,
+                                                                                 used=False,
+                                                                                 closed_basket=None).order_by(
+                                "id").values("id")
+                            if product.count > product_codes.count():
+                                product.status = 3
+                                product.save()
+                                basket.status = 4
+                                basket.save()
+                                return Response(data={"Error": "There is no more coupon codes for this product!"},
+                                                status=status.HTTP_400_BAD_REQUEST)
+                            product_codes = product_codes[:product.count]
                             ProductValidationCode.objects.bulk_update(
                                 (ProductValidationCode(id=item["id"], closed_basket_id=basket.id) for item in
                                  product_codes),
                                 fields=["closed_basket_id", ])
-                        # for i in range(0, product.count):
-                        #     coupon_code = ProductValidationCode.objects.create(product_id=product.id)
-                        #     coupon_code.save()
                 basket.save()
                 return Response(data=serializer.data, status=status.HTTP_200_OK)
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
