@@ -3,16 +3,11 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
-from django.shortcuts import render
 
 from .models import Offer
 from ..basket.models import Basket, ClosedBasket
 from .filters import IsSuperUserOrOwner
 from .serializers import OfferSerializer, OfferValidatorSerializer
-
-from django.http import HttpResponse
-from django.template.loader import get_template, render_to_string
-from weasyprint import HTML
 
 
 class OfferViewSet(ModelViewSet):
