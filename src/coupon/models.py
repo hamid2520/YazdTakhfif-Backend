@@ -25,7 +25,7 @@ class Category(models.Model):
         return super().save(force_insert=False, force_update=False, using=None, update_fields=None)
 
     def __str__(self):
-        return f"{self.title}({self.level})"
+        return f"{self.title}"
 
     class Meta:
         verbose_name = "Category"
