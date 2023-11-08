@@ -18,7 +18,7 @@ def goto_gateway(op):
     MERCHANT_ID = op.gateway.data['MID']
     callbackURL = settings.API_BASEURL + reverse('online-payment-callback', args=[op.token])
     amount = int(op.payment.total)  # Toman / Required
-    description = "خرید پکیج از آزتو"  # Required
+    description = "خرید محصول از یزدتخفیف"  # Required
     email = op.user.email or ''  # Optional
     mobile = op.user.usermeta.phone  # Optional
     _status = False

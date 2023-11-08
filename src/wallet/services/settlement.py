@@ -7,9 +7,9 @@ from core.models import UserMeta
 
 def add_request_settlement(user, amount):
     to_acc_change = Account.objects.filter(
-        id=Account.ACCOUNT_AZETO_BANK1_ID).first()
+        id=Account.ACCOUNT_YAZD_TAKHFIF_BANK1_ID).first()
     to_acc_commission = Account.objects.filter(
-        id=Account.ACCOUNT_AZETO_COMMISSION_ID).first()
+        id=Account.ACCOUNT_YAZD_TAKHFIF_COMMISSION_ID).first()
     from_acc1 = Account.objects.filter(
         owner=user, type=Account.TYPE_COMMISSION).first()
     from_acc2 = Account.objects.filter(

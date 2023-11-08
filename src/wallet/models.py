@@ -13,8 +13,8 @@ class Account(models.Model):
         verbose_name = "حساب"
         verbose_name_plural = "حساب‌ها"
 
-    ACCOUNT_AZETO_COMMISSION_ID = 100
-    ACCOUNT_AZETO_BANK1_ID = 101
+    ACCOUNT_YAZD_TAKHFIF_COMMISSION_ID = 100
+    ACCOUNT_YAZD_TAKHFIF_BANK1_ID = 101
 
     TYPE_COMMISSION = 1
     TYPE_CHARGE = 2
@@ -31,7 +31,7 @@ class Account(models.Model):
     type = models.SmallIntegerField(
         verbose_name='نوع', choices=TYPE_CHOICES)
     # برای حسابهای بدهکاری : وقتی پولی به این حساب واریز بشه موجودیش کسر میشه و وقتی ازش برداشت بشه ، موجودیش افزوده میشه.
-    # مثل حساب پرداخت پورسانت آزتو که اول صفر هست و با پرداخت پورسانت به اعضا، موجودیش مثبت میشه و با تسویه اعضا، موجودیش کسر میشه
+    # مثل حساب پرداخت پورسانت یزدتخفیف که اول صفر هست و با پرداخت پورسانت به اعضا، موجودیش مثبت میشه و با تسویه اعضا، موجودیش کسر میشه
     debit = models.BooleanField(verbose_name='حساب بدهکاری', default=False)
 
     def __str__(self):
