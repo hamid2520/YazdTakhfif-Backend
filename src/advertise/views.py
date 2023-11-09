@@ -1,4 +1,5 @@
 from rest_framework.viewsets import ModelViewSet
+from rest_framework import generics
 
 from .models import Advertise
 from .serializers import AdvertiseSerializer
@@ -9,3 +10,14 @@ class AdvertiseViewSet(ModelViewSet):
     queryset = Advertise.objects.all()
     serializer_class = AdvertiseSerializer
     permission_classes = [IsSuperUserOrReadOnly, ]
+
+
+class AdvertiseSliderApiView(generics.ListAPIView):
+    queryset = Advertise.objects.all()
+    serializer_class = AdvertiseSerializer
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        is_slider = self.request.GET.get('is_slider', True)
+        queryset = Advertise.objects.filter(is_slider=is_slider)
+        return queryset
