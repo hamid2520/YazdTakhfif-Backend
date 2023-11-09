@@ -1,5 +1,7 @@
 import uuid
-from datetime import timedelta, datetime
+import random
+import string
+from datetime import timedelta
 
 from django.db import models
 from django.utils import timezone
@@ -8,6 +10,7 @@ from django.db.models import Avg, Count
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+# from src.basket.models import ClosedBasket
 from src.business.models import Business
 from src.users.models import User
 
@@ -16,14 +19,13 @@ class Category(models.Model):
     title = models.CharField(max_length=128, unique=True)
     slug = models.SlugField(max_length=256, db_index=True, allow_unicode=True, editable=False, blank=True)
     parent = models.ForeignKey(to="Category", on_delete=models.CASCADE, null=True, blank=True)
-    level = models.SmallIntegerField(default=1, validators=[MaxValueValidator(3), MinValueValidator(1)])
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.title, allow_unicode=True)
-        super().save(force_insert=False, force_update=False, using=None, update_fields=None)
+        return super().save(force_insert=False, force_update=False, using=None, update_fields=None)
 
     def __str__(self):
-        return f"{self.title}({self.level})"
+        return f"{self.title}"
 
     class Meta:
         verbose_name = "Category"
