@@ -33,11 +33,19 @@ class CouponSerializer(serializers.ModelSerializer):
 
         rate_count = obj.rate_count
         for key, value in rates_list.items():
-            rate_percent = round((value * 100) / rate_count)
-            rates_list[key] = {
-                "count": value,
-                "percent": rate_percent
-            }
+            if rate_count :
+                rate_percent = round((value * 100) / rate_count)
+                rates_list[key] = {
+                    "count": value,
+                    "percent": rate_percent
+                }
+
+            else :
+                rates_list[key] = {
+                    "count": 0,
+                    "percent": 0
+                }  
+                
         return rates_list
 
 

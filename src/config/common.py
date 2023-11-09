@@ -55,9 +55,10 @@ INSTALLED_APPS = (
     'src.payment',
     'src.basket',
     'src.offer',
-    'src.advertise',
+    'src.advertise
     'src.payment_gateway',
     'src.wallet',
+    'src.search_engine'
     # Third party optional apps
     # app must be placed somewhere after all the apps that are going to be generating activities
     # 'actstream',                  # activity stream
@@ -288,6 +289,7 @@ REST_FRAMEWORK = {
         # 'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
