@@ -1,0 +1,66 @@
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.shortcuts import redirect
+from core.util.mixin import IsAuthenticatedPermission
+from . import serializers
+from . import models
+from accounting.models import Payment, OnlinePayment, Gateway
+import logging
+from django.http import Http404
+from django.shortcuts import render
+from django.urls import reverse
+from rest_framework import status
+from core.util.extend import RetrieveListViewSet, StandardResultsSetPagination
+from core.util.helper import play_filtering_form
+from .services.services import add_user_commission
+from .services import settlement
+from azbankgateways import bankfactories, models as bank_models, default_settings as settings
+from azbankgateways.apps import AZIranianBankGatewaysConfig
+from azbankgateways.exceptions import AZBankGatewaysException
+
+
+class SetCommissionTurnover(APIView):
+    def get(self, request, *args, **kwargs):
+        client = request.user
+        add_user_commission(client, 1000)
+        return Response({"total-price": 1000})
+
+
+class TransactionViewSet(IsAuthenticatedPermission, RetrieveListViewSet):
+    serializer_class = serializers.TransactionSerializer
+    pagination_class = StandardResultsSetPagination
+    queryset = models.Transaction.objects.all()
+
+    def get_queryset(self):
+        user = self.request.user
+        user_acc, created = models.Account.objects.get_or_create(
+            owner=user,
+            type=models.Account.TYPE_COMMISSION,
+        )
+        if self.request.query_params.get('my_withdraw', None) == '1':
+            queryset = models.Transaction.objects.filter(
+                from_account=user_acc, type=models.Transaction.TYPE_WITHDRAW_COMMISSION)
+            return queryset.all()
+        queryset = models.Transaction.objects.filter(to_account=user_acc)
+        return queryset.all()
+
+    def filter_queryset(self, queryset):
+        queryset = self.get_queryset()
+        queryset = play_filtering_form(queryset, self.request.query_params)
+        return queryset
+
+
+class AccountViewSet(IsAuthenticatedPermission, RetrieveListViewSet):
+    serializer_class = serializers.AccountSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        result = models.Account.objects.filter(owner=user).all()
+        return result
+
+
+class RequestSettlementView(IsAuthenticatedPermission, APIView):
+    def post(self, request):
+        user = request.user
+        amount = request.data['value']
+        return settlement.add_request_settlement(user, amount)

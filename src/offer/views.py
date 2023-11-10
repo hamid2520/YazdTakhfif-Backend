@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
 
 from .models import Offer
-from ..basket.models import Basket
+from ..basket.models import Basket, ClosedBasket
 from .filters import IsSuperUserOrOwner
 from .serializers import OfferSerializer, OfferValidatorSerializer
 

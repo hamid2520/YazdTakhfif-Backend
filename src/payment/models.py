@@ -6,6 +6,7 @@ from django.utils import timezone
 from src.users.models import User
 from src.basket.models import Basket, ClosedBasket, ClosedBasketDetail
 from src.business.models import Business
+from src.config.celery import app
 
 
 def get_instance_values(instance):
@@ -16,6 +17,7 @@ def get_instance_values(instance):
     return kwargs
 
 
+# @app.task(name="payment.payment_done")
 def payment_done(closed_basket_id):
     closed_basket = ClosedBasket.objects.get(id=closed_basket_id)
     # Closed Basket Detail fields
