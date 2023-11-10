@@ -7,6 +7,7 @@ from rest_framework import status
 from src.users.models import User
 from src.users.permissions import IsUserOrReadOnly
 from src.users.serializers import CreateUserSerializer, UserSerializer
+from rest_framework import pagination
 
 
 class UserViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -17,6 +18,7 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.Cre
     queryset = User.objects.all()
     serializers = {'default': UserSerializer, 'create': CreateUserSerializer}
     permissions = {'default': (IsUserOrReadOnly,), 'create': (AllowAny,)}
+    pagination_class = pagination.LimitOffsetPagination
 
     def get_serializer_class(self):
         return self.serializers.get(self.action, self.serializers['default'])

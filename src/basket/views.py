@@ -13,7 +13,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 from src.utils.custom_api_views import ListRetrieveAPIView
-
+from rest_framework import pagination
 from .permissions import IsSuperUser
 from src.coupon.models import LineCoupon
 from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, ProductValidationCode
@@ -28,6 +28,7 @@ class BasketViewSet(ModelViewSet):
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserBasket, ]
+    pagination_class = pagination.LimitOffsetPagination
 
     @swagger_auto_schema(responses={200: BasketDetailSerializer(many=True), })
     @action(detail=True, methods=["GET"], url_path="products-list", url_name="products_list", )
@@ -82,6 +83,7 @@ class BasketDetailViewSet(ModelViewSet):
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserBasketDetail, ]
+    pagination_class = pagination.LimitOffsetPagination
 
 
 class ClosedBasketAPIView(ListRetrieveAPIView):
@@ -91,6 +93,7 @@ class ClosedBasketAPIView(ListRetrieveAPIView):
     lookup_url_kwarg = "slug"
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserBasket, SearchFilter]
     search_fields = ["product__line_coupon__title", ]
+    pagination_class = pagination.LimitOffsetPagination
 
     def get(self, request, *args, **kwargs):
         if self.kwargs.get("slug"):
@@ -102,12 +105,14 @@ class PaidClosedBasketListAPIView(ListAPIView):
     queryset = ClosedBasket.objects.filter(status=2)
     serializer_class = ClosedBasketSerializer
     permission_classes = [IsSuperUser, ]
+    pagination_class = pagination.LimitOffsetPagination
 
 
 class PaidClosedBasketDetailListAPIView(ListAPIView):
     queryset = ClosedBasketDetail.objects.filter(status=1)
     serializer_class = ClosedBasketDetailSerializer
     permission_classes = [IsSuperUser, ]
+    pagination_class = pagination.LimitOffsetPagination
 
 
 class ClosedBasketDetailValidatorAPIView(APIView):
