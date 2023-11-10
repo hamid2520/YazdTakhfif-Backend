@@ -4,9 +4,9 @@ from .models import Category, Coupon, LineCoupon, FAQ, Rate, Comment
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ["title", "parent", "level"]
-    list_filter = ["parent", "level"]
-    list_editable = ["parent", "level"]
+    list_display = ["title", "parent"]
+    list_filter = ["parent",]
+    list_editable = ["parent",]
 
 
 class FAQAdmin(admin.ModelAdmin):

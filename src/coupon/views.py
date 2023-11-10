@@ -14,6 +14,9 @@ from .filters import IsOwnerOrSuperUserCoupon, IsOwnerOrSuperUserLineCoupon, Pri
 from .serializers import CategorySerializer, CouponSerializer, CouponCreateSerializer, LineCouponSerializer, \
     RateSerializer, CommentSerializer
 from .permissions import IsSuperUserOrOwner
+from ..basket.models import ProductValidationCode
+from ..basket.serializers import ProductValidationCodeSerializer
+from rest_framework import pagination
 
 
 class CategoryViewSet(ModelViewSet):
@@ -23,6 +26,7 @@ class CategoryViewSet(ModelViewSet):
     lookup_url_kwarg = "slug"
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserCoupon, SearchFilter]
     search_fields = ['title', ]
+    pagination_class = pagination.LimitOffsetPagination
 
 
 class CouponViewSet(ModelViewSet):
@@ -33,8 +37,7 @@ class CouponViewSet(ModelViewSet):
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserCoupon, SearchFilter, PriceFilter,
                                                               OfferFilter, RateFilter, BusinessFilter, CategoryFilter]
     search_fields = ['title', "linecoupon__title"]
-    ordering_fields = ['linecoupon__price']
-
+    pagination_class = pagination.LimitOffsetPagination
 
     def get_serializer_class(self):
         if self.action == ("list" or "retrieve"):
@@ -104,3 +107,12 @@ class LineCouponViewSet(ModelViewSet):
     lookup_url_kwarg = "slug"
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserLineCoupon, SearchFilter, PriceFilter, ]
     search_fields = ['title', "coupon__title"]
+    pagination_class = pagination.LimitOffsetPagination
+
+    @swagger_auto_schema(responses={200: ProductValidationCodeSerializer(), })
+    @action(detail=True, methods=["GET"], url_path="line-coupon-code-list", url_name="line_coupon_code_list", )
+    def get_coupon_comments_list(self, request, slug):
+        line_coupon: LineCoupon = self.get_object()
+        coupon_codes = line_coupon.productvalidationcode_set.all().order_by("used")
+        serializer = ProductValidationCodeSerializer(instance=coupon_codes, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)

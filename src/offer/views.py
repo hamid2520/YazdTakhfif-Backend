@@ -5,9 +5,10 @@ from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
 
 from .models import Offer
-from ..basket.models import Basket
+from ..basket.models import Basket, ClosedBasket
 from .filters import IsSuperUserOrOwner
 from .serializers import OfferSerializer, OfferValidatorSerializer
+from rest_framework import pagination
 
 
 class OfferViewSet(ModelViewSet):
@@ -16,6 +17,7 @@ class OfferViewSet(ModelViewSet):
     lookup_field = "offer_code"
     lookup_url_kwarg = "offer_code"
     filter_backends = [IsSuperUserOrOwner, ]
+    pagination_class = pagination.LimitOffsetPagination
 
     @action(detail=False, methods=["POST", ], url_path="validate-offer", url_name="validate_offer")
     def validate_offer(self, offer_code):
