@@ -55,7 +55,7 @@ INSTALLED_APPS = (
     'src.payment',
     'src.basket',
     'src.offer',
-    'src.advertise
+    'src.advertise',
     'src.payment_gateway',
     'src.wallet',
     'src.search_engine'

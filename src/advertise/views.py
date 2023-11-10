@@ -4,6 +4,7 @@ from rest_framework import pagination
 from .models import Advertise
 from .serializers import AdvertiseSerializer
 from .permissions import IsSuperUserOrReadOnly
+from src.utils.get_bool import __get_boolean
 
 
 class AdvertiseViewSet(ModelViewSet):
@@ -21,5 +22,6 @@ class AdvertiseSliderApiView(generics.ListAPIView):
     def get_queryset(self):
         queryset = super().get_queryset()
         is_slider = self.request.GET.get('is_slider', True)
+        is_slider = __get_boolean(is_slider)
         queryset = Advertise.objects.filter(is_slider=is_slider)
         return queryset
