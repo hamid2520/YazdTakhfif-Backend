@@ -181,3 +181,14 @@ class VerifyQRCode(APIView):
                 return Response(data=serializer.data, status=status.HTTP_200_OK)
             return Response(data={"Error": "This code has been used"}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class UserBasketProductCount(APIView):
+    def get(self, request):
+        current_user = self.request.user.id
+        user_basket = Basket.objects.filter(user=current_user).first()
+        if user_basket :
+            product_count = user_basket.product.all().count()
+            return Response(data={'product_count' : product_count}, status=status.HTTP_200_OK)
+        else : 
+            return Response(data={'product_count' : 0}, status=status.HTTP_200_OK)
