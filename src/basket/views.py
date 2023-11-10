@@ -7,7 +7,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 from src.utils.custom_api_views import ListRetrieveAPIView
-from rest_framework.decorators import APIView
+
 from src.coupon.models import LineCoupon
 from .models import Basket, BasketDetail, ClosedBasket
 from .filters import IsOwnerOrSuperUserBasket, IsOwnerOrSuperUserBasketDetail
@@ -90,12 +90,3 @@ class ClosedBasketAPIView(ListRetrieveAPIView):
         return self.list(request, *args, **kwargs)
 
 
-class UserBasketProductCount(APIView):
-    def get(self, request):
-        current_user = self.request.user.id
-        user_basket = Basket.objects.filter(user=current_user).first()
-        if user_basket :
-            product_count = user_basket.product.all().count()
-            return Response(data={'product_count' : product_count}, status=status.HTTP_200_OK)
-        else : 
-            return Response(data={'product_count' : 0}, status=status.HTTP_200_OK)
