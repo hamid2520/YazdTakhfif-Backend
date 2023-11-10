@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.filters import SearchFilter
-
+from rest_framework import filters
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.settings import api_settings
 
@@ -33,6 +33,8 @@ class CouponViewSet(ModelViewSet):
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserCoupon, SearchFilter, PriceFilter,
                                                               OfferFilter, RateFilter, BusinessFilter, CategoryFilter]
     search_fields = ['title', "linecoupon__title"]
+    ordering_fields = ['linecoupon__price']
+
 
     def get_serializer_class(self):
         if self.action == ("list" or "retrieve"):
