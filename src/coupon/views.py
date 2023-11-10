@@ -16,6 +16,7 @@ from .serializers import CategorySerializer, CouponSerializer, CouponCreateSeria
 from .permissions import IsSuperUserOrOwner
 from ..basket.models import ProductValidationCode
 from ..basket.serializers import ProductValidationCodeSerializer
+from rest_framework import pagination
 
 
 class CategoryViewSet(ModelViewSet):
@@ -25,6 +26,7 @@ class CategoryViewSet(ModelViewSet):
     lookup_url_kwarg = "slug"
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserCoupon, SearchFilter]
     search_fields = ['title', ]
+    pagination_class = pagination.LimitOffsetPagination
 
 
 class CouponViewSet(ModelViewSet):
@@ -35,6 +37,7 @@ class CouponViewSet(ModelViewSet):
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserCoupon, SearchFilter, PriceFilter,
                                                               OfferFilter, RateFilter, BusinessFilter, CategoryFilter]
     search_fields = ['title', "linecoupon__title"]
+    pagination_class = pagination.LimitOffsetPagination
 
     def get_serializer_class(self):
         if self.action == ("list" or "retrieve"):
@@ -104,6 +107,7 @@ class LineCouponViewSet(ModelViewSet):
     lookup_url_kwarg = "slug"
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserLineCoupon, SearchFilter, PriceFilter, ]
     search_fields = ['title', "coupon__title"]
+    pagination_class = pagination.LimitOffsetPagination
 
     @swagger_auto_schema(responses={200: ProductValidationCodeSerializer(), })
     @action(detail=True, methods=["GET"], url_path="line-coupon-code-list", url_name="line_coupon_code_list", )
