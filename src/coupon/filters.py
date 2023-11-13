@@ -1,6 +1,6 @@
 from django.db.models import Q
 from rest_framework import filters
-
+from utils.get_bool import get_boolean
 from .models import Business, Category
 
 
@@ -68,4 +68,15 @@ class CategoryFilter(filters.BaseFilterBackend):
                 category = category.first()
                 return queryset.filter(category=category)
             return queryset.filter(category=None)
+        return queryset
+
+
+class IsAvailableFilter(filters.BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        is_available = request.query_params.get("is_available")
+        if is_available:
+            if get_boolean(is_available):
+                return queryset.filter(linecoupon__count__gt=0)
+            else:
+                return queryset.filter(linecoupon__count=0)
         return queryset

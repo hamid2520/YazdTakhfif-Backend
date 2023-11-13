@@ -4,7 +4,7 @@ from rest_framework.settings import api_settings
 from src.utils.custom_api_views import ListRetrieveAPIView
 from .models import Category, Coupon, LineCoupon
 from .serializers import CategorySerializer, CouponSerializer, LineCouponSerializer
-from .filters import PriceFilter, OfferFilter, RateFilter, BusinessFilter, CategoryFilter
+from .filters import PriceFilter, OfferFilter, RateFilter, BusinessFilter, CategoryFilter, IsAvailableFilter
 
 
 class CategoryAPIView(ListAPIView):
@@ -20,8 +20,9 @@ class CouponAPIView(ListRetrieveAPIView):
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter, PriceFilter, OfferFilter, RateFilter,
-                                                              BusinessFilter, CategoryFilter]
+                                                              BusinessFilter, CategoryFilter, IsAvailableFilter]
     search_fields = ['title', "linecoupon__title"]
+    ordering_fields = ['linecoupon__offer_percent','linecoupon__price', 'created']
 
     def get(self, request, *args, **kwargs):
         if kwargs.get("slug"):
