@@ -9,7 +9,7 @@ from .models import Category, Coupon, LineCoupon, Rate, Comment
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ["title", "slug", "parent", "level"]
+        fields = ["title", "slug", "parent"]
         read_only_fields = ["slug", ]
 
 

@@ -38,11 +38,11 @@ def payment_done(closed_basket_id):
 
 class Payment(models.Model):
     slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    basket = models.ForeignKey(ClosedBasket, on_delete=models.CASCADE, null=True, blank=True)
-    total_price = models.PositiveIntegerField(blank=True, null=True)
-    total_price_with_offer = models.PositiveIntegerField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="کاربر")
+    basket = models.ForeignKey(ClosedBasket, on_delete=models.CASCADE, null=True, blank=True, verbose_name="سبد خرید")
+    total_price = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت کل")
+    total_price_with_offer = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت کل با تخفیف")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
@@ -62,5 +62,5 @@ class Payment(models.Model):
         return f"{self.basket}({self.user})"
 
     class Meta:
-        verbose_name = "Payment"
-        verbose_name_plural = "Payments"
+        verbose_name = "پرداخت"
+        verbose_name_plural = "پرداخت ها"

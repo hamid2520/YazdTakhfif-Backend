@@ -11,7 +11,7 @@ from src.users.models import User
 class Account(models.Model):
     class Meta:
         verbose_name = "حساب"
-        verbose_name_plural = "حساب‌ها"
+        verbose_name_plural = "حساب‌ ها"
 
     ACCOUNT_YAZD_TAKHFIF_COMMISSION_ID = 100
     ACCOUNT_YAZD_TAKHFIF_BANK1_ID = 101
@@ -26,7 +26,7 @@ class Account(models.Model):
     )
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True,
-                              verbose_name='کاربر')
+                              verbose_name='ضاحب حساب')
     balance = models.BigIntegerField(verbose_name='موجودی', default=0)
     type = models.SmallIntegerField(
         verbose_name='نوع', choices=TYPE_CHOICES)
@@ -41,7 +41,7 @@ class Account(models.Model):
 class Transaction(models.Model):
     class Meta:
         verbose_name = 'تراکنش'
-        verbose_name_plural = 'تراکنش‌ها'
+        verbose_name_plural = 'تراکنش‌ ها'
 
     TYPE_DEPOSIT_COMMISSION = 1
     TYPE_WITHDRAW_COMMISSION = 2
@@ -56,7 +56,7 @@ class Transaction(models.Model):
                                    related_name='to_account')
     type = models.SmallIntegerField(verbose_name='نوع', choices=TYPE_CHOICES)
     amount = models.BigIntegerField(verbose_name='مبلغ')
-    datetime = models.DateTimeField(verbose_name='زمان', auto_now_add=True)
+    datetime = models.DateTimeField(verbose_name='تاریخ ایجاد', auto_now_add=True)
 
     def __str__(self):
         return 'from:{} to:{} amount:{}'.format(
@@ -145,7 +145,7 @@ class Transaction(models.Model):
 class Turnover(models.Model):
     class Meta:
         verbose_name = 'گردش حساب'
-        verbose_name_plural = 'گردش حساب'
+        verbose_name_plural = 'گردش حساب ها'
 
     transaction = models.ForeignKey(
         'wallet.Transaction', on_delete=models.CASCADE, verbose_name='تراکنش')
@@ -160,7 +160,7 @@ class Turnover(models.Model):
 class RequestSettlement(models.Model):
     class Meta:
         verbose_name = 'درخواست تسویه'
-        verbose_name_plural = 'درخواست تسویه'
+        verbose_name_plural = 'درخواست های تسویه'
 
     STATUS_UNPAID = 1
     STATUS_WAITING = 2

@@ -31,7 +31,8 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
 
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    profile_picture = ThumbnailerImageField('ProfilePicture', upload_to='profile_pictures/', blank=True, null=True)
+    profile_picture = ThumbnailerImageField(verbose_name='عکس پروفایل', upload_to='profile_pictures/', blank=True,
+                                            null=True, )
 
     def get_tokens(self):
         refresh = RefreshToken.for_user(self)
