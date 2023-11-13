@@ -17,6 +17,7 @@ from .permissions import IsSuperUserOrOwner
 from ..basket.models import ProductValidationCode
 from ..basket.serializers import ProductValidationCodeSerializer
 from rest_framework import pagination
+from .exceptions import MaximumNumberOfDeletableObjectsError
 
 
 class CategoryViewSet(ModelViewSet):

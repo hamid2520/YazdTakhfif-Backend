@@ -4,6 +4,7 @@ from rest_framework.exceptions import ValidationError
 
 from src.business.serializers import BusinessSerializer
 from .models import Category, Coupon, LineCoupon, Rate, Comment
+from .exceptions import MaximumNumberOfDeletableObjectsError
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -33,19 +34,19 @@ class CouponSerializer(serializers.ModelSerializer):
 
         rate_count = obj.rate_count
         for key, value in rates_list.items():
-            if rate_count :
+            if rate_count:
                 rate_percent = round((value * 100) / rate_count)
                 rates_list[key] = {
                     "count": value,
                     "percent": rate_percent
                 }
 
-            else :
+            else:
                 rates_list[key] = {
                     "count": 0,
                     "percent": 0
-                }  
-                
+                }
+
         return rates_list
 
 
@@ -56,6 +57,12 @@ class CouponCreateSerializer(serializers.ModelSerializer):
 
 
 class LineCouponSerializer(serializers.ModelSerializer):
+    def save(self, **kwargs):
+        try:
+            return super().save(**kwargs)
+        except MaximumNumberOfDeletableObjectsError:
+            raise ValidationError({"count": "There is no more coupon codes available for deletion!"})
+
     class Meta:
         model = LineCoupon
         fields = ["slug", "title", "coupon", "is_main", "count", "price", "offer_percent", "price_with_offer",

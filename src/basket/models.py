@@ -5,8 +5,7 @@ import uuid
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.core.validators import MaxValueValidator
-from rest_framework.exceptions import ValidationError
-from django import forms
+
 from src.users.models import User
 from src.coupon.models import LineCoupon
 
@@ -43,6 +42,11 @@ class BaseBasketDetail(models.Model):
 
 
 class BasketDetail(BaseBasketDetail):
+    def clean(self):
+        super().clean()
+        if (self.count + self.line_coupon.sell_count) > self.line_coupon.count:
+            raise ValidationError({"count": "There is no more line coupons available!"})
+
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         if self.payment_price:
