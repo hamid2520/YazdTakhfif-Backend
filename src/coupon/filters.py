@@ -1,6 +1,6 @@
 from django.db.models import Q
 from rest_framework import filters
-from utils.get_bool import get_boolean
+from src.utils.get_bool import get_boolean
 from .models import Business, Category
 
 
