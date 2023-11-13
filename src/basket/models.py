@@ -5,7 +5,8 @@ import uuid
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.core.validators import MaxValueValidator
-
+from rest_framework.exceptions import ValidationError
+from django import forms
 from src.users.models import User
 from src.coupon.models import LineCoupon
 
@@ -86,7 +87,8 @@ class BaseBasket(models.Model):
     is_paid = models.BooleanField(default=False, verbose_name="پرداخت شده / نشده")
     count = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name="تعداد")
     total_price = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت کل")
-    total_offer_percent = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(100), ], verbose_name="تخفیف کل")
+    total_offer_percent = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(100), ],
+                                                      verbose_name="تخفیف کل")
     total_price_with_offer = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت کل با تخفیف")
     status = models.PositiveIntegerField(choices=status_choices, default=1, blank=True, verbose_name="وضعیت")
 
@@ -138,9 +140,11 @@ class ClosedBasket(BaseBasket):
 
 class ProductValidationCode(models.Model):
     product = models.ForeignKey(LineCoupon, on_delete=models.CASCADE, verbose_name="لاین کوپن")
-    code = models.CharField(max_length=128, db_index=True, unique=True, blank=True, default=generate_random_string, verbose_name="کد تخفیف")
+    code = models.CharField(max_length=128, db_index=True, unique=True, blank=True, default=generate_random_string,
+                            verbose_name="کد تخفیف")
     used = models.BooleanField(default=False, verbose_name="استفاده شده / نشده")
-    closed_basket = models.ForeignKey(ClosedBasket, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="سبد خرید بسته شده")
+    closed_basket = models.ForeignKey(ClosedBasket, on_delete=models.SET_NULL, null=True, blank=True,
+                                      verbose_name="سبد خرید بسته شده")
 
     def __str__(self):
         return f"{self.product.title}({self.pk})"
