@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.filters import SearchFilter
-from rest_framework import filters
+
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.settings import api_settings
 
