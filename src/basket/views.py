@@ -1,5 +1,6 @@
 from django.core.files.base import ContentFile
 from django.db.models import Q, Sum
+from rest_framework.permissions import IsAuthenticated
 from src.utils.qrcode_generator import text_to_qrcode
 from django.urls import reverse
 from rest_framework import status
@@ -27,6 +28,7 @@ class BasketViewSet(ModelViewSet):
     serializer_class = BasketSerializer
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
+    permission_classes = [IsAuthenticated, ]
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserBasket, ]
     pagination_class = pagination.LimitOffsetPagination
 
@@ -82,6 +84,7 @@ class BasketDetailViewSet(ModelViewSet):
     serializer_class = BasketDetailSerializer
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
+    permission_classes = [IsAuthenticated, ]
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserBasketDetail, ]
     pagination_class = pagination.LimitOffsetPagination
 
@@ -91,6 +94,7 @@ class ClosedBasketAPIView(ListRetrieveAPIView):
     serializer_class = ClosedBasketSerializer
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
+    permission_classes = [IsAuthenticated, ]
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserBasket, SearchFilter]
     search_fields = ["product__line_coupon__title", ]
     pagination_class = pagination.LimitOffsetPagination
@@ -159,6 +163,7 @@ class ClosedBasketDetailValidatorAPIView(APIView):
 
 
 class GetQRCode(APIView):
+    permission_classes = [IsAuthenticated,]
     def get(self, request, slug):
         product = ClosedBasketDetail.objects.filter(slug=slug, status=2)
         if product.exists():
@@ -175,6 +180,7 @@ class GetQRCode(APIView):
 
 
 class VerifyQRCode(APIView):
+    permission_classes = [IsAuthenticated,]
     def get(self, request, slug):
         code = ProductValidationCode.objects.filter(code=slug)
         if code.exists():
@@ -189,11 +195,13 @@ class VerifyQRCode(APIView):
 
 
 class UserBasketProductCount(APIView):
+    permission_classes = [IsAuthenticated, ]
+
     def get(self, request):
         current_user = self.request.user.id
         user_basket = Basket.objects.filter(user=current_user).first()
-        if user_basket :
+        if user_basket:
             product_count = user_basket.product.all().count()
-            return Response(data={'product_count' : product_count}, status=status.HTTP_200_OK)
-        else : 
-            return Response(data={'product_count' : 0}, status=status.HTTP_200_OK)
+            return Response(data={'product_count': product_count}, status=status.HTTP_200_OK)
+        else:
+            return Response(data={'product_count': 0}, status=status.HTTP_200_OK)
