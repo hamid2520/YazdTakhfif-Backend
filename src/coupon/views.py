@@ -1,5 +1,5 @@
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
@@ -24,6 +24,7 @@ class CategoryViewSet(ModelViewSet):
     serializer_class = CategorySerializer
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
+    permission_classes = [IsAuthenticated,]
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserCoupon, SearchFilter]
     search_fields = ['title', ]
     pagination_class = pagination.LimitOffsetPagination
@@ -92,10 +93,11 @@ class CouponViewSet(ModelViewSet):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(responses={200: CommentSerializer(), })
-    @action(detail=True, methods=["GET"], url_path="coupon-comments-list", url_name="coupon_comments_list", )
+    @action(detail=True, methods=["GET"], url_path="coupon-comments-list", url_name="coupon_comments_list",
+            permission_classes=[], filter_backends=[])
     def get_coupon_comments_list(self, request, slug):
         coupon = self.get_object()
-        coupon_comments = coupon.comment_set.all()
+        coupon_comments = coupon.comment_set.filter(verified=True)
         serializer = CommentSerializer(instance=coupon_comments, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
@@ -105,13 +107,14 @@ class LineCouponViewSet(ModelViewSet):
     serializer_class = LineCouponSerializer
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
+    permission_classes = [IsAuthenticated,]
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserLineCoupon, SearchFilter, PriceFilter, ]
     search_fields = ['title', "coupon__title"]
     pagination_class = pagination.LimitOffsetPagination
 
     @swagger_auto_schema(responses={200: ProductValidationCodeSerializer(), })
     @action(detail=True, methods=["GET"], url_path="line-coupon-code-list", url_name="line_coupon_code_list", )
-    def get_coupon_comments_list(self, request, slug):
+    def get_line_coupon_codes_list(self, request, slug):
         line_coupon: LineCoupon = self.get_object()
         coupon_codes = line_coupon.productvalidationcode_set.all().order_by("used")
         serializer = ProductValidationCodeSerializer(instance=coupon_codes, many=True)

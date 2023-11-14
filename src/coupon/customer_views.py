@@ -22,7 +22,7 @@ class CouponAPIView(ListRetrieveAPIView):
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter, PriceFilter, OfferFilter, RateFilter,
                                                               BusinessFilter, CategoryFilter, IsAvailableFilter]
     search_fields = ['title', "linecoupon__title"]
-    ordering_fields = ['linecoupon__offer_percent','linecoupon__price', 'created']
+    ordering_fields = ['linecoupon__offer_percent', 'linecoupon__price', 'created']
 
     def get(self, request, *args, **kwargs):
         if kwargs.get("slug"):

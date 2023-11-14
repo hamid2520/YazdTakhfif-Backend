@@ -141,6 +141,7 @@ class Comment(models.Model):
     parent = models.ForeignKey("Comment", on_delete=models.CASCADE, blank=True, null=True)
     text = models.CharField(max_length=1200)
     created_at = models.DateTimeField(auto_now_add=True)
+    verified = models.BooleanField(default=False, verbose_name="تایید شده / نشده")
 
     def __str__(self):
         return f"{self.coupon}({self.user})-is sub comment({bool(self.parent)})"
