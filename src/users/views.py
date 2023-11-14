@@ -23,9 +23,9 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.Cre
     def get_serializer_class(self):
         return self.serializers.get(self.action, self.serializers['default'])
 
-    # def get_permissions(self):
-    #     self.permission_classes = self.permissions.get(self.action, self.permissions['default'])
-    #     return super().get_permissions()
+    def get_permissions(self):
+        self.permission_classes = self.permissions.get(self.action, self.permissions['default'])
+        return super().get_permissions()
 
     @action(detail=False, methods=['get'], url_path='me', url_name='me')
     def get_user_data(self, instance):
