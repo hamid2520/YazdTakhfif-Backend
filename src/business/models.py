@@ -5,11 +5,11 @@ from src.users.models import User
 
 
 class Business(models.Model):
-    title = models.CharField(max_length=128, unique=True)
+    title = models.CharField(max_length=128, unique=True, verbose_name="عنوان")
     slug = models.SlugField(max_length=256, db_index=True, allow_unicode=True, editable=False, blank=True)
-    admin = models.ForeignKey(to=User, on_delete=models.CASCADE)
-    description = models.TextField(blank=True, null=True)
-    address = models.TextField(blank=True, null=True)
+    admin = models.ForeignKey(to=User, on_delete=models.CASCADE, verbose_name="ادمین ")
+    description = models.TextField(blank=True, null=True, verbose_name="توضیحات")
+    address = models.TextField(blank=True, null=True, verbose_name="آدرس")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.title, allow_unicode=True)
@@ -19,5 +19,5 @@ class Business(models.Model):
         return self.title.capitalize()
 
     class Meta:
-        verbose_name = "Business"
-        verbose_name_plural = "Businesses"
+        verbose_name = "کسب و کار"
+        verbose_name_plural = "کسب و کار ها"

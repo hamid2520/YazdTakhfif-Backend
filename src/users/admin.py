@@ -7,6 +7,7 @@ from src.users.models import User
 
 @admin.register(User)
 class UserAdmin(UserAdmin):
+    list_display = ["username", "first_name", "last_name", "is_superuser", "date_joined"]
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         (
@@ -19,7 +20,7 @@ class UserAdmin(UserAdmin):
                 )
             },
         ),
-        (_('Profile image'), {'fields': ('profile_picture',)}),
+        (_('عکس پروفایل'), {'fields': ('profile_picture',)}),
         (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )

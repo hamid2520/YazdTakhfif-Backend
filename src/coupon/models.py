@@ -16,50 +16,47 @@ from src.users.models import User
 
 
 class Category(models.Model):
-    title = models.CharField(max_length=128, unique=True)
+    title = models.CharField(max_length=128, unique=True, verbose_name="عنوان")
     slug = models.SlugField(max_length=256, db_index=True, allow_unicode=True, editable=False, blank=True)
-    parent = models.ForeignKey(to="Category", on_delete=models.CASCADE, null=True, blank=True)
+    parent = models.ForeignKey(to="Category", on_delete=models.CASCADE, null=True, blank=True,
+                               verbose_name="دسته بندی والد")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.title, allow_unicode=True)
         return super().save(force_insert=False, force_update=False, using=None, update_fields=None)
 
     def __str__(self):
-        return f"{self.title}"
+        return f"{self.title}({'sub' if self.parent else 'main'})"
 
     class Meta:
-        verbose_name = "Category"
-        verbose_name_plural = "Categories"
+        verbose_name = "دسته بندی"
+        verbose_name_plural = "دسته بندی ها"
 
 
 class FAQ(models.Model):
-    category = models.ForeignKey(to=Category, on_delete=models.CASCADE)
-    title = models.CharField(max_length=1000)
-    answer = models.CharField(max_length=1000)
-
-    def clean(self):
-        if not self.category.level == 1:
-            raise ValidationError({"category": "Category must be at 1 level!"})
+    category = models.ForeignKey(to=Category, on_delete=models.CASCADE, verbose_name="دسته بندی")
+    title = models.CharField(max_length=1000, verbose_name="عنوان سوال")
+    answer = models.CharField(max_length=1000, verbose_name="جواب")
 
     def __str__(self):
         return f"{self.title[0:15]}({self.category})"
 
     class Meta:
-        verbose_name = "FAQ"
-        verbose_name_plural = "FAQs"
+        verbose_name = "سوالات متداول"
+        verbose_name_plural = "سوالات متداول"
 
 
 class Coupon(models.Model):
-    title = models.CharField(max_length=128)
+    title = models.CharField(max_length=128, verbose_name="عنوان")
     slug = models.SlugField(max_length=256, db_index=True, allow_unicode=True, editable=False, blank=True)
-    business = models.ForeignKey(to=Business, on_delete=models.CASCADE)
-    created = models.DateTimeField(auto_now_add=True)
-    expire_date = models.DateTimeField(null=True, blank=True)
-    category = models.ManyToManyField(to=Category)
-    description = models.CharField(max_length=1000, blank=True, null=True)
-    terms_of_use = models.TextField(blank=True, null=True)
-    coupon_rate = models.DecimalField(blank=True, null=True, max_digits=2, decimal_places=1)
-    rate_count = models.PositiveIntegerField(null=True, blank=True)
+    business = models.ForeignKey(to=Business, on_delete=models.CASCADE, verbose_name="کسب و کار")
+    created = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد کوپن")
+    expire_date = models.DateTimeField(null=True, blank=True, verbose_name="تاریخ انقضا")
+    category = models.ManyToManyField(to=Category, verbose_name="دسته بندی")
+    description = models.CharField(max_length=1000, blank=True, null=True, verbose_name="توضیحات")
+    terms_of_use = models.TextField(blank=True, null=True, verbose_name="شرایط استفاده")
+    coupon_rate = models.DecimalField(blank=True, null=True, max_digits=2, decimal_places=1, verbose_name="امتیاز کوپن")
+    rate_count = models.PositiveIntegerField(null=True, blank=True, verbose_name="تعداد رای دهندگان")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.title, allow_unicode=True)
@@ -74,8 +71,8 @@ class Coupon(models.Model):
         return f"{self.title}({self.business})"
 
     class Meta:
-        verbose_name = "Coupon"
-        verbose_name_plural = "Coupons"
+        verbose_name = "کوپن"
+        verbose_name_plural = "کوپن ها"
 
 
 class CouponImage(models.Model):
@@ -92,14 +89,15 @@ class CouponImage(models.Model):
 
 class LineCoupon(models.Model):
     slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
-    title = models.CharField(max_length=128)
-    coupon = models.ForeignKey(to=Coupon, on_delete=models.CASCADE)
-    is_main = models.BooleanField(default=False)
-    count = models.PositiveIntegerField()
-    price = models.PositiveIntegerField()
-    offer_percent = models.PositiveSmallIntegerField()
-    price_with_offer = models.PositiveIntegerField(blank=True, null=True)
-    sell_count = models.PositiveIntegerField(blank=True, default=0)
+    title = models.CharField(max_length=128, verbose_name="عنوان")
+    coupon = models.ForeignKey(to=Coupon, on_delete=models.CASCADE, verbose_name="کوپن")
+    is_main = models.BooleanField(default=False, verbose_name="اصلی هست / نیست",
+                                  help_text="در هر کوپن فقط 1 لاین میتواند اصلی باشد!")
+    count = models.PositiveIntegerField(verbose_name="تعداد")
+    price = models.PositiveIntegerField(verbose_name="قیمت")
+    offer_percent = models.PositiveSmallIntegerField(verbose_name="درصد تخفیف")
+    price_with_offer = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت با تخفیف")
+    sell_count = models.PositiveIntegerField(blank=True, default=0, verbose_name="تعداد فروخته شده")
 
     def validate_unique(self, exclude=None):
         if self.is_main:
@@ -120,14 +118,15 @@ class LineCoupon(models.Model):
         return f"{self.coupon}({self.title})"
 
     class Meta:
-        verbose_name = "Line Coupon"
-        verbose_name_plural = "Line Coupons"
+        verbose_name = "لاین کوپن"
+        verbose_name_plural = "لاین کوپن ها"
 
 
 class Rate(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE)
-    rate = models.PositiveSmallIntegerField(validators=[MaxValueValidator(5), ])
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="کاربر")
+    coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE, verbose_name="کوپن")
+    rate = models.PositiveSmallIntegerField(validators=[MaxValueValidator(5), ], verbose_name="امتیاز",
+                                            help_text="امتیاز باید بین 1 تا 5 و بصورت عدد صحیح باشد!")
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
@@ -140,11 +139,11 @@ class Rate(models.Model):
                             update_fields)
 
     def __str__(self):
-        return f"{self.coupon}({self.user})"
+        return f"{self.coupon.title}({self.user.username})"
 
     class Meta:
-        verbose_name = "Rate"
-        verbose_name_plural = "Rates"
+        verbose_name = "بازخورد"
+        verbose_name_plural = "بازخوردها"
 
 
 class Comment(models.Model):
@@ -156,8 +155,8 @@ class Comment(models.Model):
     verified = models.BooleanField(default=False, verbose_name="تایید شده / نشده")
 
     def __str__(self):
-        return f"{self.coupon}({self.user})-is sub comment({bool(self.parent)})"
+        return f"{self.coupon}({self.user})-{'sub comment' if self.parent else 'main comment'}"
 
     class Meta:
-        verbose_name = "Comment"
-        verbose_name_plural = "Comments"
+        verbose_name = "نظر"
+        verbose_name_plural = "نظرات"

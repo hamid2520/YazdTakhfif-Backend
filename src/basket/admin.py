@@ -1,42 +1,60 @@
 from django.contrib import admin
+from django.core.exceptions import ValidationError
+from django.forms import Form
 
 from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, ProductValidationCode
 
 
+@admin.register(Basket)
 class BasketAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "created_at", "is_paid", "status", "payment_datetime", ]
-    list_editable = ["status", "is_paid", ]
-    list_filter = ["created_at", "is_paid", "payment_datetime", ]
-    readonly_fields = ["count", "total_price", "total_offer_percent", "total_price_with_offer", "payment_datetime", ]
+    list_display = ["user", "created_at", "status", "total_price", "total_offer_percent", "total_price_with_offer"]
+    list_editable = ["status", ]
+    list_filter = ["created_at", "status"]
+    search_fields = ["user__username", "user__email", "total_price", "total_price_with_offer"]
+    autocomplete_fields = ["user", "product"]
+    readonly_fields = ["count", "total_price", "total_offer_percent", "total_price_with_offer", "payment_datetime",
+                       "status"]
 
 
+@admin.register(BasketDetail)
 class BasketDetailAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "line_coupon", "count", "payment_price", "payment_offer_percent", "total_price", ]
+    list_display = ["line_coupon", "count", "total_price", "total_price_with_offer", ]
     list_editable = ["count", ]
+    search_fields = ["line_coupon__title", "line_coupon__coupon__title"]
+    autocomplete_fields = ["line_coupon", ]
     readonly_fields = ["payment_price", "payment_offer_percent", "payment_price_with_offer", "total_price",
                        "total_price_with_offer", ]
 
 
-class ClosedBasketAdmin(BasketAdmin):
-    pass
+@admin.register(ClosedBasket)
+class ClosedBasketAdmin(admin.ModelAdmin):
+    list_display = ["user", "created_at", "payment_datetime", "status", "total_price", "total_offer_percent",
+                    "total_price_with_offer"]
+    list_editable = ["status", ]
+    list_filter = ["created_at", "payment_datetime", "status"]
+    search_fields = ["user__username", "user__email", "total_price", "total_price_with_offer"]
+    autocomplete_fields = ["user", "product"]
+    readonly_fields = ["count", "payment_datetime", "total_price", "total_offer_percent", "total_price_with_offer",
+                       "status"]
 
 
+@admin.register(ClosedBasketDetail)
 class ClosedBasketDetailAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "line_coupon", "status", "count", "payment_price", "payment_offer_percent",
-                    "total_price", ]
-    list_editable = ["status", "count", ]
+    list_display = ["line_coupon", "status", "count", "total_price", "total_price_with_offer", ]
+    list_editable = ["count", "status"]
+    list_filter = ["status", ]
+    search_fields = ["line_coupon__title", "line_coupon__coupon__title"]
+    autocomplete_fields = ["line_coupon", ]
     readonly_fields = ["payment_price", "payment_offer_percent", "payment_price_with_offer", "total_price",
                        "total_price_with_offer", ]
 
 
+#
+@admin.register(ProductValidationCode)
 class ProductValidationCodeAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "code", "used", "closed_basket"]
+    list_display = ["product", "code", "used", "closed_basket"]
     list_editable = ["used", "closed_basket"]
-    readonly_fields = ["code"]
-
-
-admin.site.register(Basket, BasketAdmin)
-admin.site.register(BasketDetail, BasketDetailAdmin)
-admin.site.register(ClosedBasket, ClosedBasketAdmin)
-admin.site.register(ClosedBasketDetail, ClosedBasketDetailAdmin)
-admin.site.register(ProductValidationCode, ProductValidationCodeAdmin)
+    list_filter = ["used", ]
+    search_fields = ["product__title", "product__coupon__title", "code"]
+    autocomplete_fields = ["product", "closed_basket"]
+    readonly_fields = ["code", ]
