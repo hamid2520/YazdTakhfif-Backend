@@ -33,6 +33,7 @@ class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     profile_picture = ThumbnailerImageField(verbose_name='عکس پروفایل', upload_to='profile_pictures/', blank=True,
                                             null=True, )
+    address = models.CharField(max_length=512, null=True, blank=True,verbose_name="آدرس")
 
     def get_tokens(self):
         refresh = RefreshToken.for_user(self)

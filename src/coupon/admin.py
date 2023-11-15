@@ -31,12 +31,14 @@ class CouponAdmin(admin.ModelAdmin):
     search_fields = ["title", "business__admin__username"]
     autocomplete_fields = ["business", "category"]
     readonly_fields = ["coupon_rate", "rate_count"]
+    inlines = [ImageInline, ]
+
 
 @admin.register(CouponImage)
 class CouponImageAdmin(admin.ModelAdmin):
     list_display = ["id", "coupon"]
-    # search_fields = ["coupon__title"]
-    # autocomplete_fields = ["coupon"]
+    search_fields = ["coupon__title"]
+    autocomplete_fields = ["coupon"]
 
 
 @admin.register(LineCoupon)
@@ -60,7 +62,8 @@ class RateAdmin(admin.ModelAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ["coupon", "user", "parent", "created_at"]
-    list_filter = ["created_at", ]
+    list_display = ["coupon", "user", "parent", "created_at", "verified"]
+    list_editable = ["verified", ]
+    list_filter = ["created_at", "verified"]
     search_fields = ["coupon__title", "user__username", "text"]
     autocomplete_fields = ["coupon", "user", "parent"]

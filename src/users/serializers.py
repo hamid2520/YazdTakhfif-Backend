@@ -5,8 +5,6 @@ from src.common.serializers import ThumbnailerJSONSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
-    profile_picture = ThumbnailerJSONSerializer(required=False, allow_null=True, alias_target='src.users')
-
     class Meta:
         model = User
         fields = (
@@ -14,7 +12,8 @@ class UserSerializer(serializers.ModelSerializer):
             'username',
             'first_name',
             'last_name',
-            'profile_picture',
+            'email',
+            'address'
         )
         read_only_fields = ('username',)
 

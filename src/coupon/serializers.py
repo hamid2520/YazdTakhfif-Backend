@@ -25,12 +25,14 @@ class CouponSerializer(serializers.ModelSerializer):
     category = CategorySerializer(many=True)
     rates_list = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
+    list_data = serializers.SerializerMethodField()
+    comment_list = serializers.SerializerMethodField()
 
     class Meta:
         model = Coupon
         fields = [
             "title", "slug", "business", "created", "expire_date", "category", "description", "terms_of_use",
-            "coupon_rate", "rate_count", "rates_list", "images"]
+            "coupon_rate", "rate_count", "rates_list", "images", "list_data", "comment_list"]
 
     def get_rates_list(self, obj: Coupon):
         rates_list: dict = obj.rate_set.all().aggregate(rate_1=Count("rate", filter=Q(rate=1)),
@@ -40,6 +42,7 @@ class CouponSerializer(serializers.ModelSerializer):
                                                         rate_5=Count("rate", filter=Q(rate=5)))
 
         rate_count = obj.rate_count
+
         for key, value in rates_list.items():
             if rate_count:
                 rate_percent = round((value * 100) / rate_count)
@@ -53,13 +56,26 @@ class CouponSerializer(serializers.ModelSerializer):
                     "count": 0,
                     "percent": 0
                 }
-
-        return rates_list
+        return list(rates_list.values())
 
     def get_images(self, obj: Coupon):
-        images = obj.couponimage_set.all()
-        serializer = CouponImageSerializer(instance=images, many=True)
+        images = obj.couponimage_set.all().values("image")
+        images_list = [url["image"] for url in images]
+        # serializer = CouponImageSerializer(instance=images, many=True)
+        return images_list
+
+    def get_list_data(self, obj: Coupon):
+        main_line_coupon = obj.linecoupon_set.filter(is_main=True).first()
+        serializer = LineCouponSerializer(instance=main_line_coupon)
         return serializer.data
+
+    def get_comment_list(self, obj: Coupon):
+        if self.context["view"].kwargs.get("slug"):
+            comments = obj.comment_set.filter(verified=True)
+            serializer = CommentSerializer(instance=comments, many=True)
+            print(self.context["view"].kwargs.get("slug"))
+            return serializer.data
+        return []
 
 
 class CouponCreateSerializer(serializers.ModelSerializer):

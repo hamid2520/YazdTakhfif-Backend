@@ -25,7 +25,7 @@ class CategoryViewSet(ModelViewSet):
     serializer_class = CategorySerializer
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserCoupon, SearchFilter]
     search_fields = ['title', ]
     pagination_class = pagination.LimitOffsetPagination
@@ -50,7 +50,6 @@ class CouponViewSet(ModelViewSet):
     @action(detail=True, methods=["POST", ], serializer_class=CouponImageSerializer, url_path="add-image",
             url_name="add_image")
     def add_image(self, request, slug):
-        coupon = self.get_object()
         serializer = CouponImageSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -61,7 +60,7 @@ class CouponViewSet(ModelViewSet):
     def delete_image(self, request, slug):
         image = CouponImage.objects.filter(id=slug)
         if image.exists():
-            image=image.first()
+            image = image.first()
             image.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(data={"Error": "No images with this id!"}, status=status.HTTP_404_NOT_FOUND)
@@ -128,7 +127,7 @@ class LineCouponViewSet(ModelViewSet):
     serializer_class = LineCouponSerializer
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserLineCoupon, SearchFilter, PriceFilter, ]
     search_fields = ['title', "coupon__title"]
     pagination_class = pagination.LimitOffsetPagination
