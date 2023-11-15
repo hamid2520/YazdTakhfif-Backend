@@ -18,13 +18,14 @@ def generate_random_string(prefix="", length=8):
 # Basket Products
 class BaseBasketDetail(models.Model):
     slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True, max_length=128)
-    line_coupon = models.ForeignKey(LineCoupon, on_delete=models.DO_NOTHING)
-    count = models.PositiveSmallIntegerField()
-    payment_price = models.PositiveIntegerField(blank=True, null=True)
-    payment_offer_percent = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(100), ])
-    payment_price_with_offer = models.PositiveIntegerField(blank=True, null=True)
-    total_price = models.PositiveIntegerField(blank=True, null=True)
-    total_price_with_offer = models.PositiveIntegerField(blank=True, null=True)
+    line_coupon = models.ForeignKey(LineCoupon, on_delete=models.CASCADE, verbose_name="لاین کوپن")
+    count = models.PositiveSmallIntegerField(verbose_name="تعداد")
+    payment_price = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت تمام شده")
+    payment_offer_percent = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(100), ],
+                                                        verbose_name="تخفیف تمام شده")
+    payment_price_with_offer = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت تمام شده با تخفیف")
+    total_price = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت کل")
+    total_price_with_offer = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت کل با تخفیف")
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
@@ -41,6 +42,11 @@ class BaseBasketDetail(models.Model):
 
 
 class BasketDetail(BaseBasketDetail):
+    def clean(self):
+        super().clean()
+        if (self.count + self.line_coupon.sell_count) > self.line_coupon.count:
+            raise ValidationError({"count": "There is no more line coupons available!"})
+
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         if self.payment_price:
@@ -53,41 +59,42 @@ class BasketDetail(BaseBasketDetail):
                             update_fields)
 
     class Meta:
-        verbose_name = "Basket Detail"
-        verbose_name_plural = "Basket Details"
+        verbose_name = "محصول سبد خرید"
+        verbose_name_plural = "محصولات سبد خرید"
 
 
 class ClosedBasketDetail(BaseBasketDetail):
     status_choices = (
-        (1, "Created"),
-        (2, "Verified"),
-        (3, "Canceled"),
+        (1, "ایجاد شده"),
+        (2, "تایید شده"),
+        (3, "لغو شده"),
     )
-    status = models.PositiveIntegerField(choices=status_choices, default=1, blank=True)
+    status = models.PositiveIntegerField(choices=status_choices, default=1, blank=True, verbose_name="وضعیت")
 
     class Meta:
-        verbose_name = "Closed Basket Detail"
-        verbose_name_plural = "Closed Basket Details"
+        verbose_name = "محصول سبد خرید بسته شده"
+        verbose_name_plural = "محصولات سبد خرید بسته شده"
 
 
 # Basket
 class BaseBasket(models.Model):
     status_choices = (
-        (1, "Created"),
-        (2, "Paid"),
-        (3, "Verified"),
-        (4, "Canceled"),
+        (1, "ایجاد شده"),
+        (2, "پرداخت شده"),
+        (3, "تایید شده"),
+        (4, "لغو شده"),
     )
     slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    payment_datetime = models.DateTimeField(blank=True, null=True)
-    is_paid = models.BooleanField(default=False)
-    count = models.PositiveSmallIntegerField(blank=True, null=True)
-    total_price = models.PositiveIntegerField(blank=True, null=True)
-    total_offer_percent = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(100), ])
-    total_price_with_offer = models.PositiveIntegerField(blank=True, null=True)
-    status = models.PositiveIntegerField(choices=status_choices, default=1, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="کاربر")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد سبد خرید")
+    payment_datetime = models.DateTimeField(blank=True, null=True, verbose_name="تاریخ پرداخت سبد خرید")
+    is_paid = models.BooleanField(default=False, verbose_name="پرداخت شده / نشده")
+    count = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name="تعداد")
+    total_price = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت کل")
+    total_offer_percent = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(100), ],
+                                                      verbose_name="تخفیف کل")
+    total_price_with_offer = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت کل با تخفیف")
+    status = models.PositiveIntegerField(choices=status_choices, default=1, blank=True, verbose_name="وضعیت")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.slug is None:
@@ -102,7 +109,7 @@ class BaseBasket(models.Model):
 
 
 class Basket(BaseBasket):
-    product = models.ManyToManyField(BasketDetail, blank=True, null=True)
+    product = models.ManyToManyField(BasketDetail, blank=True, null=True, verbose_name="محصولات")
 
     def final_count_validation(self):
         errors = []
@@ -117,12 +124,12 @@ class Basket(BaseBasket):
         return None
 
     class Meta:
-        verbose_name = "Basket"
-        verbose_name_plural = "Baskets"
+        verbose_name = "سبد خرید"
+        verbose_name_plural = "سبد خرید ها"
 
 
 class ClosedBasket(BaseBasket):
-    product = models.ManyToManyField(ClosedBasketDetail, blank=True, null=True)
+    product = models.ManyToManyField(ClosedBasketDetail, blank=True, null=True, verbose_name="محصولات")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.status == 1:
@@ -131,19 +138,21 @@ class ClosedBasket(BaseBasket):
         return super().save(force_insert=False, force_update=False, using=None, update_fields=None)
 
     class Meta:
-        verbose_name = "ClosedBasket"
-        verbose_name_plural = "ClosedBaskets"
+        verbose_name = "سبد خرید بسته شده"
+        verbose_name_plural = "سبد خرید های بسته شده"
 
 
 class ProductValidationCode(models.Model):
-    product = models.ForeignKey(LineCoupon, on_delete=models.CASCADE)
-    code = models.CharField(max_length=128, db_index=True, unique=True, blank=True, default=generate_random_string)
-    used = models.BooleanField(default=False)
-    closed_basket = models.ForeignKey(ClosedBasket, on_delete=models.SET_NULL, null=True, blank=True)
+    product = models.ForeignKey(LineCoupon, on_delete=models.CASCADE, verbose_name="لاین کوپن")
+    code = models.CharField(max_length=128, db_index=True, unique=True, blank=True, default=generate_random_string,
+                            verbose_name="کد تخفیف")
+    used = models.BooleanField(default=False, verbose_name="استفاده شده / نشده")
+    closed_basket = models.ForeignKey(ClosedBasket, on_delete=models.SET_NULL, null=True, blank=True,
+                                      verbose_name="سبد خرید بسته شده")
 
     def __str__(self):
         return f"{self.product.title}({self.pk})"
 
     class Meta:
-        verbose_name = "Coupon Code"
-        verbose_name_plural = "Coupon Codes"
+        verbose_name = "کد تخفیف لاین کوپن"
+        verbose_name_plural = "کد تخفیف های لاین کوپن"

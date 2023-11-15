@@ -34,6 +34,9 @@ class User(AbstractUser):
     profile_picture = ThumbnailerImageField('ProfilePicture', upload_to='profile_pictures/', blank=True, null=True)
     sms_code = models.CharField(max_length=5, null=True)
     phone = models.CharField(max_length=11, unique=True)
+    profile_picture = ThumbnailerImageField(verbose_name='عکس پروفایل', upload_to='profile_pictures/', blank=True,
+                                            null=True, )
+    address = models.CharField(max_length=512, null=True, blank=True,verbose_name="آدرس")
 
     def get_tokens(self):
         refresh = RefreshToken.for_user(self)

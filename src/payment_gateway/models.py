@@ -22,18 +22,19 @@ class Gateway(models.Model):
         ("BAHAMTA", "با همتا"),
         ("PAYV1", "PAYV1"),
     )
-    name = models.CharField(max_length=128)
-    gateway = models.CharField(max_length=10, choices=GATEWAY_CHOICES)
+    name = models.CharField(max_length=128, verbose_name="نام درگاه")
+    gateway = models.CharField(max_length=10, choices=GATEWAY_CHOICES, verbose_name="نوع درگاه")
     # put merchant_id or anything else in data
-    data = models.JSONField(default=dict, null=True, blank=True)
-    active = models.BooleanField(default=False)
+    data = models.JSONField(default=dict, null=True, blank=True, verbose_name="اطلاعات درگاه",
+                            help_text="اطلاعات درگاه مانند مرچنت آیدی و ... را در این قسمت قرار دهید!")
+    active = models.BooleanField(default=False, verbose_name="فعال / غیرفعال")
 
     def __str__(self):
         return f"{self.name}({self.gateway})"
 
     class Meta:
-        verbose_name = "Gateway"
-        verbose_name_plural = "Gateways"
+        verbose_name = "درگاه پرداخت"
+        verbose_name_plural = "درگاه های پرداخت"
 
 
 class OnlinePayment(models.Model):
@@ -65,18 +66,18 @@ class OnlinePayment(models.Model):
         (30, FAILED_CODE_FINALIZE),
     )
 
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name="کاربر")
     status = models.PositiveSmallIntegerField(default=STATUS_NEW, verbose_name='وضعیت', choices=STATUS_CHOICES)
     token = models.UUIDField(default=uuid.uuid4, unique=True, verbose_name='توکن', editable=False)
-    gateway = models.ForeignKey(Gateway, on_delete=models.CASCADE)
+    gateway = models.ForeignKey(Gateway, on_delete=models.CASCADE, verbose_name="درگاه")
     # جواب هنگام ارسال به درگاه پرداخت
-    extra_data = models.JSONField(default=dict, null=True, blank=True)
+    extra_data = models.JSONField(default=dict, null=True, blank=True, verbose_name="دیتای ارسالی به درگاه")
     # جواب بعد پرداخت
     # {pre_confirm={}, post_confirm={}}
-    response = models.JSONField(default=dict, null=True, blank=True)
-    ref_id = models.CharField(max_length=64, blank=True, null=True, default=None)
-    payment = models.ForeignKey(Basket, on_delete=models.SET_NULL, null=True)
-    paid_at = models.DateTimeField(null=True, blank=True, default=None)
+    response = models.JSONField(default=dict, null=True, blank=True, verbose_name="دیتای دریافتی از درگاه")
+    ref_id = models.CharField(max_length=64, blank=True, null=True, default=None, verbose_name="کد رهگیری خرید")
+    payment = models.ForeignKey(Basket, on_delete=models.SET_NULL, null=True, verbose_name="سبد خرید پرداختی")
+    paid_at = models.DateTimeField(null=True, blank=True, default=None, verbose_name="تاریخ پرداخت")
 
     def __str__(self):
         return f"{str(self.token)}({self.user})"
@@ -91,5 +92,5 @@ class OnlinePayment(models.Model):
                             update_fields)
 
     class Meta:
-        verbose_name = "Online Payment"
-        verbose_name_plural = "Online Payments"
+        verbose_name = "پرداخت های آنلاین"
+        verbose_name_plural = "پرداخت های آنلاین"

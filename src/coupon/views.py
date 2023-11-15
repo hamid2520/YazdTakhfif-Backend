@@ -1,5 +1,5 @@
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
@@ -8,15 +8,16 @@ from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.settings import api_settings
 
-from .models import Category, Coupon, LineCoupon, Rate, Comment
+from .models import Category, Coupon, LineCoupon, Rate, Comment, CouponImage
 from .filters import IsOwnerOrSuperUserCoupon, IsOwnerOrSuperUserLineCoupon, PriceFilter, OfferFilter, RateFilter, \
     BusinessFilter, CategoryFilter
 from .serializers import CategorySerializer, CouponSerializer, CouponCreateSerializer, LineCouponSerializer, \
-    RateSerializer, CommentSerializer
+    RateSerializer, CommentSerializer, CouponImageSerializer
 from .permissions import IsSuperUserOrOwner
 from ..basket.models import ProductValidationCode
 from ..basket.serializers import ProductValidationCodeSerializer
 from rest_framework import pagination
+from .exceptions import MaximumNumberOfDeletableObjectsError
 
 
 class CategoryViewSet(ModelViewSet):
@@ -24,6 +25,7 @@ class CategoryViewSet(ModelViewSet):
     serializer_class = CategorySerializer
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
+    permission_classes = [IsAuthenticated, ]
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserCoupon, SearchFilter]
     search_fields = ['title', ]
     pagination_class = pagination.LimitOffsetPagination
@@ -43,6 +45,25 @@ class CouponViewSet(ModelViewSet):
         if self.action == ("list" or "retrieve"):
             return CouponSerializer
         return CouponCreateSerializer
+
+    @swagger_auto_schema(request_body=CouponImageSerializer, responses={200: CouponImageSerializer(), })
+    @action(detail=True, methods=["POST", ], serializer_class=CouponImageSerializer, url_path="add-image",
+            url_name="add_image")
+    def add_image(self, request, slug):
+        serializer = CouponImageSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=["DELETE", ], url_path="delete-image", url_name="delete_image")
+    def delete_image(self, request, slug):
+        image = CouponImage.objects.filter(id=slug)
+        if image.exists():
+            image = image.first()
+            image.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(data={"Error": "No images with this id!"}, status=status.HTTP_404_NOT_FOUND)
 
     @swagger_auto_schema(request_body=RateSerializer, responses={200: RateSerializer(), })
     @action(detail=True, methods=["POST", ], serializer_class=RateSerializer, url_path="rate-coupon",
@@ -92,10 +113,11 @@ class CouponViewSet(ModelViewSet):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(responses={200: CommentSerializer(), })
-    @action(detail=True, methods=["GET"], url_path="coupon-comments-list", url_name="coupon_comments_list", )
+    @action(detail=True, methods=["GET"], url_path="coupon-comments-list", url_name="coupon_comments_list",
+            permission_classes=[], filter_backends=[])
     def get_coupon_comments_list(self, request, slug):
         coupon = self.get_object()
-        coupon_comments = coupon.comment_set.all()
+        coupon_comments = coupon.comment_set.filter(verified=True)
         serializer = CommentSerializer(instance=coupon_comments, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
@@ -105,13 +127,14 @@ class LineCouponViewSet(ModelViewSet):
     serializer_class = LineCouponSerializer
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
+    permission_classes = [IsAuthenticated, ]
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserLineCoupon, SearchFilter, PriceFilter, ]
     search_fields = ['title', "coupon__title"]
     pagination_class = pagination.LimitOffsetPagination
 
     @swagger_auto_schema(responses={200: ProductValidationCodeSerializer(), })
     @action(detail=True, methods=["GET"], url_path="line-coupon-code-list", url_name="line_coupon_code_list", )
-    def get_coupon_comments_list(self, request, slug):
+    def get_line_coupon_codes_list(self, request, slug):
         line_coupon: LineCoupon = self.get_object()
         coupon_codes = line_coupon.productvalidationcode_set.all().order_by("used")
         serializer = ProductValidationCodeSerializer(instance=coupon_codes, many=True)

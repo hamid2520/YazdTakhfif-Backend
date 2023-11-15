@@ -23,7 +23,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'jet',
+    # 'jet',
     'django.contrib.admin',
     # Third party apps
     'rest_framework',  # utilities for rest apis
@@ -121,11 +121,11 @@ DATABASES = {
 # General
 APPEND_SLASH = True
 TIME_ZONE = 'Asia/Tehran'
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'fa-ir'
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
-USE_I18N = False
-USE_L10N = True
+USE_I18N = True
+USE_L10N = False
 USE_TZ = True
 LOGIN_REDIRECT_URL = '/'
 
