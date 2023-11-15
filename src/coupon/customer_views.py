@@ -2,7 +2,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.filters import SearchFilter
 from rest_framework.settings import api_settings
 from src.utils.custom_api_views import ListRetrieveAPIView
-from .models import Category, Coupon, LineCoupon
+from .models import Category, Coupon
 from .serializers import CategorySerializer, CouponSerializer, LineCouponSerializer
 from .filters import PriceFilter, OfferFilter, RateFilter, BusinessFilter, CategoryFilter, IsAvailableFilter
 

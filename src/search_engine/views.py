@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from itertools import chain, count
 from src.coupon.models import Category, Coupon, LineCoupon
 from .serializers import SearchEngineApiSerializer
+from django.db.models import F
 
 # Create your views here.
 
@@ -16,15 +17,14 @@ class SearchEngineListApiView(APIView):
             model_name=Value('category', output_field=CharField()))
         coupon_search_data = Coupon.objects.filter(title__icontains=text).values('title', 'slug').annotate(
             model_name=Value('coupon', output_field=CharField()))
-        line_coupon_search_data = LineCoupon.objects.filter(title__icontains=text).values('title', 'slug').annotate(
-            model_name=Value('line_coupon', output_field=CharField()))
+        line_coupon_search_data = LineCoupon.objects.filter(title__icontains=text).values('title', 'coupon__slug').annotate(
+            model_name=Value('line_coupon', output_field=CharField()),slug=F('coupon__slug'))
 
         if (category_search_data.count() == 0) and (coupon_search_data.count() == 0) and (line_coupon_search_data.count() == 0):
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=status.HTTP_200_OK)
         
         result_queryset = chain(category_search_data, coupon_search_data, line_coupon_search_data)
         data = SearchEngineApiSerializer(instance=result_queryset, many=True)
-        
         return Response(data.data, status.HTTP_200_OK)
 
         
