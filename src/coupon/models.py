@@ -75,6 +75,18 @@ class Coupon(models.Model):
         verbose_name_plural = "کوپن ها"
 
 
+class CouponImage(models.Model):
+    image = models.ImageField(upload_to="coupon_images/", verbose_name="عکس")
+    coupon = models.ForeignKey(to=Coupon, on_delete=models.CASCADE, verbose_name="کوپن")
+
+    def __str__(self):
+        return f"{self.coupon.title}({self.id})"
+
+    class Meta:
+        verbose_name = "عکس کوپن"
+        verbose_name_plural = "عکس های کوپن"
+
+
 class LineCoupon(models.Model):
     slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
     title = models.CharField(max_length=128, verbose_name="عنوان")
@@ -140,6 +152,7 @@ class Comment(models.Model):
     parent = models.ForeignKey("Comment", on_delete=models.CASCADE, blank=True, null=True)
     text = models.CharField(max_length=1200)
     created_at = models.DateTimeField(auto_now_add=True)
+    verified = models.BooleanField(default=False, verbose_name="تایید شده / نشده")
 
     def __str__(self):
         return f"{self.coupon}({self.user})-{'sub comment' if self.parent else 'main comment'}"

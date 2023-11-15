@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Coupon, LineCoupon, FAQ, Rate, Comment
+from .models import Category, Coupon, CouponImage, LineCoupon, FAQ, Rate, Comment
 
 
 @admin.register(Category)
@@ -9,6 +9,7 @@ class CategoryAdmin(admin.ModelAdmin):
     list_editable = ["parent", ]
     search_fields = ["title", ]
     autocomplete_fields = ["parent", ]
+    list_filter = ["parent", ]
 
 
 @admin.register(FAQ)
@@ -19,6 +20,10 @@ class FAQAdmin(admin.ModelAdmin):
     autocomplete_fields = ["category", ]
 
 
+class ImageInline(admin.TabularInline):
+    model = CouponImage
+
+
 @admin.register(Coupon)
 class CouponAdmin(admin.ModelAdmin):
     list_display = ["title", "business", "created", "expire_date"]
@@ -26,6 +31,12 @@ class CouponAdmin(admin.ModelAdmin):
     search_fields = ["title", "business__admin__username"]
     autocomplete_fields = ["business", "category"]
     readonly_fields = ["coupon_rate", "rate_count"]
+
+@admin.register(CouponImage)
+class CouponImageAdmin(admin.ModelAdmin):
+    list_display = ["id", "coupon"]
+    # search_fields = ["coupon__title"]
+    # autocomplete_fields = ["coupon"]
 
 
 @admin.register(LineCoupon)

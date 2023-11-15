@@ -3,7 +3,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from src.business.serializers import BusinessSerializer
-from .models import Category, Coupon, LineCoupon, Rate, Comment
+from .models import Category, Coupon, LineCoupon, Rate, Comment, CouponImage
 from .exceptions import MaximumNumberOfDeletableObjectsError
 
 
@@ -14,16 +14,23 @@ class CategorySerializer(serializers.ModelSerializer):
         read_only_fields = ["slug", ]
 
 
+class CouponImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CouponImage
+        fields = "__all__"
+
+
 class CouponSerializer(serializers.ModelSerializer):
     business = BusinessSerializer()
     category = CategorySerializer(many=True)
     rates_list = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
 
     class Meta:
         model = Coupon
         fields = [
             "title", "slug", "business", "created", "expire_date", "category", "description", "terms_of_use",
-            "coupon_rate", "rate_count", "rates_list"]
+            "coupon_rate", "rate_count", "rates_list", "images"]
 
     def get_rates_list(self, obj: Coupon):
         rates_list: dict = obj.rate_set.all().aggregate(rate_1=Count("rate", filter=Q(rate=1)),
@@ -48,6 +55,11 @@ class CouponSerializer(serializers.ModelSerializer):
                 }
 
         return rates_list
+
+    def get_images(self, obj: Coupon):
+        images = obj.couponimage_set.all()
+        serializer = CouponImageSerializer(instance=images, many=True)
+        return serializer.data
 
 
 class CouponCreateSerializer(serializers.ModelSerializer):
