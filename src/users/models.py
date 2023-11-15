@@ -32,6 +32,8 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     profile_picture = ThumbnailerImageField('ProfilePicture', upload_to='profile_pictures/', blank=True, null=True)
+    sms_code = models.CharField(max_length=5, null=True)
+    phone = models.CharField(max_length=11, unique=True)
 
     def get_tokens(self):
         refresh = RefreshToken.for_user(self)

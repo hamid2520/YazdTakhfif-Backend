@@ -1,3 +1,4 @@
+from pyexpat import model
 from rest_framework import serializers
 
 from src.users.models import User
@@ -15,6 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'profile_picture',
+            'phone'
         )
         read_only_fields = ('username',)
 
@@ -46,3 +48,11 @@ class CreateUserSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('tokens',)
         extra_kwargs = {'password': {'write_only': True}}
+
+class SignInSerializer(serializers.Serializer):
+    phone = serializers.CharField()
+
+
+class LoginSerializer(serializers.Serializer):
+    phone = serializers.CharField()
+    sms_code = serializers.CharField()
