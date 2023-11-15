@@ -1,12 +1,12 @@
 from django.contrib import admin
 
-from .models import Category, Coupon, LineCoupon, FAQ, Rate, Comment
+from .models import Category, Coupon, CouponImage, LineCoupon, FAQ, Rate, Comment
 
 
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ["title", "parent"]
-    list_filter = ["parent",]
-    list_editable = ["parent",]
+    list_filter = ["parent", ]
+    list_editable = ["parent", ]
 
 
 class FAQAdmin(admin.ModelAdmin):
@@ -14,9 +14,21 @@ class FAQAdmin(admin.ModelAdmin):
     list_filter = ["category"]
 
 
+class ImageInline(admin.TabularInline):
+    model = CouponImage
+
+
 class CouponAdmin(admin.ModelAdmin):
     list_display = ["title", "business", "created", "expire_date"]
     list_filter = ["business", "category", "created", "expire_date"]
+    inlines = [ImageInline, ]
+
+
+@admin.register(CouponImage)
+class CouponImageAdmin(admin.ModelAdmin):
+    list_display = ["id", "coupon"]
+    # search_fields = ["coupon__title"]
+    # autocomplete_fields = ["coupon"]
 
 
 class LineCouponAdmin(admin.ModelAdmin):
