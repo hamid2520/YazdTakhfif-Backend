@@ -1,7 +1,6 @@
 from django.db.models import Count, Q
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-
 from src.business.serializers import BusinessSerializer
 from .models import Category, Coupon, LineCoupon, Rate, Comment, CouponImage
 from .exceptions import MaximumNumberOfDeletableObjectsError

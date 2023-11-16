@@ -205,3 +205,12 @@ class UserBasketProductCount(APIView):
             return Response(data={'product_count': product_count}, status=status.HTTP_200_OK)
         else:
             return Response(data={'product_count': 0}, status=status.HTTP_200_OK)
+
+
+class CurrentUserBasketDetail(APIView):
+    def get(self, request):
+
+        basket_detail = ClosedBasket.objects.filter(user=self.request.user.id).all()
+        serializer = ClosedBasketSerializer(instance=basket_detail, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
