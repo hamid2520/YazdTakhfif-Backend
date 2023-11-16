@@ -5,6 +5,7 @@ from rest_framework.exceptions import ValidationError
 from src.business.serializers import BusinessSerializer
 from .models import Category, Coupon, LineCoupon, Rate, Comment, CouponImage
 from .exceptions import MaximumNumberOfDeletableObjectsError
+from ..users.models import User
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -24,7 +25,7 @@ class CustomerCategorySerializer(serializers.ModelSerializer):
 
     def get_sub_categories(self, obj: Category):
         sub_categories = obj.category_set.all()
-        serializer = CategorySerializer(instance=sub_categories,many=True)
+        serializer = CategorySerializer(instance=sub_categories, many=True)
         return serializer.data
 
 
@@ -120,6 +121,7 @@ class RateSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
 
     def validate_user(self, value):
         request = self.context["request"]
@@ -144,3 +146,6 @@ class CommentSerializer(serializers.ModelSerializer):
                 "required": False
             }
         }
+
+    def get_user(self, obj):
+        return f"{obj.user.first_name} {obj.user.last_name}"
