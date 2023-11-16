@@ -43,8 +43,8 @@ class CouponImageAdmin(admin.ModelAdmin):
 
 @admin.register(LineCoupon)
 class LineCouponAdmin(admin.ModelAdmin):
-    list_display = ["title", "coupon", "is_main", "count", "price", "offer_percent", "price_with_offer", ]
-    list_editable = ["is_main", "price", "offer_percent", "count"]
+    list_display = ["title", "coupon", "is_main", "count", "price", "offer_percent", "price_with_offer","sell_count" ]
+    list_editable = ["is_main", "price", "offer_percent", "count","sell_count"]
     list_filter = ["is_main", ]
     search_fields = ["title", "coupon__title"]
     autocomplete_fields = ["coupon", ]

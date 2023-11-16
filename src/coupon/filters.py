@@ -1,7 +1,7 @@
-from django.db.models import Q
+from django.db.models import Q, Sum
 from rest_framework import filters
 from src.utils.get_bool import get_boolean
-from .models import Business, Category
+from .models import Business, Category, Coupon
 
 
 class IsOwnerOrSuperUserCoupon(filters.BaseFilterBackend):
@@ -80,3 +80,25 @@ class IsAvailableFilter(filters.BaseFilterBackend):
             else:
                 return queryset.filter(linecoupon__count=0)
         return queryset
+
+
+class HotSellsFilter(filters.BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        ordering = request.query_params.get("ordering")
+        if ordering == "hot_sells":
+            return queryset.annotate(hot_sells=Sum("linecoupon__sell_count")).order_by(
+                "-hot_sells").distinct()
+        return queryset
+
+
+# class RelatedCouponsFilter(filters.BaseFilterBackend):
+#     def filter_queryset(self, request, queryset: Coupon.objects.all(), view):
+#         coupon_slug = request.query_params.get("related")
+#         if coupon_slug:
+#             coupon = Coupon.objects.filter(slug=coupon_slug)
+#             if coupon.exists():
+#                 coupon = coupon.first()
+#                 categories_id = coupon.category.all().values_list("id")
+#                 print(categories_id)
+#                 return queryset.filter(category__id__in=categories_id).distinct().order_by("?")
+#         return queryset

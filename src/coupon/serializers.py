@@ -14,6 +14,20 @@ class CategorySerializer(serializers.ModelSerializer):
         read_only_fields = ["slug", ]
 
 
+class CustomerCategorySerializer(serializers.ModelSerializer):
+    sub_categories = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Category
+        fields = ["title", "slug", "parent", "sub_categories"]
+        read_only_fields = ["slug", ]
+
+    def get_sub_categories(self, obj: Category):
+        sub_categories = obj.category_set.all()
+        serializer = CategorySerializer(instance=sub_categories,many=True)
+        return serializer.data
+
+
 class CouponImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = CouponImage
