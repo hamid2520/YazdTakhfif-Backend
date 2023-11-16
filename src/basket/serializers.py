@@ -53,7 +53,24 @@ class AddToBasketSerializer(serializers.Serializer):
             raise ValidationError({"line_coupon_slug": "Line coupon does not exists!"})
 
 
-class ClosedBasketDetailSerializer(serializers.ModelSerializer):
+class ClosedBasketDetailSerializer(serializers.ModelSerializer):  
+    class Meta:
+        model = ClosedBasketDetail
+        exclude = ["id", ]
+
+class UserClosedBasketDetailSerializer(serializers.Serializer):
+    linecoupon_title = serializers.CharField()
+    coupon_title = serializers.CharField()
+    address = serializers.CharField()
+    phonenumber = serializers.CharField()
+    status =serializers.SerializerMethodField()
+
+    def get_status(self,obj):
+        try: 
+            return ClosedBasketDetail.status_choices[int(obj.status) -1][1]
+        except:
+            return 'نامشخص'
+
     class Meta:
         model = ClosedBasketDetail
         exclude = ["id", ]
@@ -106,3 +123,9 @@ class QRCodeSerializer(serializers.Serializer):
 class QRCodeGetSerializer(serializers.Serializer):
     code = serializers.CharField()
     used = serializers.BooleanField()
+
+
+# class UserClosedBasketDetailSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = ClosedBasketDetail
+#         fields = "__all__"

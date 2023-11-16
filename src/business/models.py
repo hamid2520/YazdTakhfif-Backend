@@ -10,6 +10,7 @@ class Business(models.Model):
     admin = models.ForeignKey(to=User, on_delete=models.CASCADE, verbose_name="ادمین ")
     description = models.TextField(blank=True, null=True, verbose_name="توضیحات")
     address = models.TextField(blank=True, null=True, verbose_name="آدرس")
+    phone_number = models.CharField(max_length=11, blank=True, verbose_name="شماره تماس")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.title, allow_unicode=True)
