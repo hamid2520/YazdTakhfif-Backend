@@ -20,7 +20,8 @@ from src.coupon.models import LineCoupon
 from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, ProductValidationCode
 from .filters import IsOwnerOrSuperUserBasket, IsOwnerOrSuperUserBasketDetail
 from .serializers import BasketSerializer, BasketDetailSerializer, AddToBasketSerializer, ClosedBasketSerializer, \
-    ClosedBasketDetailSerializer, ClosedBasketDetailValidatorSerializer, QRCodeSerializer, QRCodeGetSerializer
+    ClosedBasketDetailSerializer, ClosedBasketDetailValidatorSerializer, QRCodeSerializer, QRCodeGetSerializer, \
+    UserClosedBasketDetailSerializer
 
 
 class BasketViewSet(ModelViewSet):
@@ -213,10 +214,7 @@ class CurrentUserBasketDetail(APIView):
             linecoupon_title=F('line_coupon__title'), coupon_title=F('line_coupon__coupon__title'), 
             address=F('line_coupon__coupon__business__address'), phonenumber=F('line_coupon__coupon__business__phone_number'),
             )
-        serializer = ClosedBasketDetailSerializer(instance=basket_detail, many=True)
+        serializer = UserClosedBasketDetailSerializer(instance=basket_detail, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    """
-                product__title=F('coupon__title'),
-    """
