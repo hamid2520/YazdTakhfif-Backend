@@ -54,9 +54,25 @@ class AddToBasketSerializer(serializers.Serializer):
 
 
 class ClosedBasketDetailSerializer(serializers.ModelSerializer):
+    linecoupon_title = serializers.CharField()
+    coupon_title = serializers.CharField()
+    address = serializers.CharField()
+    phonenumber = serializers.CharField()
+    status =serializers.SerializerMethodField()
+
+    def get_status(self,obj):
+        try: 
+            return ClosedBasketDetail.status_choices[int(obj.status) -1][1]
+        except:
+            return 'نامشخص'
+
     class Meta:
         model = ClosedBasketDetail
         exclude = ["id", ]
+
+# class UserClosedBasketDetailSerializer(serializers.Serializer):
+#     coupon__title  = serializers.CharField()
+#     linecoupon__title = serializers.CharField()
 
 
 class ClosedBasketSerializer(serializers.ModelSerializer):
@@ -106,3 +122,9 @@ class QRCodeSerializer(serializers.Serializer):
 class QRCodeGetSerializer(serializers.Serializer):
     code = serializers.CharField()
     used = serializers.BooleanField()
+
+
+# class UserClosedBasketDetailSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = ClosedBasketDetail
+#         fields = "__all__"

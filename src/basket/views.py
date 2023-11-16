@@ -1,5 +1,5 @@
 from django.core.files.base import ContentFile
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum,F
 from rest_framework.permissions import IsAuthenticated
 from src.utils.qrcode_generator import text_to_qrcode
 from django.urls import reverse
@@ -209,8 +209,14 @@ class UserBasketProductCount(APIView):
 
 class CurrentUserBasketDetail(APIView):
     def get(self, request):
-
-        basket_detail = ClosedBasket.objects.filter(user=self.request.user.id).all()
-        serializer = ClosedBasketSerializer(instance=basket_detail, many=True)
+        basket_detail = ClosedBasketDetail.objects.filter(closedbasket__user=self.request.user.id).annotate(
+            linecoupon_title=F('line_coupon__title'), coupon_title=F('line_coupon__coupon__title'), 
+            address=F('line_coupon__coupon__business__address'), phonenumber=F('line_coupon__coupon__business__phone_number'),
+            )
+        serializer = ClosedBasketDetailSerializer(instance=basket_detail, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    """
+                product__title=F('coupon__title'),
+    """

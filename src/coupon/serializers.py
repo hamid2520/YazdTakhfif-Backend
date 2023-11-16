@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.db.models import Count, Q
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -136,7 +137,7 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = "__all__"
-        read_only_fields = ["id", "user", "coupon", "created_at"]
+        read_only_fields = ["id", "created_at"]
         extra_kwargs = {
             "user": {
                 "required": False,

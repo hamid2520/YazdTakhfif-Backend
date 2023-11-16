@@ -88,11 +88,13 @@ class CouponViewSet(ModelViewSet):
     @action(detail=True, methods=["POST", ], serializer_class=CommentSerializer, url_path="add-comment",
             url_name="add_comment", )
     def add_comment(self, request, slug):
-        serializer = CommentSerializer(data=request.data, context={"request": request, "kwargs": self.kwargs})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if 'text' in request.data:
+            new_comment = Comment.objects.create(user=self.request.user,
+                                                 text=str(request.data.get('text', '')),
+                                                 coupon=self.get_object(),
+                                                 parent_id=request.data.get('parent', None))
+            return Response(data=CommentSerializer(instance=new_comment).data, status=status.HTTP_201_CREATED)
+        return Response(data={"errors": ['text is required']}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=["DELETE", ], permission_classes=[IsSuperUserOrOwner, ], url_path="delete-comment",
             url_name="delete_comment", lookup_url_kwarg="pk")
