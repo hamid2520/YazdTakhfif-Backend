@@ -9,7 +9,7 @@ from .filters import PriceFilter, OfferFilter, RateFilter, BusinessFilter, Categ
 
 
 class CategoryAPIView(ListAPIView):
-    queryset = Category.objects.all()
+    queryset = Category.objects.filter(parent=None)
     serializer_class = CustomerCategorySerializer
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter, ]
     search_fields = ['title', ]
