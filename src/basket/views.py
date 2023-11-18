@@ -210,7 +210,7 @@ class UserBasketProductCount(APIView):
 
 class CurrentUserBasketDetail(APIView):
     def get(self, request):
-        basket_detail = ClosedBasketDetail.objects.filter(closedbasket__user=self.request.user.id).annotate(
+        basket_detail = ClosedBasketDetail.objects.filter(closedbasket__user=self.request.user.id,status=2).annotate(
             linecoupon_title=F('line_coupon__title'), coupon_title=F('line_coupon__coupon__title'), 
             address=F('line_coupon__coupon__business__address'), phonenumber=F('line_coupon__coupon__business__phone_number'),
             )
