@@ -78,10 +78,17 @@ class UserClosedBasketDetailSerializer(serializers.Serializer):
 
 class ClosedBasketSerializer(serializers.ModelSerializer):
     product = ClosedBasketDetailSerializer(many=True)
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = ClosedBasket
         exclude = ["id", ]
+
+    def get_status(self,obj):
+        try: 
+            return ClosedBasket.status_choices[int(obj.status) -1][1]
+        except:
+            return 'نامشخص'
 
 
 class ClosedBasketDetailValidatorSerializer(serializers.Serializer):
