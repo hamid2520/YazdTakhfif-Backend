@@ -81,7 +81,7 @@ class UserClosedBasketDetailSerializer(serializers.Serializer):
         if obj.days_left > time_now:
             return (obj.days_left - timezone.now()).days
         else:
-            return 0
+            return -1
 
     class Meta:
         model = ClosedBasketDetail
