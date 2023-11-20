@@ -14,8 +14,8 @@ from .filters import IsOwnerOrSuperUserCoupon, IsOwnerOrSuperUserLineCoupon, Pri
 from .serializers import CategorySerializer, CouponSerializer, CouponCreateSerializer, LineCouponSerializer, \
     RateSerializer, CommentSerializer, CouponImageSerializer
 from .permissions import IsSuperUserOrOwner
-from ..basket.models import ProductValidationCode
-from ..basket.serializers import ProductValidationCodeSerializer
+from src.basket.models import ProductValidationCode
+from src.basket.serializers import ProductValidationCodeSerializer
 from rest_framework import pagination
 from .exceptions import MaximumNumberOfDeletableObjectsError
 
@@ -141,3 +141,15 @@ class LineCouponViewSet(ModelViewSet):
         coupon_codes = line_coupon.productvalidationcode_set.all().order_by("used")
         serializer = ProductValidationCodeSerializer(instance=coupon_codes, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(responses={200: ProductValidationCodeSerializer(), })
+    @action(detail=False, methods=["POST"], url_path="line-coupon-code-validation",
+            url_name="line_coupon_code_validation")
+    def get_line_coupon_codes_list(self, request):
+        code = request.data.get("code")
+        code_object = ProductValidationCode.objects.filter(code=code)
+        if code_object.exists():
+            code_object = code_object.first()
+            serializer = ProductValidationCodeSerializer(instance=code_object)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_404_NOT_FOUND)
