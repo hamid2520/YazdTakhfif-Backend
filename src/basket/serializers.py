@@ -1,7 +1,8 @@
 from django.db.models import Sum
+from django.utils import timezone
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
-
+from datetime import datetime, timedelta
 from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, ProductValidationCode
 from src.coupon.models import LineCoupon
 
@@ -53,23 +54,34 @@ class AddToBasketSerializer(serializers.Serializer):
             raise ValidationError({"line_coupon_slug": "Line coupon does not exists!"})
 
 
-class ClosedBasketDetailSerializer(serializers.ModelSerializer):  
+class ClosedBasketDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClosedBasketDetail
         exclude = ["id", ]
+
 
 class UserClosedBasketDetailSerializer(serializers.Serializer):
     linecoupon_title = serializers.CharField()
     coupon_title = serializers.CharField()
     address = serializers.CharField()
     phonenumber = serializers.CharField()
-    status =serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+    used = serializers.BooleanField()
+    code = serializers.CharField()
+    days_left = serializers.SerializerMethodField()
 
-    def get_status(self,obj):
-        try: 
-            return ClosedBasketDetail.status_choices[int(obj.status) -1][1]
+    def get_status(self, obj):
+        try:
+            return ClosedBasketDetail.status_choices[int(obj.status) - 1][1]
         except:
             return 'نامشخص'
+
+    def get_days_left(self, obj):
+        time_now = timezone.now()
+        if obj.days_left > time_now:
+            return (obj.days_left - timezone.now()).days
+        else:
+            return -1
 
     class Meta:
         model = ClosedBasketDetail
@@ -84,9 +96,9 @@ class ClosedBasketSerializer(serializers.ModelSerializer):
         model = ClosedBasket
         exclude = ["id", ]
 
-    def get_status(self,obj):
-        try: 
-            return ClosedBasket.status_choices[int(obj.status) -1][1]
+    def get_status(self, obj):
+        try:
+            return ClosedBasket.status_choices[int(obj.status) - 1][1]
         except:
             return 'نامشخص'
 
@@ -130,7 +142,6 @@ class QRCodeSerializer(serializers.Serializer):
 class QRCodeGetSerializer(serializers.Serializer):
     code = serializers.CharField()
     used = serializers.BooleanField()
-
 
 # class UserClosedBasketDetailSerializer(serializers.ModelSerializer):
 #     class Meta:

@@ -1,5 +1,5 @@
 from django.core.files.base import ContentFile
-from django.db.models import Q, Sum,F
+from django.db.models import Q, Sum, F
 from rest_framework.permissions import IsAuthenticated
 from src.utils.qrcode_generator import text_to_qrcode
 from django.urls import reverse
@@ -164,7 +164,8 @@ class ClosedBasketDetailValidatorAPIView(APIView):
 
 
 class GetQRCode(APIView):
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
+
     def get(self, request, slug):
         product = ClosedBasketDetail.objects.filter(slug=slug, status=2)
         if product.exists():
@@ -181,7 +182,8 @@ class GetQRCode(APIView):
 
 
 class VerifyQRCode(APIView):
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
+
     def get(self, request, slug):
         code = ProductValidationCode.objects.filter(code=slug)
         if code.exists():
@@ -211,10 +213,13 @@ class UserBasketProductCount(APIView):
 class CurrentUserBasketDetail(APIView):
     def get(self, request):
         basket_detail = ClosedBasketDetail.objects.filter(closedbasket__user=self.request.user.id).annotate(
-            linecoupon_title=F('line_coupon__title'), coupon_title=F('line_coupon__coupon__title'), 
-            address=F('line_coupon__coupon__business__address'), phonenumber=F('line_coupon__coupon__business__phone_number'),
-            )
+            linecoupon_title=F('line_coupon__title'), coupon_title=F('line_coupon__coupon__title'),
+            address=F('line_coupon__coupon__business__address'),
+            phonenumber=F('line_coupon__coupon__business__phone_number'),
+            used=F('closedbasket__productvalidationcode__used'),
+            code=F('closedbasket__productvalidationcode__code'),
+            days_left=F('line_coupon__coupon__expire_date')
+        )
         serializer = UserClosedBasketDetailSerializer(instance=basket_detail, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
