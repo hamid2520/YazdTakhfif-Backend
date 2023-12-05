@@ -143,7 +143,11 @@ class QRCodeGetSerializer(serializers.Serializer):
     code = serializers.CharField()
     used = serializers.BooleanField()
 
+
 # class UserClosedBasketDetailSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = ClosedBasketDetail
 #         fields = "__all__"
+
+class CurrentUserBasketLineCouponsCountSerializer(serializers.Serializer):
+    count = serializers.IntegerField()

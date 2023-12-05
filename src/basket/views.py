@@ -21,7 +21,7 @@ from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, Prod
 from .filters import IsOwnerOrSuperUserBasket, IsOwnerOrSuperUserBasketDetail
 from .serializers import BasketSerializer, BasketDetailSerializer, AddToBasketSerializer, ClosedBasketSerializer, \
     ClosedBasketDetailSerializer, ClosedBasketDetailValidatorSerializer, QRCodeSerializer, QRCodeGetSerializer, \
-    UserClosedBasketDetailSerializer
+    UserClosedBasketDetailSerializer, CurrentUserBasketLineCouponsCountSerializer
 
 
 class BasketViewSet(ModelViewSet):
@@ -223,3 +223,17 @@ class CurrentUserBasketDetail(APIView):
         serializer = UserClosedBasketDetailSerializer(instance=basket_detail, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CurrentUserBasketLineCouponsCount(APIView):
+    def get(self, reqeust, slug):
+        current_user = self.request.user
+        line_coupons_count = BasketDetail.objects.filter(basket__user=current_user.id,
+                                                         line_coupon__coupon__slug=slug).annotate(
+            linecoupon_count=F('count')
+        )
+        if line_coupons_count:
+            data = CurrentUserBasketLineCouponsCountSerializer(instance=line_coupons_count, many=True)
+            return Response(data.data, status=status.HTTP_200_OK)
+        else:
+            return Response({'count': 0}, status=status.HTTP_200_OK)
