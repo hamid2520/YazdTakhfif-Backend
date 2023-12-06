@@ -33,6 +33,14 @@ class BasketViewSet(ModelViewSet):
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserBasket, ]
     pagination_class = pagination.LimitOffsetPagination
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        if not queryset.exists():
+            basket = Basket.objects.create(user_id=self.request.user.id)
+            basket.save()
+        return super().list(request, *args, **kwargs)
+
+
     @swagger_auto_schema(responses={200: BasketDetailSerializer(many=True), })
     @action(detail=True, methods=["GET"], url_path="products-list", url_name="products_list", )
     def get_products_list(self, request, slug):
@@ -41,30 +49,27 @@ class BasketViewSet(ModelViewSet):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(request_body=AddToBasketSerializer, responses={200: AddToBasketSerializer(), })
-    @action(detail=True, methods=["POST", ], url_path="add-to-basket", url_name="add_to_basket",
+    @action(detail=False, methods=["POST", ], url_path="add-to-basket", url_name="add_to_basket",
             serializer_class=AddToBasketSerializer)
-    def add_to_basket(self, request, slug):
-        basket = Basket.objects.filter(slug=slug)
-        if basket.exists():
-            basket = basket.first()
-            add_serializer = AddToBasketSerializer(data=request.data)
-            if add_serializer.is_valid():
-                data = add_serializer.validated_data
-                line_coupon = LineCoupon.objects.get(slug=data.get("line_coupon_slug"))
-                product = basket.product.filter(line_coupon_id=line_coupon.id)
-                product_count = data.get("basket_detail_count")
-                if product.exists():
-                    product = product.first()
-                    product.count = product_count
-                    product.save()
-                else:
-                    product = BasketDetail.objects.create(line_coupon_id=line_coupon.id, count=product_count)
-                    product.save()
-                    basket.product.add(product)
-                    basket.save()
-                return Response(data=add_serializer.data, status=status.HTTP_200_OK)
-            return Response(data=add_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return HttpResponseNotFound("Basket not found!")
+    def add_to_basket(self, request):
+        basket, created = Basket.objects.get_or_create(user_id=request.user.id)
+        add_serializer = AddToBasketSerializer(data=request.data)
+        if add_serializer.is_valid():
+            data = add_serializer.validated_data
+            line_coupon = LineCoupon.objects.get(slug=data.get("line_coupon_slug"))
+            product = basket.product.filter(line_coupon_id=line_coupon.id)
+            product_count = data.get("basket_detail_count")
+            if product.exists():
+                product = product.first()
+                product.count = product_count
+                product.save()
+            else:
+                product = BasketDetail.objects.create(line_coupon_id=line_coupon.id, count=product_count)
+                product.save()
+                basket.product.add(product)
+                basket.save()
+            return Response(data=add_serializer.data, status=status.HTTP_200_OK)
+        return Response(data=add_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @action(detail=True, methods=["DELETE"], url_path="delete-from-basket", url_name="delete_from_basket", )
