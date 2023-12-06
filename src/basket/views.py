@@ -16,12 +16,12 @@ from rest_framework.viewsets import ModelViewSet
 from src.utils.custom_api_views import ListRetrieveAPIView
 from rest_framework import pagination
 from .permissions import IsSuperUser
-from src.coupon.models import LineCoupon
+from src.coupon.models import LineCoupon, Coupon
 from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, ProductValidationCode
 from .filters import IsOwnerOrSuperUserBasket, IsOwnerOrSuperUserBasketDetail
 from .serializers import BasketSerializer, BasketDetailSerializer, AddToBasketSerializer, ClosedBasketSerializer, \
     ClosedBasketDetailSerializer, ClosedBasketDetailValidatorSerializer, QRCodeSerializer, QRCodeGetSerializer, \
-    UserClosedBasketDetailSerializer
+    UserBoughtCodesSerializer
 
 
 class BasketViewSet(ModelViewSet):
@@ -210,16 +210,15 @@ class UserBasketProductCount(APIView):
             return Response(data={'product_count': 0}, status=status.HTTP_200_OK)
 
 
-class CurrentUserBasketDetail(APIView):
+class UserBoughtCodesAPIView(APIView):
     def get(self, request):
-        basket_detail = ClosedBasketDetail.objects.filter(closedbasket__user=self.request.user.id).annotate(
-            linecoupon_title=F('line_coupon__title'), coupon_title=F('line_coupon__coupon__title'),
-            address=F('line_coupon__coupon__business__address'),
-            phonenumber=F('line_coupon__coupon__business__phone_number'),
-            used=F('closedbasket__productvalidationcode__used'),
-            code=F('closedbasket__productvalidationcode__code'),
-            days_left=F('line_coupon__coupon__expire_date')
-        )
-        serializer = UserClosedBasketDetailSerializer(instance=basket_detail, many=True)
-
+        coupon_codes = Coupon.objects.filter(
+            linecoupon__closedbasketdetail__closedbasket__user_id=request.user.id).annotate(
+            business_title=F('business__title'),
+            address=F('business__address'),
+            phone_number=F('business__phone_number'),
+            days_left=F('expire_date')
+        ).order_by("title")
+        serializer = UserBoughtCodesSerializer(instance=coupon_codes, many=True,
+                                               context={"user_id": self.request.user.id})
         return Response(serializer.data, status=status.HTTP_200_OK)
