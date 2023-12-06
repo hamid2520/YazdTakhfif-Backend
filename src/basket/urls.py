@@ -2,14 +2,16 @@ from django.urls import path
 from rest_framework.routers import SimpleRouter
 
 from .views import BasketViewSet, BasketDetailViewSet, ClosedBasketAPIView, PaidClosedBasketListAPIView, \
-    PaidClosedBasketDetailListAPIView, ClosedBasketDetailValidatorAPIView, GetQRCode, VerifyQRCode, UserBasketProductCount, CurrentUserBasketDetail
+    PaidClosedBasketDetailListAPIView, ClosedBasketDetailValidatorAPIView, GetQRCode, VerifyQRCode, \
+    UserBasketProductCount,UserBoughtCodesAPIView
 
 router = SimpleRouter()
 router.register(prefix="baskets", viewset=BasketViewSet, basename="basket", )
 router.register(prefix="basket-details", viewset=BasketDetailViewSet, basename="basket_detail", )
 urlpatterns = [
                   path("closed-baskets/<slug:slug>/", ClosedBasketAPIView.as_view(), name="closed_basket_detail"),
-                  path('user-basket-product-count/', UserBasketProductCount.as_view(), name='user_basket_product_count'),
+                  path('user-basket-product-count/', UserBasketProductCount.as_view(),
+                       name='user_basket_product_count'),
                   path("closed-baskets/", ClosedBasketAPIView.as_view(), name="closed_basket_list"),
                   path("paid-closed-baskets/", PaidClosedBasketListAPIView.as_view(), name="paid_closed_basket_list"),
                   path("paid-closed-basket-details/<slug:slug>/", PaidClosedBasketDetailListAPIView.as_view(),
@@ -20,5 +22,5 @@ urlpatterns = [
                        name="get_qrcode"),
                   path("verify-qrcode/<slug>/", VerifyQRCode.as_view(),
                        name="verify_qrcode"),
-                  path('user-bought-coupon/', CurrentUserBasketDetail.as_view(), name='user_bought_coupon')
+                  path('user-bought-coupon/', UserBoughtCodesAPIView.as_view(), name='user_bought_coupon'),
               ] + router.urls
