@@ -145,7 +145,7 @@ class LineCouponViewSet(ModelViewSet):
     @swagger_auto_schema(responses={200: ProductValidationCodeSerializer(), })
     @action(detail=False, methods=["POST"], url_path="line-coupon-code-validation",
             url_name="line_coupon_code_validation")
-    def get_line_coupon_codes_list(self, request):
+    def get_line_coupon_codes_validation(self, request):
         code = request.data.get("code")
         code_object = ProductValidationCode.objects.filter(code=code)
         if code_object.exists():
