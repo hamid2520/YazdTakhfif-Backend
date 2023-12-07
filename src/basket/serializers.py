@@ -26,22 +26,50 @@ class BasketDetailSerializer(serializers.ModelSerializer):
 
 
 class BasketDetailShowSerializer(serializers.ModelSerializer):
-    line_coupon = LineCouponSerializer(read_only=True)
+    line_coupon = serializers.SlugRelatedField(slug_field="title", read_only=True)
+    in_stock = serializers.SerializerMethodField()
     imagesrc = serializers.SerializerMethodField()
+    max = serializers.SerializerMethodField()
+    min = serializers.SerializerMethodField()
+    price = serializers.SerializerMethodField()
+
+    def get_in_stock(self, obj: BasketDetail):
+        line_coupon = obj.line_coupon
+        available_count = line_coupon.count - line_coupon.sell_count
+        return True if available_count > 0 else False
 
     def get_imagesrc(self, obj: BasketDetail):
         image: CouponImage = CouponImage.objects.filter(coupon_id=obj.line_coupon.coupon.id).first()
         return image.image.url
 
+    def get_max(self, obj: BasketDetail):
+        line_coupon = obj.line_coupon
+        available_count = line_coupon.count - line_coupon.sell_count
+        return available_count
+
+    def get_min(self, obj: BasketDetail):
+        return 1 if self.get_in_stock(obj) else 0
+
+    def get_price(self, obj: BasketDetail):
+        line_coupon = obj.line_coupon
+        return {
+            "price": line_coupon.price,
+            "discounted_price": line_coupon.price_with_offer,
+            "discounted_percentage": line_coupon.offer_percent,
+            "total_price": obj.total_price,
+            "total_price_with_offer": obj.total_price_with_offer,
+        }
+
     class Meta:
         model = BasketDetail
-        exclude = ["id", ]
+        exclude = ["id", "payment_price", "payment_price_with_offer", "payment_offer_percent", "total_price",
+                   "total_price_with_offer"]
         read_only_fields = ["slug", "payment_price", "payment_offer_percent", "payment_price_with_offer", "total_price",
                             "total_price_with_offer", ]
 
 
 class BasketSerializer(serializers.ModelSerializer):
-    product = BasketDetailShowSerializer(many=True)
+    product = serializers.SlugRelatedField(slug_field="slug", read_only=True, many=True)
 
     class Meta:
         model = Basket
