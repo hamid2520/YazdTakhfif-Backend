@@ -3,7 +3,8 @@ from rest_framework.filters import SearchFilter
 from rest_framework.settings import api_settings
 from src.utils.custom_api_views import ListRetrieveAPIView
 from .models import Category, Coupon
-from .serializers import CategorySerializer, CouponSerializer, LineCouponSerializer, CustomerCategorySerializer
+from .serializers import CategorySerializer, CouponSerializer, LineCouponSerializer, CustomerCategorySerializer, \
+    LineCouponShowSerializer
 from .filters import PriceFilter, OfferFilter, RateFilter, BusinessFilter, CategoryFilter, IsAvailableFilter, \
     HotSellsFilter
 
@@ -33,7 +34,7 @@ class CouponAPIView(ListRetrieveAPIView):
 
 
 class LineCouponAPIView(ListAPIView):
-    serializer_class = LineCouponSerializer
+    serializer_class = LineCouponShowSerializer
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter, PriceFilter]
     search_fields = ['title', "coupon__title"]
 

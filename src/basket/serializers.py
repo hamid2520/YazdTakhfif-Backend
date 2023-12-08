@@ -9,7 +9,7 @@ from src.coupon.serializers import LineCouponSerializer
 
 
 class BasketDetailSerializer(serializers.ModelSerializer):
-    line_coupon = serializers.SlugRelatedField(slug_field="title", read_only=True)
+    line_coupon = serializers.SlugRelatedField(slug_field="slug", queryset=LineCoupon.objects.all())
 
     def validate(self, attrs):
         data = super().validate(attrs)
