@@ -15,7 +15,7 @@ from .serializers import CategorySerializer, CouponSerializer, CouponCreateSeria
     RateSerializer, CommentSerializer, CouponImageSerializer
 from .permissions import IsSuperUserOrOwner
 from src.basket.models import ProductValidationCode
-from src.basket.serializers import ProductValidationCodeSerializer
+from src.basket.serializers import ProductValidationCodeSerializer, ProductValidationCodeShowSerializer
 from rest_framework import pagination
 from .exceptions import MaximumNumberOfDeletableObjectsError
 
@@ -150,6 +150,6 @@ class LineCouponViewSet(ModelViewSet):
         code_object = ProductValidationCode.objects.filter(code=code)
         if code_object.exists():
             code_object = code_object.first()
-            serializer = ProductValidationCodeSerializer(instance=code_object)
+            serializer = ProductValidationCodeShowSerializer(instance=code_object)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_404_NOT_FOUND)
