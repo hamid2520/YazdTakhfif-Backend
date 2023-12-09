@@ -40,7 +40,9 @@ class BasketDetailShowSerializer(serializers.ModelSerializer):
 
     def get_imagesrc(self, obj: BasketDetail):
         image: CouponImage = CouponImage.objects.filter(coupon_id=obj.line_coupon.coupon.id).first()
-        return image.image.url
+        if image:
+            return image.image.url
+        return ""
 
     def get_max(self, obj: BasketDetail):
         line_coupon = obj.line_coupon
@@ -70,6 +72,24 @@ class BasketDetailShowSerializer(serializers.ModelSerializer):
 
 class BasketSerializer(serializers.ModelSerializer):
     product = serializers.SlugRelatedField(slug_field="slug", read_only=True, many=True)
+
+    class Meta:
+        model = Basket
+        exclude = ["id", ]
+        read_only_fields = ["slug", "created_at", "payment_datetime", "is_paid", "count", "total_price",
+                            "total_offer_percent", "total_price_with_offer", ]
+
+    def save(self, **kwargs):
+        user = self.validated_data.get("user")
+        basket = Basket.objects.filter(user_id=user.id, is_paid=False)
+        if basket.exists():
+            self.instance = basket.first()
+        super().save(**kwargs)
+        return self.instance
+
+
+class BasketShowSerializer(serializers.ModelSerializer):
+    product = BasketDetailShowSerializer(read_only=True,many=True)
 
     class Meta:
         model = Basket
