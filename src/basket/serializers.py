@@ -182,6 +182,18 @@ class ProductValidationCodeSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class ProductValidationCodeShowSerializer(serializers.ModelSerializer):
+    product = serializers.SlugRelatedField("title", read_only=True)
+    closed_basket = serializers.SerializerMethodField()
+
+    def get_closed_basket(self, obj):
+        return f"{obj.closed_basket.user.username}({obj.closed_basket.payment_datetime})"
+
+    class Meta:
+        model = ProductValidationCode
+        fields = "__all__"
+
+
 class BytesField(serializers.Field):
     def to_internal_value(self, data):
         # Convert the string representation back to bytes

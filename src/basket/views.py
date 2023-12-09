@@ -171,16 +171,13 @@ class GetQRCode(APIView):
     permission_classes = [IsAuthenticated, ]
 
     def get(self, request, slug):
-        product = ClosedBasketDetail.objects.filter(slug=slug, status=2)
-        if product.exists():
-            product = product.first()
-            closed_basket = product.closedbasket_set.first()
-            coupon_codes = product.line_coupon.productvalidationcode_set.filter(closed_basket_id=closed_basket.id)
-            codes_list = [
-                {"code": text_to_qrcode(
-                    request.build_absolute_uri(reverse("verify_qrcode", args=[code.code, ]))),
-                    "used": code.used} for code in coupon_codes]
-            serializer = QRCodeSerializer(instance=codes_list, many=True)
+        product_code = ProductValidationCode.objects.filter(code=slug)
+        if product_code.exists():
+            product_code = product_code.first()
+            data = {"code": text_to_qrcode(
+                    request.build_absolute_uri(reverse("verify_qrcode", args=[product_code.code, ]))),
+                    "used": product_code.used}
+            serializer = QRCodeSerializer(instance=data)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_404_NOT_FOUND)
 
