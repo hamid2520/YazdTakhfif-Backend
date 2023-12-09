@@ -21,7 +21,7 @@ from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, Prod
 from .filters import IsOwnerOrSuperUserBasket, IsOwnerOrSuperUserBasketDetail
 from .serializers import BasketSerializer, BasketDetailSerializer, AddToBasketSerializer, ClosedBasketSerializer, \
     ClosedBasketDetailSerializer, ClosedBasketDetailValidatorSerializer, QRCodeSerializer, QRCodeGetSerializer, \
-    UserBoughtCodesSerializer,BasketDetailShowSerializer
+    UserBoughtCodesSerializer, BasketDetailShowSerializer, BasketShowSerializer
 
 
 class BasketViewSet(ModelViewSet):
@@ -67,7 +67,8 @@ class BasketViewSet(ModelViewSet):
                 product.save()
                 basket.product.add(product)
                 basket.save()
-            return Response(data=add_serializer.data, status=status.HTTP_200_OK)
+            serializer = BasketShowSerializer(basket)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
         return Response(data=add_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
