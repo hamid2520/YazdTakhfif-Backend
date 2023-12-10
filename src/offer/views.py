@@ -21,7 +21,7 @@ class OfferViewSet(ModelViewSet):
     pagination_class = pagination.LimitOffsetPagination
 
     @action(detail=False, methods=["POST", ], url_path="validate-offer", url_name="validate_offer")
-    def validate_offer(self, offer_code):
+    def validate_offer(self, request):
         serializer = OfferValidatorSerializer(data=self.request.data)
         if serializer.is_valid():
             data = serializer.validated_data
@@ -31,7 +31,7 @@ class OfferViewSet(ModelViewSet):
                     "error": "Offer is expired"
                 }
                 return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-            basket = Basket.objects.get(slug=data.get("basket_slug"))
+            basket = Basket.objects.get(user_id=self.request.user.id)
             products_total_price = basket.product.filter(
                 line_coupon__coupon__business__in=offer.limited_businesses.all()).aggregate(
                 total_offered_products_price=Sum("total_price_with_offer"))["total_offered_products_price"]
