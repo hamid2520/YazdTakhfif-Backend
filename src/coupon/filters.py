@@ -30,22 +30,27 @@ class PriceFilter(filters.BaseFilterBackend):
             return queryset.filter(linecoupon__price__gte=min_price).distinct()
         return queryset
 
+
 class PriceQueryFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
-        price = request.query_params.get("price")
-        if price :
+        price = request.query_params.get("price", None)
+        if price:
+            price = str(price)
             if price == "-10000":
-                 return queryset.filter(linecoupon__price__lte=10000).distinct()
+                return queryset.filter(linecoupon__price__lte=10000)
             elif price == "10000-100000":
-                return queryset.filter(Q(linecoupon__price__gte=10000) & Q(linecoupon__price__lte=100000)).distinct()
+                return queryset.filter(linecoupon__price__gte=10000, linecoupon__price__lte=100000)
             elif price == "100000-250000":
-                return queryset.filter(Q(linecoupon__price__gte=100000) & Q(linecoupon__price__lte=250000)).distinct()
+                return queryset.filter(linecoupon__price__gte=100000, linecoupon__price__lte=250000)
             elif price == "250000-500000":
-                return queryset.filter(Q(linecoupon__price__gte=250000) & Q(linecoupon__price__lte=500000)).distinct()
+                return queryset.filter(linecoupon__price__gte=250000, linecoupon__price__lte=500000)
             elif price == "+500000":
-                return queryset.filter(linecoupon__price__gte=500000).distinct()
-            else :
+                return queryset.filter(linecoupon__price__gte=500000)
+            else:
                 return queryset
+            
+        return queryset
+
 
 class RateFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
@@ -78,7 +83,7 @@ class BusinessFilter(filters.BaseFilterBackend):
 class CategoryFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         if request.GET.get('category', None):
-            queryset =  queryset.filter(slug=request.GET.get('category'))
+            queryset = queryset.filter(slug=request.GET.get('category'))
             return queryset
         return queryset
 
@@ -86,7 +91,7 @@ class CategoryFilter(filters.BaseFilterBackend):
 class IsAvailableFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         is_available = request.query_params.get("is_available")
-        if is_available:
+        if is_available and queryset.exists():
             if get_boolean(is_available):
                 return queryset.filter(linecoupon__count__gt=0)
             else:
@@ -101,7 +106,6 @@ class HotSellsFilter(filters.BaseFilterBackend):
             return queryset.annotate(hot_sells=Sum("linecoupon__sell_count")).order_by(
                 "-hot_sells").distinct()
         return queryset
-
 
 # class RelatedCouponsFilter(filters.BaseFilterBackend):
 #     def filter_queryset(self, request, queryset: Coupon.objects.all(), view):
