@@ -48,3 +48,4 @@ django-health-check==3.16.4
 
 az-iranian-bank-gateways==1.9.0
 qrcode
+jdatetime
