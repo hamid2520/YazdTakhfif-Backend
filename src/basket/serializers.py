@@ -89,7 +89,7 @@ class BasketSerializer(serializers.ModelSerializer):
 
 
 class BasketShowSerializer(serializers.ModelSerializer):
-    product = BasketDetailShowSerializer(read_only=True,many=True)
+    product = BasketDetailShowSerializer(read_only=True, many=True)
 
     class Meta:
         model = Basket
@@ -109,6 +109,12 @@ class BasketShowSerializer(serializers.ModelSerializer):
 class AddToBasketSerializer(serializers.Serializer):
     line_coupon_slug = serializers.SlugField()
     basket_detail_count = serializers.IntegerField(min_value=1)
+    basket = serializers.SerializerMethodField(read_only=True)
+
+    def get_basket(self, obj):
+        basket = Basket.objects.get(id = self.context.get("basket_id"))
+        serializer = BasketShowSerializer(instance=basket)
+        return serializer.data
 
     def validate(self, attrs):
         data = super().validate(attrs)
