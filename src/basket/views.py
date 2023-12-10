@@ -60,13 +60,17 @@ class BasketViewSet(ModelViewSet):
             product_count = data.get("basket_detail_count")
             if product.exists():
                 product = product.first()
-                product.count = product_count
-                product.save()
+                if product_count == 0:
+                    product.delete()
+                else:
+                    product.count = product_count
+                    product.save()
             else:
-                product = BasketDetail.objects.create(line_coupon_id=line_coupon.id, count=product_count)
-                product.save()
-                basket.product.add(product)
-                basket.save()
+                if product_count:
+                    product = BasketDetail.objects.create(line_coupon_id=line_coupon.id, count=product_count)
+                    product.save()
+                    basket.product.add(product)
+                    basket.save()
             add_serializer.context["basket_id"] = basket.id
             return Response(data=add_serializer.data, status=status.HTTP_200_OK)
         return Response(data=add_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

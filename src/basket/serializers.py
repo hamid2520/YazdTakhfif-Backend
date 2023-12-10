@@ -29,6 +29,7 @@ class BasketDetailSerializer(serializers.ModelSerializer):
 
 class BasketDetailShowSerializer(serializers.ModelSerializer):
     line_coupon = serializers.SlugRelatedField(slug_field="title", read_only=True)
+    line_coupon_slug = serializers.SlugField(read_only=True,source="line_coupon.slug")
     in_stock = serializers.SerializerMethodField()
     imagesrc = serializers.SerializerMethodField()
     max = serializers.SerializerMethodField()
@@ -82,7 +83,7 @@ class BasketSerializer(serializers.ModelSerializer):
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
     def get_formatted_payment_datetime(self, obj):
-        try :
+        try:
             datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.payment_datetime)
             return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
         except ValueError:
@@ -113,8 +114,11 @@ class BasketShowSerializer(serializers.ModelSerializer):
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
     def get_formatted_payment_datetime(self, obj):
-        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.payment_datetime)
-        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
+        try:
+            datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.payment_datetime)
+            return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
+        except ValueError:
+            return None
 
     class Meta:
         model = Basket
@@ -133,7 +137,7 @@ class BasketShowSerializer(serializers.ModelSerializer):
 
 class AddToBasketSerializer(serializers.Serializer):
     line_coupon_slug = serializers.SlugField()
-    basket_detail_count = serializers.IntegerField(min_value=1)
+    basket_detail_count = serializers.IntegerField(min_value=0)
     basket = serializers.SerializerMethodField(read_only=True)
 
     def get_basket(self, obj):
