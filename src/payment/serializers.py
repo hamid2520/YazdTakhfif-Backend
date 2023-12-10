@@ -53,5 +53,6 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Payment
-        fields = ["slug", "user", "basket", "basket_id", "total_price", "total_price_with_offer", "created_at"]
+        fields = ["slug", "user", "basket", "basket_id", "total_price", "total_price_with_offer", "created_at",
+                  "formatted_created_at"]
         read_only_fields = ["slug", "basket", "created_at", "total_price", "total_price_with_offer"]
