@@ -30,6 +30,22 @@ class PriceFilter(filters.BaseFilterBackend):
             return queryset.filter(linecoupon__price__gte=min_price).distinct()
         return queryset
 
+class PriceQueryFilter(filters.BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        price = request.query_params.get("price")
+        if price :
+            if price == "-10000":
+                 return queryset.filter(linecoupon__price__lte=10000).distinct()
+            elif price == "10000-100000":
+                return queryset.filter(Q(linecoupon__price__gte=10000) & Q(linecoupon__price__lte=100000)).distinct()
+            elif price == "100000-250000":
+                return queryset.filter(Q(linecoupon__price__gte=100000) & Q(linecoupon__price__lte=250000)).distinct()
+            elif price == "250000-500000":
+                return queryset.filter(Q(linecoupon__price__gte=250000) & Q(linecoupon__price__lte=500000)).distinct()
+            elif price == "+500000":
+                return queryset.filter(linecoupon__price__gte=500000).distinct()
+            else :
+                return queryset
 
 class RateFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
@@ -61,13 +77,9 @@ class BusinessFilter(filters.BaseFilterBackend):
 
 class CategoryFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
-        category_slug = request.query_params.get("category")
-        if category_slug:
-            category = Category.objects.filter(slug=category_slug)
-            if category.exists():
-                category = category.first()
-                return queryset.filter(category=category)
-            return queryset.filter(category=None)
+        if request.GET.get('category', None):
+            queryset =  queryset.filter(slug=request.GET.get('category'))
+            return queryset
         return queryset
 
 
