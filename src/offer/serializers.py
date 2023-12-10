@@ -37,16 +37,9 @@ class OfferSerializer(serializers.ModelSerializer):
 
 class OfferValidatorSerializer(serializers.Serializer):
     offer_code = serializers.CharField(max_length=16)
-    basket_slug = serializers.SlugField()
 
     def validate_offer_code(self, value):
         offer = Offer.objects.filter(offer_code=value)
         if offer.exists():
             return value
         raise ValidationError("Offer code is not valid!")
-
-    def validate_basket_slug(self, value):
-        basket = Basket.objects.filter(slug=value)
-        if basket.exists():
-            return value
-        raise ValidationError("Basket does not exists!")
