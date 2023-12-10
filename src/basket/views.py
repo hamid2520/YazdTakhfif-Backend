@@ -49,19 +49,17 @@ class BasketViewSet(ModelViewSet):
         basket_products = self.filter_queryset(self.get_queryset()).first().product.all()
         serializer = BasketDetailShowSerializer(instance=basket_products, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
-        
+
     @swagger_auto_schema(responses={200: BasketDetailSerializer(many=True), })
     @action(detail=False, methods=["GET"], url_path="get-basket-slug", url_name="get_basket_slug")
     def get_basket_slug(self, request):
         current_basket = Basket.objects.filter(user_id=self.request.user.id)
         if current_basket.exists():
-            return Response(data={'slug' : current_basket.last().slug}, status=status.HTTP_200_OK)
+            return Response(data={'slug': current_basket.last().slug}, status=status.HTTP_200_OK)
 
         basket = Basket.objects.create(user_id=self.request.user.id)
         basket.save()
-        return Response(data={'slug' : basket.slug}, status=status.HTTP_200_OK)
-
-
+        return Response(data={'slug': basket.slug}, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(request_body=AddToBasketSerializer, responses={200: AddToBasketSerializer(), })
     @action(detail=False, methods=["POST", ], url_path="add-to-basket", url_name="add_to_basket",
@@ -91,18 +89,25 @@ class BasketViewSet(ModelViewSet):
             return Response(data=add_serializer.data, status=status.HTTP_200_OK)
         return Response(data=add_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=True, methods=["DELETE"], url_path="delete-from-basket", url_name="delete_from_basket", )
+    def delete_from_basket(self, request, slug):
+        basket_product = BasketDetail.objects.get(slug=slug)
+        basket_product.delete()
+        return Response(data={}, status=status.HTTP_204_NO_CONTENT)
 
-@action(detail=True, methods=["DELETE"], url_path="delete-from-basket", url_name="delete_from_basket", )
-def delete_from_basket(self, request, slug):
-    basket_product = BasketDetail.objects.get(slug=slug)
-    basket_product.delete()
-    return Response(data={}, status=status.HTTP_204_NO_CONTENT)
+    @action(detail=True, methods=["GET"], url_path="get-basket-count", url_name="get_basket_count", )
+    def get_basket_count(self, request, slug):
+        count = self.get_object().count
+        return Response(data={"count": count}, status=status.HTTP_200_OK)
 
-
-@action(detail=True, methods=["GET"], url_path="get-basket-count", url_name="get_basket_count", )
-def get_basket_count(self, request, slug):
-    count = self.get_object().count
-    return Response(data={"count": count}, status=status.HTTP_200_OK)
+    @action(detail=False, methods=["GET"], url_path="reset-basket-price", url_name="reset_basket_price", )
+    def reset_basket_price(self, request):
+        basket = Basket.objects.get(user_id=request.user.id)
+        basket_total_price_with_offer = basket.product.all().aggregate(total_price=Sum("total_price_with_offer"))[
+            "total_price"]
+        basket.total_price_with_offer = basket_total_price_with_offer if basket_total_price_with_offer else 0
+        basket.save()
+        return Response(status=status.HTTP_200_OK)
 
 
 class BasketDetailViewSet(ModelViewSet):

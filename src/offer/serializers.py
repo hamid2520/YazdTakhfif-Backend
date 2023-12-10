@@ -37,6 +37,7 @@ class OfferSerializer(serializers.ModelSerializer):
 
 class OfferValidatorSerializer(serializers.Serializer):
     offer_code = serializers.CharField(max_length=16)
+    apply_to_basket = serializers.BooleanField(default=False)
 
     def validate_offer_code(self, value):
         offer = Offer.objects.filter(offer_code=value)
