@@ -242,7 +242,7 @@ class CustomerCommentSerializer(serializers.ModelSerializer):
     def get_rate(self, obj: Comment):
         user_id = obj.user.id
         rate = obj.coupon.rate_set.filter(user_id=user_id).first()
-        return rate.rate if rate else None
+        return rate.rate if rate else 0
 
     class Meta:
         model = Comment
