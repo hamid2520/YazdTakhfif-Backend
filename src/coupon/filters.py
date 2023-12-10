@@ -46,9 +46,6 @@ class PriceQueryFilter(filters.BaseFilterBackend):
                 return queryset.filter(linecoupon__price__gte=250000, linecoupon__price__lte=500000)
             elif price == "+500000":
                 return queryset.filter(linecoupon__price__gte=500000)
-            else:
-                return queryset
-            
         return queryset
 
 
