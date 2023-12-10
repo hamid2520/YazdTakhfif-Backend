@@ -4,9 +4,11 @@ from rest_framework.permissions import IsAuthenticated
 from src.utils.qrcode_generator import text_to_qrcode
 from django.urls import reverse
 from rest_framework import status
+from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import HttpResponseNotFound
+from django.views import View
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.filters import SearchFilter
@@ -187,7 +189,7 @@ class GetQRCode(APIView):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-class VerifyQRCode(APIView):
+class VerifyQRCode(View):
     permission_classes = [IsAuthenticated, ]
 
     def get(self, request, slug):
@@ -198,9 +200,18 @@ class VerifyQRCode(APIView):
                 serializer = QRCodeGetSerializer(instance=code)
                 code.used = True
                 code.save()
-                return Response(data=serializer.data, status=status.HTTP_200_OK)
-            return Response(data={"Error": "This code has been used"}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_404_NOT_FOUND)
+                return render(request, "basket/validationpage.html", context={
+                    "status_code": 200,
+                    "text": "!وضعیت کد تخفیف به استفاده شده تغییر کرد",
+                })
+            return render(request, "basket/validationpage.html", context={
+                "status_code": 400,
+                "text": "!کد تخفیف قبلا استفاده شده است",
+            })
+        return render(request, "basket/validationpage.html", context={
+            "status_code": 404,
+            "text": "!کد تخفیف یافت نشد",
+        })
 
 
 class UserBasketProductCount(APIView):
