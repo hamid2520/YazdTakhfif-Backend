@@ -112,7 +112,6 @@ class BasketDetailViewSet(ModelViewSet):
     lookup_url_kwarg = "slug"
     permission_classes = [IsAuthenticated, ]
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserBasketDetail, ]
-    pagination_class = pagination.LimitOffsetPagination
 
 
 class ClosedBasketAPIView(ListRetrieveAPIView):
