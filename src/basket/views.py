@@ -60,15 +60,19 @@ class BasketViewSet(ModelViewSet):
             product_count = data.get("basket_detail_count")
             if product.exists():
                 product = product.first()
-                product.count = product_count
-                product.save()
+                if product_count == 0:
+                    product.delete()
+                else:
+                    product.count = product_count
+                    product.save()
             else:
-                product = BasketDetail.objects.create(line_coupon_id=line_coupon.id, count=product_count)
-                product.save()
-                basket.product.add(product)
-                basket.save()
-            serializer = BasketShowSerializer(basket)
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
+                if product_count:
+                    product = BasketDetail.objects.create(line_coupon_id=line_coupon.id, count=product_count)
+                    product.save()
+                    basket.product.add(product)
+                    basket.save()
+            add_serializer.context["basket_id"] = basket.id
+            return Response(data=add_serializer.data, status=status.HTTP_200_OK)
         return Response(data=add_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -176,8 +180,8 @@ class GetQRCode(APIView):
         if product_code.exists():
             product_code = product_code.first()
             data = {"code": text_to_qrcode(
-                    request.build_absolute_uri(reverse("verify_qrcode", args=[product_code.code, ]))),
-                    "used": product_code.used}
+                request.build_absolute_uri(reverse("verify_qrcode", args=[product_code.code, ]))),
+                "used": product_code.used}
             serializer = QRCodeSerializer(instance=data)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_404_NOT_FOUND)
