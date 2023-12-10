@@ -40,6 +40,7 @@ class BasketViewSet(ModelViewSet):
         if not queryset.exists():
             basket = Basket.objects.create(user_id=self.request.user.id)
             basket.save()
+            queryset = self.filter_queryset(self.get_queryset())
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(responses={200: BasketDetailSerializer(many=True), })
@@ -48,6 +49,19 @@ class BasketViewSet(ModelViewSet):
         basket_products = self.filter_queryset(self.get_queryset()).first().product.all()
         serializer = BasketDetailShowSerializer(instance=basket_products, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+        
+    @swagger_auto_schema(responses={200: BasketDetailSerializer(many=True), })
+    @action(detail=False, methods=["GET"], url_path="get-basket-slug", url_name="get_basket_slug")
+    def get_basket_slug(self, request):
+        current_basket = Basket.objects.filter(user_id=self.request.user.id)
+        if current_basket.exists():
+            return Response(data={'slug' : current_basket.last().slug}, status=status.HTTP_200_OK)
+
+        basket = Basket.objects.create(user_id=self.request.user.id)
+        basket.save()
+        return Response(data={'slug' : basket.slug}, status=status.HTTP_200_OK)
+
+
 
     @swagger_auto_schema(request_body=AddToBasketSerializer, responses={200: AddToBasketSerializer(), })
     @action(detail=False, methods=["POST", ], url_path="add-to-basket", url_name="add_to_basket",
