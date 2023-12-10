@@ -105,8 +105,9 @@ class CouponSerializer(serializers.ModelSerializer):
 
     def get_comment_list(self, obj: Coupon):
         if self.context["view"].kwargs.get("slug"):
-            comments = obj.comment_set.filter(verified=True)
-            serializer = CommentSerializer(instance=comments, many=True)
+            print(self.context)
+            comments = obj.comment_set.filter(verified=True, parent__isnull=True)
+            serializer = CustomerCommentSerializer(instance=comments, many=True)
             print(self.context["view"].kwargs.get("slug"))
             return serializer.data
         return []
@@ -219,3 +220,32 @@ class CommentSerializer(serializers.ModelSerializer):
 
     def get_user(self, obj):
         return f"{obj.user.first_name} {obj.user.last_name}"
+
+
+class CustomerCommentSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    coupon = serializers.SlugRelatedField(slug_field="slug", queryset=Coupon.objects.all())
+    formatted_created_at = serializers.SerializerMethodField()
+    sub_comment = serializers.SerializerMethodField()
+    rate = serializers.SerializerMethodField()
+
+    def get_user(self, obj):
+        name_valid = bool(obj.user.first_name and obj.user.last_name)
+        return f"{obj.user.first_name} {obj.user.last_name}" if name_valid else obj.user.username
+
+    def get_formatted_created_at(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created_at)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
+
+    def get_sub_comment(self, obj):
+        sub_comment = CustomerCommentSerializer(instance=obj.comment_set.all(), many=True)
+        return sub_comment.data
+
+    def get_rate(self, obj: Comment):
+        user_id = obj.user.id
+        rate = obj.coupon.rate_set.filter(user_id=user_id).first()
+        return rate.rate if rate else None
+
+    class Meta:
+        model = Comment
+        fields = "__all__"

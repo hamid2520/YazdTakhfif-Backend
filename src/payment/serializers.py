@@ -1,6 +1,6 @@
+import jdatetime
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-
 
 from .models import Payment, get_instance_values
 from src.basket.models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail
@@ -8,6 +8,11 @@ from src.basket.models import Basket, BasketDetail, ClosedBasket, ClosedBasketDe
 
 class PaymentSerializer(serializers.ModelSerializer):
     basket_id = serializers.IntegerField()
+    formatted_created_at = serializers.SerializerMethodField()
+
+    def get_formatted_created_at(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created_at)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
     def validate_basket_id(self, value):
         basket = Basket.objects.filter(id=value)
