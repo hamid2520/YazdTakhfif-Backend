@@ -1,3 +1,4 @@
+import jdatetime
 from django.db import IntegrityError
 from django.db.models import Count, Q
 from rest_framework import serializers
@@ -49,12 +50,23 @@ class CouponSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
     list_data = serializers.SerializerMethodField()
     comment_list = serializers.SerializerMethodField()
+    formatted_created = serializers.SerializerMethodField()
+    formatted_expire_date = serializers.SerializerMethodField()
+
+    def get_formatted_created(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
+
+    def get_formatted_expire_date(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.expire_date)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
     class Meta:
         model = Coupon
         fields = [
             "title", "slug", "business", "created", "expire_date", "category", "description", "terms_of_use",
-            "coupon_rate", "rate_count", "rates_list", "images", "list_data", "comment_list"]
+            "coupon_rate", "rate_count", "rates_list", "images", "list_data", "comment_list", "formatted_created",
+            "formatted_expire_date"]
 
     def get_rates_list(self, obj: Coupon):
         rates_list: dict = obj.rate_set.all().aggregate(rate_1=Count("rate", filter=Q(rate=1)),
@@ -103,10 +115,21 @@ class CouponSerializer(serializers.ModelSerializer):
 class CouponCreateSerializer(serializers.ModelSerializer):
     business = serializers.SlugRelatedField(slug_field="slug", queryset=Business.objects.all())
     category = serializers.SlugRelatedField(slug_field="slug", queryset=Category.objects.all(), many=True)
+    formatted_created = serializers.SerializerMethodField()
+    formatted_expire_date = serializers.SerializerMethodField()
+
+    def get_formatted_created(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
+
+    def get_formatted_expire_date(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.expire_date)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
     class Meta:
         model = Coupon
-        fields = ["title", "business", "expire_date", "category", "description", "terms_of_use"]
+        fields = ["title", "business", "expire_date", "category", "description", "terms_of_use", "formatted_created",
+                  "formatted_expire_date"]
 
 
 class LineCouponSerializer(serializers.ModelSerializer):
@@ -164,6 +187,11 @@ class RateSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     coupon = serializers.SlugRelatedField(slug_field="slug", queryset=Coupon.objects.all())
+    formatted_created_at = serializers.SerializerMethodField()
+
+    def get_formatted_created_at(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created_at)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
     def validate_user(self, value):
         request = self.context["request"]

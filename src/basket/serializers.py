@@ -1,3 +1,5 @@
+import jdatetime
+
 from django.db.models import Sum
 from django.utils import timezone
 from rest_framework import serializers
@@ -72,6 +74,19 @@ class BasketDetailShowSerializer(serializers.ModelSerializer):
 
 class BasketSerializer(serializers.ModelSerializer):
     product = serializers.SlugRelatedField(slug_field="slug", read_only=True, many=True)
+    formatted_created_at = serializers.SerializerMethodField()
+    formatted_payment_datetime = serializers.SerializerMethodField()
+
+    def get_formatted_created_at(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created_at)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
+
+    def get_formatted_payment_datetime(self, obj):
+        try :
+            datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.payment_datetime)
+            return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
+        except ValueError:
+            return None
 
     class Meta:
         model = Basket
@@ -90,6 +105,16 @@ class BasketSerializer(serializers.ModelSerializer):
 
 class BasketShowSerializer(serializers.ModelSerializer):
     product = BasketDetailShowSerializer(read_only=True, many=True)
+    formatted_created_at = serializers.SerializerMethodField()
+    formatted_payment_datetime = serializers.SerializerMethodField()
+
+    def get_formatted_created_at(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created_at)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
+
+    def get_formatted_payment_datetime(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.payment_datetime)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
     class Meta:
         model = Basket
@@ -112,7 +137,7 @@ class AddToBasketSerializer(serializers.Serializer):
     basket = serializers.SerializerMethodField(read_only=True)
 
     def get_basket(self, obj):
-        basket = Basket.objects.get(id = self.context.get("basket_id"))
+        basket = Basket.objects.get(id=self.context.get("basket_id"))
         serializer = BasketShowSerializer(instance=basket)
         return serializer.data
 
@@ -139,6 +164,16 @@ class ClosedBasketDetailSerializer(serializers.ModelSerializer):
 class ClosedBasketSerializer(serializers.ModelSerializer):
     product = ClosedBasketDetailSerializer(many=True)
     status = serializers.SerializerMethodField()
+    formatted_created_at = serializers.SerializerMethodField()
+    formatted_payment_datetime = serializers.SerializerMethodField()
+
+    def get_formatted_created_at(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created_at)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
+
+    def get_formatted_payment_datetime(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.payment_datetime)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
     class Meta:
         model = ClosedBasket
@@ -171,6 +206,16 @@ class UserBoughtCodesSerializer(serializers.ModelSerializer):
     business_title = serializers.CharField()
     address = serializers.CharField()
     phone_number = serializers.CharField()
+    formatted_created = serializers.SerializerMethodField()
+    formatted_expire_date = serializers.SerializerMethodField()
+
+    def get_formatted_created(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
+
+    def get_formatted_expire_date(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.expire_date)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
     def get_line_coupons(self, obj):
         user_id = self.context.get("user_id")
@@ -213,7 +258,8 @@ class ProductValidationCodeShowSerializer(serializers.ModelSerializer):
     closed_basket = serializers.SerializerMethodField()
 
     def get_closed_basket(self, obj):
-        return f"{obj.closed_basket.user.username}({obj.closed_basket.payment_datetime})"
+        datetime_obj = jdatetime.datetime.fromgregorian(datetime=obj.closed_basket.payment_datetime)
+        return f"{obj.closed_basket.user.username}({datetime_obj.strftime('%Y/%m/%d %H:%M:%S')})"
 
     class Meta:
         model = ProductValidationCode

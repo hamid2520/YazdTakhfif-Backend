@@ -1,3 +1,4 @@
+import jdatetime
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -7,6 +8,18 @@ from ..business.models import Business
 
 
 class OfferSerializer(serializers.ModelSerializer):
+    limited_businesses = serializers.SlugRelatedField(slug_field="slug", queryset=Business.objects.all(), many=True)
+    formatted_start_date = serializers.SerializerMethodField()
+    formatted_expire_date = serializers.SerializerMethodField()
+
+    def get_formatted_start_date(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.start_date)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
+
+    def get_formatted_expire_date(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.expire_date)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
+
     def validate_limited_businesses(self, value):
         user = self.context.get("request").user
         if not user.is_superuser:
@@ -17,7 +30,9 @@ class OfferSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Offer
-        fields = ["offer_code", "percent", "start_date", "expire_date", "limited_businesses", "maximum_offer_price"]
+        fields = ["offer_code", "percent", "start_date", "expire_date", "limited_businesses", "maximum_offer_price",
+                  "formatted_start_date",
+                  "formatted_expire_date"]
 
 
 class OfferValidatorSerializer(serializers.Serializer):

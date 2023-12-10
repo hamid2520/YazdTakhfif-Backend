@@ -1,4 +1,5 @@
 from django.db.models import Sum
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -25,11 +26,18 @@ class OfferViewSet(ModelViewSet):
         if serializer.is_valid():
             data = serializer.validated_data
             offer = Offer.objects.get(offer_code=data.get("offer_code"))
+            if not offer.start_date < timezone.now() < offer.expire_date:
+                data = {
+                    "error": "Offer is expired"
+                }
+                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
             basket = Basket.objects.get(slug=data.get("basket_slug"))
             products_total_price = basket.product.filter(
                 line_coupon__coupon__business__in=offer.limited_businesses.all()).aggregate(
                 total_offered_products_price=Sum("total_price_with_offer"))["total_offered_products_price"]
-            offered_price = basket.total_price_with_offer - ((products_total_price * offer.percent) // 100)
+            offer_price = ((products_total_price * offer.percent) // 100)
+            offered_price = basket.total_price_with_offer - (
+                offer_price if offer_price < offer.maximum_offer_price else offer.maximum_offer_price)
             data = {
                 "offer_percent": offer.percent,
                 "offered_price": offered_price,
