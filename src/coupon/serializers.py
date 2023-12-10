@@ -105,10 +105,8 @@ class CouponSerializer(serializers.ModelSerializer):
 
     def get_comment_list(self, obj: Coupon):
         if self.context["view"].kwargs.get("slug"):
-            print(self.context)
             comments = obj.comment_set.filter(verified=True, parent__isnull=True)
             serializer = CustomerCommentSerializer(instance=comments, many=True)
-            print(self.context["view"].kwargs.get("slug"))
             return serializer.data
         return []
 
