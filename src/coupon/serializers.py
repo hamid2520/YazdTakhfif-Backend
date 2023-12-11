@@ -1,6 +1,6 @@
 import jdatetime
 from django.db import IntegrityError
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from src.business.serializers import BusinessSerializer
@@ -152,6 +152,7 @@ class LineCouponShowSerializer(serializers.ModelSerializer):
     basket_detail_count = serializers.SerializerMethodField(read_only=True)
     in_stock = serializers.SerializerMethodField(read_only=True)
     max = serializers.SerializerMethodField(read_only=True)
+    line_coupon_count = serializers.SerializerMethodField(read_only=True)
 
     def get_in_stock(self, obj: LineCoupon):
         available_count = obj.count - obj.sell_count
@@ -167,10 +168,18 @@ class LineCouponShowSerializer(serializers.ModelSerializer):
         available_count = obj.count - obj.sell_count
         return available_count
 
+    def get_line_coupon_count(self, obj: LineCoupon):
+        try:
+            basket_detail: BasketDetail = BasketDetail.objects.filter(line_coupon_id=obj.id,
+                                                                      basket__user=self.context['request'].user).first()
+            return basket_detail.count
+        except:
+            return 0
+
     class Meta:
         model = LineCoupon
         fields = ["slug", "title", "coupon", "is_main", "count", "price", "offer_percent", "price_with_offer",
-                  "sell_count", "basket_detail_count", "in_stock", "max"]
+                  "sell_count", "basket_detail_count", "in_stock", "max", "line_coupon_count"]
         read_only_fields = ["slug", "price_with_offer", "sell_count"]
 
 
