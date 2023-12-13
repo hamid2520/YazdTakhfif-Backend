@@ -75,7 +75,9 @@ class BasketViewSet(ModelViewSet):
             if product.exists():
                 product = product.first()
                 if product_count == 0:
+                    basket.product.remove(product)
                     product.delete()
+                    basket.save()
                 else:
                     product.count = product_count
                     product.save()

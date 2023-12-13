@@ -1,4 +1,4 @@
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.filters import SearchFilter
 from rest_framework.settings import api_settings
 from src.utils.custom_api_views import ListRetrieveAPIView
@@ -39,5 +39,5 @@ class LineCouponAPIView(ListAPIView):
     search_fields = ['title', "coupon__title"]
 
     def get_queryset(self):
-        coupon = Coupon.objects.get(slug=self.kwargs.get("coupon_slug"))
+        coupon = get_object_or_404(Coupon,slug=self.kwargs.get("coupon_slug"))
         return coupon.linecoupon_set.all()
