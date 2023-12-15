@@ -59,7 +59,7 @@ class CouponViewSet(ModelViewSet):
     @action(detail=True, methods=["DELETE", ], url_path="delete-image", url_name="delete_image")
     def delete_image(self, request, slug):
         coupon = self.get_object()
-        image = CouponImage.objects.filter(coupon_id=coupon.id,id=request.data["id"])
+        image = CouponImage.objects.filter(coupon_id=coupon.id, id=request.data["id"])
         if image.exists():
             image = image.first()
             image.delete()

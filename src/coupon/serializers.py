@@ -2,6 +2,7 @@ import jdatetime
 from django.db import IntegrityError
 from django.db.models import Count, Q, Sum
 from rest_framework import serializers
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 from src.business.serializers import BusinessSerializer
 from .models import Category, Coupon, LineCoupon, Rate, Comment, CouponImage
@@ -153,6 +154,14 @@ class LineCouponShowSerializer(serializers.ModelSerializer):
     in_stock = serializers.SerializerMethodField(read_only=True)
     max = serializers.SerializerMethodField(read_only=True)
     line_coupon_count = serializers.SerializerMethodField(read_only=True)
+    days_left = serializers.SerializerMethodField(read_only=True)
+
+    def get_days_left(self, obj):
+        time_now = timezone.now()
+        if obj.coupon.expire_date > time_now:
+            return (obj.coupon.expire_date - timezone.now()).days
+        else:
+            return -1
 
     def get_in_stock(self, obj: LineCoupon):
         available_count = obj.count - obj.sell_count
@@ -179,7 +188,7 @@ class LineCouponShowSerializer(serializers.ModelSerializer):
     class Meta:
         model = LineCoupon
         fields = ["slug", "title", "coupon", "is_main", "count", "price", "offer_percent", "price_with_offer",
-                  "sell_count", "basket_detail_count", "in_stock", "max", "line_coupon_count"]
+                  "sell_count", "basket_detail_count", "in_stock", "max", "line_coupon_count", "days_left"]
         read_only_fields = ["slug", "price_with_offer", "sell_count"]
 
 
