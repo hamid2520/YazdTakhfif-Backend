@@ -12,7 +12,7 @@ from .models import Category, Coupon, LineCoupon, Rate, Comment, CouponImage
 from .filters import IsOwnerOrSuperUserCoupon, IsOwnerOrSuperUserLineCoupon, PriceFilter, OfferFilter, RateFilter, \
     BusinessFilter, CategoryFilter
 from .serializers import CategorySerializer, CouponSerializer, CouponCreateSerializer, LineCouponSerializer, \
-    RateSerializer, CommentSerializer, CouponImageSerializer
+    RateSerializer, CommentSerializer, CouponImageSerializer, LineCouponShowSerializer
 from .permissions import IsSuperUserOrOwner
 from src.basket.models import ProductValidationCode
 from src.basket.serializers import ProductValidationCodeSerializer, ProductValidationCodeShowSerializer
@@ -126,13 +126,17 @@ class CouponViewSet(ModelViewSet):
 
 class LineCouponViewSet(ModelViewSet):
     queryset = LineCoupon.objects.all()
-    serializer_class = LineCouponSerializer
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
     permission_classes = [IsAuthenticated, ]
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserLineCoupon, SearchFilter, PriceFilter, ]
     search_fields = ['title', "coupon__title"]
     pagination_class = pagination.LimitOffsetPagination
+
+    def get_serializer_class(self):
+        if self.action == ("list" or "retrieve"):
+            return LineCouponShowSerializer
+        return LineCouponSerializer
 
     @swagger_auto_schema(responses={200: ProductValidationCodeSerializer(), })
     @action(detail=True, methods=["GET"], url_path="line-coupon-code-list", url_name="line_coupon_code_list", )
@@ -145,7 +149,7 @@ class LineCouponViewSet(ModelViewSet):
     @swagger_auto_schema(responses={200: ProductValidationCodeSerializer(), })
     @action(detail=False, methods=["POST"], url_path="line-coupon-code-validation",
             url_name="line_coupon_code_validation")
-    def get_line_coupon_codes_validation(self, request):
+    def line_coupon_codes_validation(self, request):
         code = request.data.get("code")
         code_object = ProductValidationCode.objects.filter(code=code)
         if code_object.exists():
