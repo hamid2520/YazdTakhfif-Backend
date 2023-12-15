@@ -94,7 +94,7 @@ class CouponSerializer(serializers.ModelSerializer):
 
     def get_images(self, obj: Coupon):
         images = obj.couponimage_set.all()
-        images_list = [item.image.url for item in images]
+        images_list = [{"id": item.id, "url": item.image.url} for item in images]
         # serializer = CouponImageSerializer(instance=images, many=True)
         return images_list
 

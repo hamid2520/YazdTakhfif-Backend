@@ -47,9 +47,9 @@ class CouponViewSet(ModelViewSet):
         return CouponCreateSerializer
 
     @swagger_auto_schema(request_body=CouponImageSerializer, responses={200: CouponImageSerializer(), })
-    @action(detail=True, methods=["POST", ], serializer_class=CouponImageSerializer, url_path="add-image",
+    @action(detail=False, methods=["POST", ], serializer_class=CouponImageSerializer, url_path="add-image",
             url_name="add_image")
-    def add_image(self, request, slug):
+    def add_image(self, request):
         serializer = CouponImageSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -58,7 +58,8 @@ class CouponViewSet(ModelViewSet):
 
     @action(detail=True, methods=["DELETE", ], url_path="delete-image", url_name="delete_image")
     def delete_image(self, request, slug):
-        image = CouponImage.objects.filter(id=slug)
+        coupon = self.get_object()
+        image = CouponImage.objects.filter(coupon_id=coupon.id,id=request.data["id"])
         if image.exists():
             image = image.first()
             image.delete()
