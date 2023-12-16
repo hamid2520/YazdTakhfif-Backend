@@ -3,6 +3,7 @@ from django.db import IntegrityError
 from django.db.models import Count, Q, Sum
 from rest_framework import serializers
 from django.utils import timezone
+from django.db.models import F
 from rest_framework.exceptions import ValidationError
 from src.business.serializers import BusinessSerializer
 from .models import Category, Coupon, LineCoupon, Rate, Comment, CouponImage
@@ -53,6 +54,14 @@ class CouponSerializer(serializers.ModelSerializer):
     comment_list = serializers.SerializerMethodField()
     formatted_created = serializers.SerializerMethodField()
     formatted_expire_date = serializers.SerializerMethodField()
+    available_coupon_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Coupon
+        fields = [
+            "title", "slug", "business", "created", "expire_date", "category", "description", "terms_of_use",
+            "coupon_rate", "rate_count", "rates_list", "images", "list_data", "comment_list", "formatted_created",
+            "formatted_expire_date", "available_coupon_count"]
 
     def get_formatted_created(self, obj):
         datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created)
@@ -61,13 +70,6 @@ class CouponSerializer(serializers.ModelSerializer):
     def get_formatted_expire_date(self, obj):
         datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.expire_date)
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
-
-    class Meta:
-        model = Coupon
-        fields = [
-            "title", "slug", "business", "created", "expire_date", "category", "description", "terms_of_use",
-            "coupon_rate", "rate_count", "rates_list", "images", "list_data", "comment_list", "formatted_created",
-            "formatted_expire_date"]
 
     def get_rates_list(self, obj: Coupon):
         rates_list: dict = obj.rate_set.all().aggregate(rate_1=Count("rate", filter=Q(rate=1)),
@@ -110,6 +112,10 @@ class CouponSerializer(serializers.ModelSerializer):
             serializer = CustomerCommentSerializer(instance=comments, many=True)
             return serializer.data
         return []
+
+    def get_available_coupon_count(self, obj: Coupon):
+        counts = obj.linecoupon_set.all().aggregate(count=Sum("count"), bought_count=Sum("sell_count"))
+        return counts["count"] - counts["bought_count"] if counts["count"] else 0
 
 
 class CouponCreateSerializer(serializers.ModelSerializer):

@@ -42,7 +42,7 @@ class CouponViewSet(ModelViewSet):
     pagination_class = pagination.LimitOffsetPagination
 
     def get_serializer_class(self):
-        if self.action == ("list" or "retrieve"):
+        if self.request.method == "GET":
             return CouponSerializer
         return CouponCreateSerializer
 
