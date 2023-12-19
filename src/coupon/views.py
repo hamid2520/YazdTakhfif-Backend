@@ -156,9 +156,9 @@ class LineCouponViewSet(ModelViewSet):
         code_object = ProductValidationCode.objects.filter(code=code)
         if code_object.exists():
             code_object = code_object.first()
-            serializer = ProductValidationCodeShowSerializer(instance=code_object)
+            data = ProductValidationCodeShowSerializer(instance=code_object).data
             if get_boolean(request.data.get('used', False)) and not code_object.used:
                 code_object.used = True
                 code_object.save()
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
+            return Response(data=data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_404_NOT_FOUND)
