@@ -241,7 +241,8 @@ class CommentSerializer(serializers.ModelSerializer):
         }
 
     def get_user(self, obj):
-        return f"{obj.user.first_name} {obj.user.last_name}"
+        user = obj.user
+        return f"{user.first_name} {user.last_name}" if user.first_name and user.last_name else user.username
 
 
 class CustomerCommentSerializer(serializers.ModelSerializer):
