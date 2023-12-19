@@ -10,6 +10,12 @@ from rest_framework import status
 
 class UserCommentList(APIView):
     def get(self, request: Request):
-        comment = Comment.objects.filter(verified=True, coupon__business__admin=self.request.user)
-        comment = CommentSerializer(instance=comment, many=True)
-        return Response(data=comment.data, status=status.HTTP_200_OK)
+        if self.request.user.is_superuser:
+            comment = Comment.objects.filter(verified=True).order_by("created_at")
+            comment = CommentSerializer(instance=comment, many=True)
+            return Response(data=comment.data, status=status.HTTP_200_OK)
+        else:
+            comment = Comment.objects.filter(verified=True, coupon__business__admin=self.request.user).order_by(
+                "created_at")
+            comment = CommentSerializer(instance=comment, many=True)
+            return Response(data=comment.data, status=status.HTTP_200_OK)
