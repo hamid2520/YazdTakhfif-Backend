@@ -260,10 +260,17 @@ class ProductValidationCodeSerializer(serializers.ModelSerializer):
 class ProductValidationCodeShowSerializer(serializers.ModelSerializer):
     product = serializers.SlugRelatedField("title", read_only=True)
     closed_basket = serializers.SerializerMethodField()
+    coupon_title = serializers.SerializerMethodField()
 
     def get_closed_basket(self, obj):
-        datetime_obj = jdatetime.datetime.fromgregorian(datetime=obj.closed_basket.payment_datetime)
-        return f"{obj.closed_basket.user.username}({datetime_obj.strftime('%Y/%m/%d %H:%M:%S')})"
+        try :
+            datetime_obj = jdatetime.datetime.fromgregorian(datetime=obj.closed_basket.payment_datetime)
+            return f"{obj.closed_basket.user.username}({datetime_obj.strftime('%Y/%m/%d %H:%M:%S')})"
+        except :
+            return f"{obj.closed_basket.user.username}"
+
+    def get_coupon_title(self, obj):
+        return obj.product.coupon.title
 
     class Meta:
         model = ProductValidationCode
