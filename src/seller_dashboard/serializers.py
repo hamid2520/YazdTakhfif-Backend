@@ -38,7 +38,7 @@ class SellerDashboardSerializer(serializers.ModelSerializer):
     total_sell_price = serializers.SerializerMethodField()
     total_active_coupons = serializers.SerializerMethodField()
     verified_comments = serializers.SerializerMethodField()
-    recently_sold_coupons = serializers.SerializerMethodField()
+    # recently_sold_coupons = serializers.SerializerMethodField()
 
     def get_total_sell_price(self, obj: Business):
         user = obj.admin
@@ -55,12 +55,11 @@ class SellerDashboardSerializer(serializers.ModelSerializer):
         comments_count = Comment.objects.filter(coupon__business_id=obj.id, verified=True).count()
         return comments_count
 
-    def get_recently_sold_coupons(self, obj):
-        sold_coupons = ClosedBasketDetail.objects.filter(line_coupon__coupon__business_id=obj.id,
-                                                         closedbasket__created_at__date=timezone.now().date()).order_by(
-            'closedbasket__payment_datetime')
-        serializer = SoldCouponsSerializer(instance=sold_coupons, many=True)
-        return serializer.data
+    # def get_recently_sold_coupons(self, obj):
+    #     sold_coupons = ClosedBasketDetail.objects.filter(line_coupon__coupon__business_id=obj.id).order_by(
+    #         'closedbasket__payment_datetime')
+    #     serializer = SoldCouponsSerializer(instance=sold_coupons, many=True)
+    #     return serializer.data
 
     class Meta:
         model = Business
