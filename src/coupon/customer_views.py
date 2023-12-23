@@ -22,7 +22,7 @@ class CouponAPIView(ListRetrieveAPIView):
     lookup_url_kwarg = "slug"
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter, PriceFilter, OfferFilter, RateFilter,
                                                               BusinessFilter, CategoryFilter, IsAvailableFilter,
-                                                              HotSellsFilter, PriceQueryFilter, CustomOrderingFilter]
+                                                              HotSellsFilter, PriceQueryFilter]
     search_fields = ['title', "linecoupon__title"]
     ordering_fields = ['linecoupon__offer_percent', 'linecoupon__price', 'created']
 
