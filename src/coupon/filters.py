@@ -104,6 +104,12 @@ class HotSellsFilter(filters.BaseFilterBackend):
                 "-hot_sells").distinct()
         return queryset
 
+
+# class CustomOrderingFilter(filters.OrderingFilter):
+#     def filter_queryset(self, request, queryset, view):
+#         return super().filter_queryset(request, queryset, view).distinct()
+
+
 # class RelatedCouponsFilter(filters.BaseFilterBackend):
 #     def filter_queryset(self, request, queryset: Coupon.objects.all(), view):
 #         coupon_slug = request.query_params.get("related")

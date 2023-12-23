@@ -6,7 +6,7 @@ from .models import Category, Coupon
 from .serializers import CategorySerializer, CouponSerializer, LineCouponSerializer, CustomerCategorySerializer, \
     LineCouponShowSerializer
 from .filters import PriceFilter, OfferFilter, RateFilter, BusinessFilter, CategoryFilter, IsAvailableFilter, \
-    HotSellsFilter, PriceQueryFilter
+    HotSellsFilter, PriceQueryFilter, CustomOrderingFilter
 
 
 class CategoryAPIView(ListAPIView):
@@ -14,7 +14,6 @@ class CategoryAPIView(ListAPIView):
     serializer_class = CustomerCategorySerializer
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter, ]
     search_fields = ['title', ]
-
 
 class CouponAPIView(ListRetrieveAPIView):
     queryset = Coupon.objects.all()
