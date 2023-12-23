@@ -35,6 +35,7 @@ urlpatterns = [
                   path('advertise/', include('src.advertise.urls')),
                   path('search/', include('src.search_engine.urls')),
                   path('seller-dashboard/', include('src.seller_dashboard.urls')),
+                  path('wallet/', include('src.wallet.urls')),
                   # admin panel
                   path('admin/', admin.site.urls),
                   # url(r'^jet/', include('jet.urls', 'jet')),  # Django JET URLS
