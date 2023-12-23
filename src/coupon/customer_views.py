@@ -6,7 +6,7 @@ from .models import Category, Coupon
 from .serializers import CategorySerializer, CouponSerializer, LineCouponSerializer, CustomerCategorySerializer, \
     LineCouponShowSerializer
 from .filters import PriceFilter, OfferFilter, RateFilter, BusinessFilter, CategoryFilter, IsAvailableFilter, \
-    HotSellsFilter, PriceQueryFilter, CustomOrderingFilter
+    HotSellsFilter, PriceQueryFilter
 
 
 class CategoryAPIView(ListAPIView):
