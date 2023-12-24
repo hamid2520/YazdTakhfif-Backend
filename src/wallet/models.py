@@ -5,6 +5,7 @@ from rest_framework.serializers import ValidationError
 
 from src.users.models import User
 
+
 # from core.util.extend import raise_not_field_error
 
 
@@ -50,6 +51,11 @@ class Transaction(models.Model):
         (TYPE_WITHDRAW_COMMISSION, 'تسویه پورسانت'),
     )
 
+    STATUS_CHOICES = (
+        (1, 'تایید شده'),
+        (2, 'کنسل شده')
+    )
+
     from_account = models.ForeignKey('wallet.Account', on_delete=models.CASCADE, verbose_name='حساب مبدا',
                                      related_name='from_account')
     to_account = models.ForeignKey('wallet.Account', on_delete=models.CASCADE, verbose_name='حساب مقصد',
@@ -57,6 +63,8 @@ class Transaction(models.Model):
     type = models.SmallIntegerField(verbose_name='نوع', choices=TYPE_CHOICES)
     amount = models.BigIntegerField(verbose_name='مبلغ')
     datetime = models.DateTimeField(verbose_name='تاریخ ایجاد', auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='کاربر')
+    status = models.SmallIntegerField(verbose_name='وضعیت', choices=STATUS_CHOICES)
 
     def __str__(self):
         return 'from:{} to:{} amount:{}'.format(
