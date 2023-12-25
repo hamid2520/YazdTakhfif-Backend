@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import redirect
+from django.db.models import F
 from rest_framework.generics import get_object_or_404
 # from core.util.mixin import IsAuthenticatedPermission
 from . import serializers
@@ -12,7 +13,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from rest_framework import status
 
-from .serializers import WalletSerializer
+from .serializers import WalletSerializer, UserBoughtCodesSerializer
 # from core.util.extend import RetrieveListViewSet, StandardResultsSetPagination
 # from core.util.helper import play_filtering_form
 # from .services.services import add_user_commission
@@ -71,6 +72,19 @@ from ..business.models import Business
 #         return settlement.add_request_settlement(user, amount)
 class WalletView(APIView):
     def get(self, request):
-        businesses = get_object_or_404(Business, admin_id=self.request.user.id)
-        serializer = WalletSerializer(instance=businesses, context={'user_id': self.request.user.id})
+        user_id = request.user.id
+        businesses = get_object_or_404(Business, admin_id=user_id)
+        serializer = WalletSerializer(instance=businesses, context={'user_id': user_id})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class WalletCouponsView(APIView):
+    def get(self, request):
+        user_id = request.user.id
+        business = get_object_or_404(Business, admin_id=user_id)
+        sold_coupons = (
+            business.coupon_set.filter(linecoupon__closedbasketdetail__closedbasket__status=3).distinct("id").annotate(
+                days_left=F('expire_date')
+            ))
+        serializer = UserBoughtCodesSerializer(instance=sold_coupons, many=True, context={"user_id": user_id})
         return Response(serializer.data, status=status.HTTP_200_OK)
