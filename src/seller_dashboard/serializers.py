@@ -2,7 +2,6 @@ from rest_framework import serializers
 from jdatetime import datetime
 from django.utils import timezone
 from django.db.models import Sum
-
 from src.basket.models import ClosedBasketDetail, ClosedBasket
 from src.business.models import Business
 from src.coupon.models import Comment, LineCoupon
@@ -38,6 +37,7 @@ class SellerDashboardSerializer(serializers.ModelSerializer):
     total_sell_price = serializers.SerializerMethodField()
     total_active_coupons = serializers.SerializerMethodField()
     verified_comments = serializers.SerializerMethodField()
+
     # recently_sold_coupons = serializers.SerializerMethodField()
 
     def get_total_sell_price(self, obj: Business):
@@ -69,6 +69,7 @@ class SellerDashboardSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     user_full_name = serializers.SerializerMethodField()
     coupon = serializers.SlugRelatedField("slug", read_only=True)
+    last_replay = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
@@ -76,3 +77,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     def get_user_full_name(self, obj):
         return f'{obj.user.first_name} {obj.user.last_name}'
+
+    def get_last_replay(self, obj):
+        last_replay = Comment.objects.filter(parent=obj).values('text').first()
+        return last_replay

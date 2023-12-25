@@ -36,7 +36,8 @@ class UserCommentList(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser:
-            return Comment.objects.filter(verified=True).order_by("created_at")
+            return Comment.objects.filter(verified=True, parent=None).order_by("created_at")
         else:
-            return Comment.objects.filter(verified=True, coupon__business__admin=self.request.user).order_by(
+            return Comment.objects.filter(verified=True, coupon__business__admin=self.request.user,
+                                          parent=None).order_by(
                 "created_at")
