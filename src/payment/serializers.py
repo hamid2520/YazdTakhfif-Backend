@@ -7,7 +7,7 @@ from src.basket.models import Basket, BasketDetail, ClosedBasket, ClosedBasketDe
 
 
 class PaymentSerializer(serializers.ModelSerializer):
-    basket_id = serializers.IntegerField()
+    basket_id = serializers.SlugField()
     formatted_created_at = serializers.SerializerMethodField()
 
     def get_formatted_created_at(self, obj):
@@ -15,7 +15,7 @@ class PaymentSerializer(serializers.ModelSerializer):
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
     def validate_basket_id(self, value):
-        basket = Basket.objects.filter(id=value)
+        basket = Basket.objects.filter(slug=value)
         if basket.exists():
             basket = basket.first()
             errors = []
@@ -33,7 +33,7 @@ class PaymentSerializer(serializers.ModelSerializer):
     def save(self, **kwargs):
         if not self.instance:
             data = self.validated_data
-            basket = Basket.objects.get(id=data.get("basket_id"))
+            basket = Basket.objects.get(slug=data.get("basket_id"))
             # create closed basket
             kwargs = get_instance_values(basket)
             closed_basket = ClosedBasket.objects.create(**kwargs)
