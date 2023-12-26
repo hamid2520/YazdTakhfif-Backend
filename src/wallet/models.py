@@ -47,19 +47,15 @@ class Transaction(models.Model):
     TYPE_DEPOSIT_COMMISSION = 1
     TYPE_WITHDRAW_COMMISSION = 2
     TYPE_CHOICES = (
-        (TYPE_DEPOSIT_COMMISSION, 'واریز پورسانت'),
-        (TYPE_WITHDRAW_COMMISSION, 'تسویه پورسانت'),
+        (TYPE_DEPOSIT_COMMISSION, 'واریز'),
+        (TYPE_WITHDRAW_COMMISSION, 'برداشت'),
     )
 
     STATUS_CHOICES = (
-        (1, 'تایید شده'),
-        (2, 'کنسل شده')
+        (1, 'موفق'),
+        (2, 'ناموفق'),
+        (3,'در انتظار تایید')
     )
-
-    from_account = models.ForeignKey('wallet.Account', on_delete=models.CASCADE, verbose_name='حساب مبدا',
-                                     related_name='from_account')
-    to_account = models.ForeignKey('wallet.Account', on_delete=models.CASCADE, verbose_name='حساب مقصد',
-                                   related_name='to_account')
     type = models.SmallIntegerField(verbose_name='نوع', choices=TYPE_CHOICES)
     amount = models.BigIntegerField(verbose_name='مبلغ')
     datetime = models.DateTimeField(verbose_name='تاریخ ایجاد', auto_now_add=True)
