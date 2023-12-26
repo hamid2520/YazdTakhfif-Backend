@@ -1,6 +1,10 @@
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from django.shortcuts import redirect
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.settings import api_settings
+from rest_framework.pagination import LimitOffsetPagination
 from django.db.models import F
 from rest_framework.generics import get_object_or_404
 # from core.util.mixin import IsAuthenticatedPermission
@@ -78,13 +82,31 @@ class WalletView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class WalletCouponsView(APIView):
-    def get(self, request):
-        user_id = request.user.id
+# class WalletCouponsView(APIView):
+#     def get(self, request):
+#         user_id = request.user.id
+#         business = get_object_or_404(Business, admin_id=user_id)
+#         sold_coupons = (
+#             business.coupon_set.filter(linecoupon__closedbasketdetail__closedbasket__status=3).distinct("id").annotate(
+#                 days_left=F('expire_date')
+#             ))
+#         serializer = UserBoughtCodesSerializer(instance=sold_coupons, many=True, context={"user_id": user_id})
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+class WalletCouponsView(ListAPIView):
+    serializer_class = UserBoughtCodesSerializer
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [IsAuthenticated, ]
+
+    def get_queryset(self):
+        user_id = self.request.user.id
         business = get_object_or_404(Business, admin_id=user_id)
         sold_coupons = (
             business.coupon_set.filter(linecoupon__closedbasketdetail__closedbasket__status=3).distinct("id").annotate(
                 days_left=F('expire_date')
             ))
-        serializer = UserBoughtCodesSerializer(instance=sold_coupons, many=True, context={"user_id": user_id})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return sold_coupons
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        user_id = self.request.user.id
+        context['user_id'] = user_id
+        return context
