@@ -122,20 +122,20 @@ class UserBoughtCodesSerializer(serializers.ModelSerializer):
 
 
 class WalletSerializer(serializers.ModelSerializer):
-    sold_coupons = serializers.SerializerMethodField()
+    # sold_coupons = serializers.SerializerMethodField()
     total_sell = serializers.SerializerMethodField()
     total_withdraw = serializers.SerializerMethodField()
     balance = serializers.SerializerMethodField()
 
-    def get_sold_coupons(self, obj: Business):
-        user_id = self.context.get("user_id")
-        sold_coupons = (
-            obj.coupon_set.filter(linecoupon__closedbasketdetail__closedbasket__status=3).distinct("id").annotate(
-                days_left=F('expire_date')
-            ))
-        serializer = UserBoughtCodesSerializer(instance=sold_coupons, many=True, context={"user_id": user_id})
-
-        return serializer.data
+    # def get_sold_coupons(self, obj: Business):
+    #     user_id = self.context.get("user_id")
+    #     sold_coupons = (
+    #         obj.coupon_set.filter(linecoupon__closedbasketdetail__closedbasket__status=3).distinct("id").annotate(
+    #             days_left=F('expire_date')
+    #         ))
+    #     serializer = UserBoughtCodesSerializer(instance=sold_coupons, many=True, context={"user_id": user_id})
+    #
+    #     return serializer.data
 
     def get_total_sell(self, obj: Business):
         return 0
