@@ -41,7 +41,6 @@ class SellerDashboardSerializer(serializers.ModelSerializer):
     # recently_sold_coupons = serializers.SerializerMethodField()
 
     def get_total_sell_price(self, obj: Business):
-        user = obj.admin
         total_sell_price = \
             ClosedBasketDetail.objects.filter(line_coupon__coupon__business_id=obj.id, status=2,
                                               closedbasket__status=3).aggregate(

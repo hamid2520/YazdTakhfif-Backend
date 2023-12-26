@@ -1,6 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.generics import get_object_or_404
+from rest_framework.settings import api_settings
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.utils import timezone
 from rest_framework.request import Request
@@ -21,14 +23,26 @@ class SellerDashboardAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class SellerDashboardCouponsAPIView(APIView):
+# class SellerDashboardCouponsAPIView(APIView):
+#
+#     def get(self, request):
+#         business = get_object_or_404(Business, admin_id=request.user.id)
+#         sold_coupons = ClosedBasketDetail.objects.filter(line_coupon__coupon__business_id=business.id).order_by(
+#             'closedbasket__payment_datetime')
+#         serializer = SoldCouponsSerializer(instance=sold_coupons, many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def get(self, request):
-        business = get_object_or_404(Business, admin_id=request.user.id)
+
+class SellerDashboardCouponsAPIView(ListAPIView):
+    serializer_class = SoldCouponsSerializer
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [IsAuthenticated, ]
+
+    def get_queryset(self):
+        user_id = self.request.user.id
+        business = get_object_or_404(Business, admin_id=user_id)
         sold_coupons = ClosedBasketDetail.objects.filter(line_coupon__coupon__business_id=business.id).order_by(
             'closedbasket__payment_datetime')
-        serializer = SoldCouponsSerializer(instance=sold_coupons, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return sold_coupons
 
 
 class UserCommentList(ListAPIView):
