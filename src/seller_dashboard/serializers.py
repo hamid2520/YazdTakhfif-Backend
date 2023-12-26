@@ -74,6 +74,7 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = "__all__"
+        ref_name = "Seller Dashboard Comment"
 
     def get_user_full_name(self, obj):
         return f'{obj.user.first_name} {obj.user.last_name}'
