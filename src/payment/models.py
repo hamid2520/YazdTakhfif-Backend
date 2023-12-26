@@ -23,6 +23,11 @@ def payment_done(closed_basket_id):
     # Closed Basket Detail fields
     for product in closed_basket.product.all():
         line_coupon = product.line_coupon
+        codes = line_coupon.productvalidationcode_set.filter(used=False, closed_basket__isnull=True).order_by("id")[
+                0:product.count]
+        for code in codes:
+            code.closed_basket_id = closed_basket_id
+            code.save()
         product.payment_price = line_coupon.price
         product.payment_offer_percent = line_coupon.offer_percent
         product.payment_price_with_offer = line_coupon.price_with_offer
