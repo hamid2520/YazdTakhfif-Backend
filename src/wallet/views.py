@@ -1,3 +1,4 @@
+from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import redirect
@@ -25,6 +26,7 @@ from azbankgateways.apps import AZIranianBankGatewaysConfig
 from azbankgateways.exceptions import AZBankGatewaysException
 
 from ..business.models import Business
+from .filters import TimeFilter
 
 
 # class SetCommissionTurnover(APIView):
@@ -83,6 +85,8 @@ class WalletView(APIView):
 class WalletCouponsView(ListAPIView):
     serializer_class = UserBoughtCodesSerializer
     permission_classes = [IsAuthenticated, ]
+    filter_backends = [SearchFilter, TimeFilter]
+    search_fields = '__all__'
 
     def get_queryset(self):
         user_id = self.request.user.id
