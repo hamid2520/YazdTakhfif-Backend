@@ -52,15 +52,15 @@ class Transaction(models.Model):
     )
 
     STATUS_CHOICES = (
-        (1, 'موفق'),
-        (2, 'ناموفق'),
-        (3,'در انتظار تایید')
+        (1, 'در انتظار تایید'),
+        (2, 'موفق'),
+        (3, 'ناموفق')
     )
+    user = models.ForeignKey(User, models.CASCADE, verbose_name='کاربر')
     type = models.SmallIntegerField(verbose_name='نوع', choices=TYPE_CHOICES)
+    status = models.SmallIntegerField(verbose_name='وضعیت', choices=TYPE_CHOICES)
     amount = models.BigIntegerField(verbose_name='مبلغ')
     datetime = models.DateTimeField(verbose_name='تاریخ ایجاد', auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='کاربر')
-    status = models.SmallIntegerField(verbose_name='وضعیت', choices=STATUS_CHOICES)
 
     def __str__(self):
         return 'from:{} to:{} amount:{}'.format(
