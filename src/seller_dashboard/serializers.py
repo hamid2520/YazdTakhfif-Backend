@@ -80,5 +80,7 @@ class CommentSerializer(serializers.ModelSerializer):
         return f'{obj.user.first_name} {obj.user.last_name}'
 
     def get_last_replay(self, obj):
-        last_replay = Comment.objects.filter(parent=obj).values('text').first()
-        return last_replay
+        last_replay = Comment.objects.filter(parent=obj)
+        if last_replay.exists():
+            return last_replay.last().text
+        return ''
