@@ -73,10 +73,13 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = "__all__"
+        ref_name = "Seller Dashboard Comment"
 
     def get_user_full_name(self, obj):
         return f'{obj.user.first_name} {obj.user.last_name}'
 
     def get_last_replay(self, obj):
-        last_replay = Comment.objects.filter(parent=obj).values('text').first()
-        return last_replay
+        last_replay = Comment.objects.filter(parent=obj)
+        if last_replay.exists():
+            return last_replay.last().text
+        return ''

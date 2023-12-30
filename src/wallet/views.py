@@ -1,3 +1,4 @@
+from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
@@ -7,6 +8,8 @@ from rest_framework.settings import api_settings
 from rest_framework.pagination import LimitOffsetPagination
 from django.db.models import F
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import ListAPIView
 # from core.util.mixin import IsAuthenticatedPermission
 from . import serializers
 from . import models
@@ -27,6 +30,7 @@ from azbankgateways.apps import AZIranianBankGatewaysConfig
 from azbankgateways.exceptions import AZBankGatewaysException
 
 from ..business.models import Business
+from .filters import TimeFilter
 
 
 # class SetCommissionTurnover(APIView):
@@ -82,9 +86,14 @@ class WalletView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# class WalletCouponsView(APIView):
-#     def get(self, request):
-#         user_id = request.user.id
+# class WalletCouponsView(ListAPIView):
+    serializer_class = UserBoughtCodesSerializer
+    permission_classes = [IsAuthenticated, ]
+    filter_backends = [SearchFilter, TimeFilter]
+    search_fields = '__all__'
+
+#     def get_queryset(self):
+#         user_id = self.request.user.id
 #         business = get_object_or_404(Business, admin_id=user_id)
 #         sold_coupons = (
 #             business.coupon_set.filter(linecoupon__closedbasketdetail__closedbasket__status=3).distinct("id").annotate(
@@ -106,7 +115,17 @@ class WalletCouponsView(ListAPIView):
         return sold_coupons
 
     def get_serializer_context(self):
-        context = super().get_serializer_context()
         user_id = self.request.user.id
+        context = super().get_serializer_context()
         context['user_id'] = user_id
         return context
+
+    # def get(self, request):
+    #     user_id = request.user.id
+    #     business = get_object_or_404(Business, admin_id=user_id)
+    #     sold_coupons = (
+    #         business.coupon_set.filter(linecoupon__closedbasketdetail__closedbasket__status=3).distinct("id").annotate(
+    #             days_left=F('expire_date')
+    #         ))
+    #     serializer = UserBoughtCodesSerializer(instance=sold_coupons, many=True, context={"user_id": user_id})
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
