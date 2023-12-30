@@ -78,12 +78,24 @@ class LineCouponWithCodesSerializer(serializers.ModelSerializer):
 
 
 class UserBoughtCodesSerializer(serializers.ModelSerializer):
+    status_choices = (
+        (1, "ایجاد شده"),
+        (2, "پرداخت شده"),
+        (3, "تایید شده"),
+        (4, "لغو شده"),
+    )
+
     line_coupons = serializers.SerializerMethodField()
     days_left = serializers.SerializerMethodField()
     formatted_created = serializers.SerializerMethodField()
     formatted_expire_date = serializers.SerializerMethodField()
     total_sell_price = serializers.SerializerMethodField()
     total_sell_count = serializers.SerializerMethodField()
+    buyer = serializers.SerializerMethodField()
+    status = serializers.ChoiceField(choices=status_choices)
+
+    def get_buyer(self, obj):
+        return f'{obj.buyer.first_name} {obj.buyer.last_name}'
 
     def get_formatted_created(self, obj):
         datetime_field = datetime.fromgregorian(datetime=obj.created)
