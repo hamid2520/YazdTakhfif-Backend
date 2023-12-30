@@ -58,7 +58,7 @@ class Transaction(models.Model):
     )
     user = models.ForeignKey(User, models.CASCADE, verbose_name='کاربر')
     type = models.SmallIntegerField(verbose_name='نوع', choices=TYPE_CHOICES)
-    status = models.SmallIntegerField(verbose_name='وضعیت', choices=TYPE_CHOICES)
+    status = models.SmallIntegerField(verbose_name='وضعیت', choices=TYPE_CHOICES, default=1)
     amount = models.BigIntegerField(verbose_name='مبلغ')
     datetime = models.DateTimeField(verbose_name='تاریخ ایجاد', auto_now_add=True)
 
