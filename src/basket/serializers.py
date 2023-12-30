@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, ProductValidationCode
 from src.coupon.models import LineCoupon, Coupon, CouponImage
 from src.coupon.serializers import LineCouponSerializer
+from ..users.models import User
 
 
 class BasketDetailSerializer(serializers.ModelSerializer):
@@ -223,7 +224,7 @@ class UserBoughtCodesSerializer(serializers.ModelSerializer):
 
     def get_line_coupons(self, obj):
         user_id = self.context.get("user_id")
-        line_coupons = LineCoupon.objects.filter(coupon_id=obj.id, closedbasketdetail__closedbasket__status=3,
+        line_coupons = LineCoupon.objects.filter(coupon_id=obj.id, closedbasketdetail__closedbasket__status=2,
                                                  closedbasketdetail__closedbasket__user_id=user_id)
         serializer = LineCouponWithCodesSerializer(instance=line_coupons, many=True, context={"user_id": user_id})
         return serializer.data
