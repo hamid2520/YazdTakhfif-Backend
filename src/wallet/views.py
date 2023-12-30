@@ -86,7 +86,7 @@ class WalletCouponsView(ListAPIView):
     serializer_class = UserBoughtCodesSerializer
     permission_classes = [IsAuthenticated, ]
     filter_backends = [SearchFilter, TimeFilter]
-    search_fields = ['business__title', 'category__title', 'linecoupon__titleg', 'title']
+    search_fields = ['business__title', 'category__title', 'linecoupon__title', 'title']
 
     def get_queryset(self):
         user_id = self.request.user.id
@@ -94,8 +94,9 @@ class WalletCouponsView(ListAPIView):
         sold_coupons = (
             business.coupon_set.filter(linecoupon__closedbasketdetail__closedbasket__status=3).distinct("id").annotate(
                 days_left=F('expire_date'),
-                buyer=F('linecoupon__closedbasketdetail__closedbasket__user'),
-                status=F('linecoupon__closedbasketdetail__closedbasket__status')
+                user_first_name=F('linecoupon__closedbasketdetail__closedbasket__user__first_name'),
+                user_last_name=F('linecoupon__closedbasketdetail__closedbasket__user__last_name'),
+                status=F('linecoupon__closedbasketdetail__closedbasket__is_paid')
             ))
         return sold_coupons
 

@@ -9,6 +9,7 @@ from ..basket.models import ProductValidationCode
 from ..basket.serializers import ProductValidationCodeSerializer
 from ..business.models import Business
 from ..coupon.models import LineCoupon, Coupon
+from ..utils.get_bool import get_boolean
 
 
 # class AccountSerializer(serializers.ModelSerializer):
@@ -78,25 +79,21 @@ class LineCouponWithCodesSerializer(serializers.ModelSerializer):
 
 
 class UserBoughtCodesSerializer(serializers.ModelSerializer):
-    status_choices = (
-        (1, "ایجاد شده"),
-        (2, "پرداخت شده"),
-        (3, "تایید شده"),
-        (4, "لغو شده"),
-    )
-
     line_coupons = serializers.SerializerMethodField()
     days_left = serializers.SerializerMethodField()
     formatted_created = serializers.SerializerMethodField()
     formatted_expire_date = serializers.SerializerMethodField()
     total_sell_price = serializers.SerializerMethodField()
     total_sell_count = serializers.SerializerMethodField()
-    buyer = serializers.SerializerMethodField()
-    status = serializers.ChoiceField(choices=status_choices)
+    user = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
-    def get_buyer(self, obj):
-        return f'{obj.buyer.first_name} {obj.buyer.last_name}'
-
+    def get_user(self, obj):
+        return f'{obj.user_first_name} {obj.user_last_name}'
+    def get_status(self, obj):
+        if get_boolean(obj.status):
+            return 'پرداخت شده'
+        return "پرداخت نشده"
     def get_formatted_created(self, obj):
         datetime_field = datetime.fromgregorian(datetime=obj.created)
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
