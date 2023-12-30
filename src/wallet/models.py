@@ -16,45 +16,21 @@ class Account(models.Model):
     ACCOUNT_YAZD_TAKHFIF_COMMISSION_ID = 100
     ACCOUNT_YAZD_TAKHFIF_BANK1_ID = 101
 
-    TYPE_COMMISSION = 1
-    TYPE_CHARGE = 2
-    TYPE_SETTLEMENT = 3
-    TYPE_CHOICES = (
-        (TYPE_COMMISSION, 'حساب پورسانت'),
-        (TYPE_CHARGE, 'حساب شارژ'),
-        (TYPE_SETTLEMENT, 'حساب تسویه'),
-    )
-
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True,
-                              verbose_name='ضاحب حساب')
-    balance = models.BigIntegerField(verbose_name='موجودی', default=0)
-    type = models.SmallIntegerField(
-        verbose_name='نوع', choices=TYPE_CHOICES)
-    # برای حسابهای بدهکاری : وقتی پولی به این حساب واریز بشه موجودیش کسر میشه و وقتی ازش برداشت بشه ، موجودیش افزوده میشه.
-    # مثل حساب پرداخت پورسانت یزدتخفیف که اول صفر هست و با پرداخت پورسانت به اعضا، موجودیش مثبت میشه و با تسویه اعضا، موجودیش کسر میشه
-    debit = models.BooleanField(verbose_name='حساب بدهکاری', default=False)
-
-    def __str__(self):
-        return self.owner.get_full_name() if self.owner else str(self.pk)
-
-
-class Transaction(models.Model):
-    class Meta:
-        verbose_name = 'تراکنش'
-        verbose_name_plural = 'تراکنش‌ ها'
-
     TYPE_DEPOSIT_COMMISSION = 1
     TYPE_WITHDRAW_COMMISSION = 2
     TYPE_CHOICES = (
-        (TYPE_DEPOSIT_COMMISSION, 'واریز پورسانت'),
-        (TYPE_WITHDRAW_COMMISSION, 'تسویه پورسانت'),
+        (TYPE_DEPOSIT_COMMISSION, 'واریز'),
+        (TYPE_WITHDRAW_COMMISSION, 'برداشت'),
     )
 
-    from_account = models.ForeignKey('wallet.Account', on_delete=models.CASCADE, verbose_name='حساب مبدا',
-                                     related_name='from_account')
-    to_account = models.ForeignKey('wallet.Account', on_delete=models.CASCADE, verbose_name='حساب مقصد',
-                                   related_name='to_account')
+    STATUS_CHOICES = (
+        (1, 'در انتظار تایید'),
+        (2, 'موفق'),
+        (3, 'ناموفق')
+    )
+    user = models.ForeignKey(User, models.CASCADE, verbose_name='کاربر')
     type = models.SmallIntegerField(verbose_name='نوع', choices=TYPE_CHOICES)
+    status = models.SmallIntegerField(verbose_name='وضعیت', choices=TYPE_CHOICES, default=1)
     amount = models.BigIntegerField(verbose_name='مبلغ')
     datetime = models.DateTimeField(verbose_name='تاریخ ایجاد', auto_now_add=True)
 
