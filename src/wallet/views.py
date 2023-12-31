@@ -1,3 +1,4 @@
+from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import redirect
@@ -27,6 +28,7 @@ from azbankgateways.apps import AZIranianBankGatewaysConfig
 from azbankgateways.exceptions import AZBankGatewaysException
 
 from ..business.models import Business
+from .filters import TimeFilter
 
 
 # class SetCommissionTurnover(APIView):
@@ -85,14 +87,18 @@ class WalletView(APIView):
 class WalletCouponsView(ListAPIView):
     serializer_class = UserBoughtCodesSerializer
     permission_classes = [IsAuthenticated, ]
-    filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter]
+    filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter, TimeFilter]
+    search_fields = ['business__title', 'category__title', 'linecoupon__title', 'title']
 
     def get_queryset(self):
         user_id = self.request.user.id
         business = get_object_or_404(Business, admin_id=user_id)
         sold_coupons = (
             business.coupon_set.filter(linecoupon__closedbasketdetail__closedbasket__status=3).distinct("id").annotate(
-                days_left=F('expire_date')
+                days_left=F('expire_date'),
+                user_first_name=F('linecoupon__closedbasketdetail__closedbasket__user__first_name'),
+                user_last_name=F('linecoupon__closedbasketdetail__closedbasket__user__last_name'),
+                status=F('linecoupon__closedbasketdetail__closedbasket__is_paid')
             ))
         return sold_coupons
 
