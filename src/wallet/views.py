@@ -2,6 +2,8 @@ from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import redirect
+from rest_framework.filters import SearchFilter
+from rest_framework.settings import api_settings
 from django.db.models import F
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -85,7 +87,7 @@ class WalletView(APIView):
 class WalletCouponsView(ListAPIView):
     serializer_class = UserBoughtCodesSerializer
     permission_classes = [IsAuthenticated, ]
-    filter_backends = [SearchFilter, TimeFilter]
+    filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter, TimeFilter]
     search_fields = ['business__title', 'category__title', 'linecoupon__title', 'title']
 
     def get_queryset(self):
