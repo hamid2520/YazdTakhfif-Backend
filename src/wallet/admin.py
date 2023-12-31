@@ -5,8 +5,7 @@ from . import models
 
 
 class TransactionAdmin(admin.ModelAdmin):
-    list_filter = ("to_account__owner",)
-
+    pass
 
 class AccountAdmin(admin.ModelAdmin):
     actions = ['withdraw']
