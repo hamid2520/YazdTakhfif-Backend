@@ -4,8 +4,8 @@ from django.contrib.admin.sites import AlreadyRegistered
 from . import models
 
 
-class TransactionAdmin(admin.ModelAdmin):
-    list_filter = ("to_account__owner",)
+# class TransactionAdmin(admin.ModelAdmin):
+#     list_filter = ("to_account__owner",)
 
 
 class AccountAdmin(admin.ModelAdmin):
@@ -29,7 +29,7 @@ class AccountAdmin(admin.ModelAdmin):
 
 
 try:
-    admin.site.register(models.Transaction, TransactionAdmin)
+    admin.site.register(models.Transaction)
     admin.site.register(models.Account, AccountAdmin)
 
     # admin.site.register(models.Exercise, ExerciseAdmin)

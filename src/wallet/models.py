@@ -5,6 +5,7 @@ from rest_framework.serializers import ValidationError
 
 from src.users.models import User
 
+
 # from core.util.extend import raise_not_field_error
 
 
@@ -12,6 +13,36 @@ class Account(models.Model):
     class Meta:
         verbose_name = "حساب"
         verbose_name_plural = "حساب‌ ها"
+
+    ACCOUNT_YAZD_TAKHFIF_COMMISSION_ID = 100
+    ACCOUNT_YAZD_TAKHFIF_BANK1_ID = 101
+
+    TYPE_COMMISSION = 1
+    TYPE_CHARGE = 2
+    TYPE_SETTLEMENT = 3
+    TYPE_CHOICES = (
+        (TYPE_COMMISSION, 'حساب پورسانت'),
+        (TYPE_CHARGE, 'حساب شارژ'),
+        (TYPE_SETTLEMENT, 'حساب تسویه'),
+    )
+
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True,
+                              verbose_name='ضاحب حساب')
+    balance = models.BigIntegerField(verbose_name='موجودی', default=0)
+    type = models.SmallIntegerField(
+        verbose_name='نوع', choices=TYPE_CHOICES)
+    # برای حسابهای بدهکاری : وقتی پولی به این حساب واریز بشه موجودیش کسر میشه و وقتی ازش برداشت بشه ، موجودیش افزوده میشه.
+    # مثل حساب پرداخت پورسانت یزدتخفیف که اول صفر هست و با پرداخت پورسانت به اعضا، موجودیش مثبت میشه و با تسویه اعضا، موجودیش کسر میشه
+    debit = models.BooleanField(verbose_name='حساب بدهکاری', default=False)
+
+    def __str__(self):
+        return self.owner.get_full_name() if self.owner else str(self.pk)
+
+
+class Transaction(models.Model):
+    class Meta:
+        verbose_name = 'تراکنش'
+        verbose_name_plural = 'تراکنش‌ ها'
 
     ACCOUNT_YAZD_TAKHFIF_COMMISSION_ID = 100
     ACCOUNT_YAZD_TAKHFIF_BANK1_ID = 101
@@ -34,14 +65,14 @@ class Account(models.Model):
     amount = models.BigIntegerField(verbose_name='مبلغ')
     datetime = models.DateTimeField(verbose_name='تاریخ ایجاد', auto_now_add=True)
 
-    def __str__(self):
-        return 'from:{} to:{} amount:{}'.format(
-            self.from_account.owner.get_full_name(
-            ) if self.from_account.owner else str(self.from_account.pk),
-            self.to_account.owner.get_full_name(
-            ) if self.to_account.owner else str(self.to_account.pk),
-            str(self.amount),
-        )
+    # def __str__(self):
+    #     return 'from:{} to:{} amount:{}'.format(
+    #         self.from_account.owner.get_full_name(
+    #         ) if self.from_account.owner else str(self.from_account.pk),
+    #         self.to_account.owner.get_full_name(
+    #         ) if self.to_account.owner else str(self.to_account.pk),
+    #         str(self.amount),
+    #     )
 
     def total_deposit(self, user):
         user_acc, created = Account.objects.get_or_create(
