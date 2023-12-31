@@ -1,6 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import redirect
+from rest_framework.filters import SearchFilter
+from rest_framework.settings import api_settings
 from django.db.models import F
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -83,6 +85,7 @@ class WalletView(APIView):
 class WalletCouponsView(ListAPIView):
     serializer_class = UserBoughtCodesSerializer
     permission_classes = [IsAuthenticated, ]
+    filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter]
 
     def get_queryset(self):
         user_id = self.request.user.id
