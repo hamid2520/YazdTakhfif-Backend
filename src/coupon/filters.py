@@ -37,15 +37,15 @@ class PriceQueryFilter(filters.BaseFilterBackend):
         if price:
             price = str(price)
             if price == "-10000":
-                return queryset.filter(linecoupon__price__lte=10000)
+                return queryset.filter(linecoupon__price__lte=10000).distinct()
             elif price == "10000-100000":
-                return queryset.filter(linecoupon__price__gte=10000, linecoupon__price__lte=100000)
+                return queryset.filter(linecoupon__price__gte=10000, linecoupon__price__lte=100000).distinct()
             elif price == "100000-250000":
-                return queryset.filter(linecoupon__price__gte=100000, linecoupon__price__lte=250000)
+                return queryset.filter(linecoupon__price__gte=100000, linecoupon__price__lte=250000).distinct()
             elif price == "250000-500000":
-                return queryset.filter(linecoupon__price__gte=250000, linecoupon__price__lte=500000)
+                return queryset.filter(linecoupon__price__gte=250000, linecoupon__price__lte=500000).distinct()
             elif price == "+500000":
-                return queryset.filter(linecoupon__price__gte=500000)
+                return queryset.filter(linecoupon__price__gte=500000).distinct()
         return queryset
 
 
@@ -53,7 +53,7 @@ class RateFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         rate = request.query_params.get("rate")
         if rate:
-            return queryset.filter(coupon_rate__gte=rate)
+            return queryset.filter(coupon_rate__gte=rate).distinct()
         return queryset
 
 
@@ -72,15 +72,15 @@ class BusinessFilter(filters.BaseFilterBackend):
             business = Business.objects.filter(slug=business_slug)
             if business.exists():
                 business = business.first()
-                return queryset.filter(business_id=business.id)
-            return queryset.filter(business_id=None)
+                return queryset.filter(business_id=business.id).distinct()
+            return queryset.filter(business_id=None).distinct()
         return queryset
 
 
 class CategoryFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         if request.GET.get('category', None):
-            queryset = queryset.filter(category__slug=str(request.GET.get('category')))
+            queryset = queryset.filter(category__slug=str(request.GET.get('category'))).distinct()
             return queryset
         return queryset
 
@@ -90,9 +90,9 @@ class IsAvailableFilter(filters.BaseFilterBackend):
         is_available = request.query_params.get("is_available")
         if is_available and queryset.exists():
             if get_boolean(is_available):
-                return queryset.filter(linecoupon__count__gt=0)
+                return queryset.filter(linecoupon__count__gt=0).distinct()
             else:
-                return queryset.filter(linecoupon__count=0)
+                return queryset.filter(linecoupon__count=0).distinct()
         return queryset
 
 
