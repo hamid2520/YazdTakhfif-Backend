@@ -38,7 +38,7 @@ class PriceQueryFilter(filters.BaseFilterBackend):
             price = str(price)
             if price == "-10000":
                 return queryset.filter(linecoupon__price__lte=10000).distinct()
-            elif price == "gi":
+            elif price == "10000-100000":
                 return queryset.filter(linecoupon__price__gte=10000, linecoupon__price__lte=100000).distinct()
             elif price == "100000-250000":
                 return queryset.filter(linecoupon__price__gte=100000, linecoupon__price__lte=250000).distinct()
