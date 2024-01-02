@@ -104,7 +104,7 @@ class BasketViewSet(ModelViewSet):
 
     @action(detail=False, methods=["GET"], url_path="reset-basket-price", url_name="reset_basket_price", )
     def reset_basket_price(self, request):
-        basket = Basket.objects.get(user_id=request.user.id)
+        basket = Basket.objects.get(user_id=request.user.id, status=1)
         basket_total_price_with_offer = basket.product.all().aggregate(total_price=Sum("total_price_with_offer"))[
             "total_price"]
         basket.total_price_with_offer = basket_total_price_with_offer if basket_total_price_with_offer else 0
