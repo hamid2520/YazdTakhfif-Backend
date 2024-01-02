@@ -17,9 +17,4 @@ class Migration(migrations.Migration):
             name='profile_picture',
             field=easy_thumbnails.fields.ThumbnailerImageField(blank=True, null=True, upload_to='profile_pictures/', verbose_name='عکس پروفایل'),
         ),
-        migrations.AddField(
-            model_name='user',
-            name='sms_code',
-            field=models.CharField(max_length=5, null=True),
-        ),
     ]
