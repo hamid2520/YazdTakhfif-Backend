@@ -199,7 +199,7 @@ class LineCouponShowSerializer(serializers.ModelSerializer):
 
 
 class RateSerializer(serializers.ModelSerializer):
-    coupon = serializers.SlugRelatedField(slug_field="slug", queryset=Coupon.objects.all())
+    # coupon = serializers.SlugRelatedField(slug_field="slug", queryset=Coupon.objects.all())
 
     class Meta:
         model = Rate

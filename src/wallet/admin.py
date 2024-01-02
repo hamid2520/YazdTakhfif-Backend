@@ -4,9 +4,8 @@ from django.contrib.admin.sites import AlreadyRegistered
 from . import models
 
 
-# class TransactionAdmin(admin.ModelAdmin):
-#     list_filter = ("to_account__owner",)
-
+class TransactionAdmin(admin.ModelAdmin):
+    pass
 
 class AccountAdmin(admin.ModelAdmin):
     actions = ['withdraw']

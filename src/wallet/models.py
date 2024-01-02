@@ -1,14 +1,10 @@
-from re import S
-from django.db import models, transaction, DatabaseError
-from django.conf import settings
-from rest_framework.serializers import ValidationError
+from django.db import models
 
 from src.users.models import User
 
 
+
 # from core.util.extend import raise_not_field_error
-
-
 class Account(models.Model):
     class Meta:
         verbose_name = "حساب"
@@ -38,15 +34,7 @@ class Account(models.Model):
     def __str__(self):
         return self.owner.get_full_name() if self.owner else str(self.pk)
 
-
 class Transaction(models.Model):
-    class Meta:
-        verbose_name = 'تراکنش'
-        verbose_name_plural = 'تراکنش‌ ها'
-
-    ACCOUNT_YAZD_TAKHFIF_COMMISSION_ID = 100
-    ACCOUNT_YAZD_TAKHFIF_BANK1_ID = 101
-
     TYPE_DEPOSIT_COMMISSION = 1
     TYPE_WITHDRAW_COMMISSION = 2
     TYPE_CHOICES = (
