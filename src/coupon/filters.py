@@ -1,7 +1,8 @@
 from django.db.models import Q, Sum
 from rest_framework import filters
+
 from src.utils.get_bool import get_boolean
-from .models import Business, Category, Coupon
+from .models import Business
 
 
 class IsOwnerOrSuperUserCoupon(filters.BaseFilterBackend):
@@ -103,7 +104,6 @@ class HotSellsFilter(filters.BaseFilterBackend):
             return queryset.annotate(hot_sells=Sum("linecoupon__sell_count")).order_by(
                 "-hot_sells").distinct()
         return queryset
-
 
 # class CustomOrderingFilter(filters.OrderingFilter):
 #     def filter_queryset(self, request, queryset, view):
