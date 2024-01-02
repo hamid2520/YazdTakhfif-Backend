@@ -1,10 +1,9 @@
-from rest_framework import serializers
-from jdatetime import datetime
-from django.utils import timezone
 from django.db.models import Sum
+from django.utils import timezone
+from jdatetime import datetime
+from rest_framework import serializers
+
 from .models import *
-from django.db.models import F
-from src.users.serializers import UserSerializer
 from ..basket.models import ProductValidationCode
 from ..basket.serializers import ProductValidationCodeSerializer
 from ..business.models import Business
@@ -12,43 +11,6 @@ from ..coupon.models import LineCoupon, Coupon
 from ..utils.get_bool import get_boolean
 
 
-# class AccountSerializer(serializers.ModelSerializer):
-#     owner = UserSerializer(read_only=True)
-#     type = models.SmallIntegerField(choices=Account.TYPE_CHOICES)
-#
-#     class Meta:
-#         model = Account
-#         fields = '__all__'
-#         extra_kwargs = {
-#             'id': {'read_only': True},
-#         }
-#
-#
-# class TransactionSerializer(serializers.ModelSerializer):
-#     to_account = AccountSerializer(read_only=True)
-#
-#     class Meta:
-#         model = Transaction
-#         fields = '__all__'
-#         extra_kwargs = {
-#             'id': {'read_only': True},
-#         }
-#
-#
-# class SetBalanceSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Account
-#         fields = 'balance'
-#         extra_kwargs = {
-#             'id': {'read_only': True},
-#         }
-#
-#     def collect(queryset):
-#         balance = 0
-#         for x in queryset:
-#             balance = balance + x.balance
-#
-#         return balance
 class LineCouponWithCodesSerializer(serializers.ModelSerializer):
     coupon_codes = serializers.SerializerMethodField()
     coupon = serializers.SlugRelatedField(slug_field="title", read_only=True)
@@ -90,10 +52,12 @@ class UserBoughtCodesSerializer(serializers.ModelSerializer):
 
     def get_user(self, obj):
         return f'{obj.user_first_name} {obj.user_last_name}'
+
     def get_status(self, obj):
         if get_boolean(obj.status):
             return 'پرداخت شده'
         return "پرداخت نشده"
+
     def get_formatted_created(self, obj):
         datetime_field = datetime.fromgregorian(datetime=obj.created)
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
@@ -147,13 +111,17 @@ class WalletSerializer(serializers.ModelSerializer):
     #     return serializer.data
 
     def get_total_sell(self, obj: Business):
-        return 0
+        deposit_amount = \
+            Transaction.objects.filter(user_id=obj.admin_id, type=1, status=2).aggregate(sum=Sum("amount"))["sum"]
+        return deposit_amount if deposit_amount else 0
 
     def get_total_withdraw(self, obj: Business):
-        return 0
+        withdraw_amount = \
+            Transaction.objects.filter(user_id=obj.admin_id, type=2, status=2).aggregate(sum=Sum("amount"))["sum"]
+        return withdraw_amount if withdraw_amount else 0
 
     def get_balance(self, obj: Business):
-        return 0
+        return self.get_total_sell(obj) - self.get_total_withdraw(obj)
 
     class Meta:
         model = Business

@@ -261,7 +261,7 @@ class CustomerCommentSerializer(serializers.ModelSerializer):
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
     def get_sub_comment(self, obj):
-        sub_comment = CustomerCommentSerializer(instance=obj.comment_set.all(), many=True)
+        sub_comment = CustomerCommentSerializer(instance=obj.comment_set.filter(verified=True), many=True)
         return sub_comment.data
 
     def get_rate(self, obj: Comment):

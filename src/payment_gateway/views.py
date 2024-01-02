@@ -10,11 +10,11 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
+from rest_framework.generics import get_object_or_404
 
 from .models import OnlinePayment, Gateway
 from src.payment.models import Payment
-from src.wallet.models import Account, Transaction
-from src.wallet import account
+from src.wallet.models import Transaction
 from src.payment.serializers import PaymentSerializer
 from django.core.exceptions import ObjectDoesNotExist
 

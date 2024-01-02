@@ -31,51 +31,7 @@ from ..business.models import Business
 from .filters import TimeFilter
 
 
-# class SetCommissionTurnover(APIView):
-#     def get(self, request, *args, **kwargs):
-#         client = request.user
-#         add_user_commission(client, 1000)
-#         return Response({"total-price": 1000})
-#
-#
-# class TransactionViewSet(IsAuthenticatedPermission, RetrieveListViewSet):
-#     serializer_class = serializers.TransactionSerializer
-#     pagination_class = StandardResultsSetPagination
-#     queryset = models.Transaction.objects.all()
-#
-#     def get_queryset(self):
-#         user = self.request.user
-#         user_acc, created = models.Account.objects.get_or_create(
-#             owner=user,
-#             type=models.Account.TYPE_COMMISSION,
-#         )
-#         if self.request.query_params.get('my_withdraw', None) == '1':
-#             queryset = models.Transaction.objects.filter(
-#                 from_account=user_acc, type=models.Transaction.TYPE_WITHDRAW_COMMISSION)
-#             return queryset.all()
-#         queryset = models.Transaction.objects.filter(to_account=user_acc)
-#         return queryset.all()
-#
-#     def filter_queryset(self, queryset):
-#         queryset = self.get_queryset()
-#         queryset = play_filtering_form(queryset, self.request.query_params)
-#         return queryset
-#
-#
-# class AccountViewSet(IsAuthenticatedPermission, RetrieveListViewSet):
-#     serializer_class = serializers.AccountSerializer
-#
-#     def get_queryset(self):
-#         user = self.request.user
-#         result = models.Account.objects.filter(owner=user).all()
-#         return result
-#
-#
-# class RequestSettlementView(IsAuthenticatedPermission, APIView):
-#     def post(self, request):
-#         user = request.user
-#         amount = request.data['value']
-#         return settlement.add_request_settlement(user, amount)
+
 class WalletView(APIView):
     def get(self, request):
         user_id = request.user.id
