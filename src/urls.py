@@ -42,7 +42,7 @@ urlpatterns = [
                   # summernote editor
                   path('summernote/', include('django_summernote.urls')),
                   # api
-                  path('api/v1/', include(router.urls)),
+                  path('api/v1/', include('src.users.urls')),
                   url(r'^api/v1/password_reset/',
                       include('django_rest_passwordreset.urls', namespace='password_reset')),
                   # auth
