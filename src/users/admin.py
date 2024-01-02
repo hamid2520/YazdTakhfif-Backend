@@ -17,6 +17,8 @@ class UserAdmin(UserAdmin):
                     'first_name',
                     'last_name',
                     'email',
+                    'phone',
+                    'sms_code',
                 )
             },
         ),
