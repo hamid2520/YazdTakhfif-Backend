@@ -68,7 +68,7 @@ class CouponViewSet(ModelViewSet):
         return Response(data={"Error": "No images with this id!"}, status=status.HTTP_404_NOT_FOUND)
 
     @swagger_auto_schema(request_body=RateSerializer, responses={200: RateSerializer(), })
-    @action(detail=True, methods=["POST", ], serializer_class=RateSerializer, url_path="rate-coupon",
+    @action(detail=True, methods=["POST", ], serializer_class=RateSerializer, filter_backends=[], url_path="rate-coupon",
             url_name="rate_coupon")
     def rate_coupon(self, request, slug):
         coupon = self.get_object()
@@ -87,7 +87,7 @@ class CouponViewSet(ModelViewSet):
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(request_body=CommentSerializer, responses={200: CommentSerializer(), })
-    @action(detail=True, methods=["POST", ], serializer_class=CommentSerializer, url_path="add-comment",
+    @action(detail=True, methods=["POST", ], serializer_class=CommentSerializer, filter_backends=[], url_path="add-comment",
             url_name="add_comment", )
     def add_comment(self, request, slug):
         if 'text' in request.data:
