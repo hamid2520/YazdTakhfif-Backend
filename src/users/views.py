@@ -53,7 +53,8 @@ class UserSignInView(APIView):
             else:
                 user = user.first()
             sms_code = get_random_string(length=4, allowed_chars='1234567890')
-            user.sms_code = make_password(sms_code)
+            user.sms_code = sms_code
+            # user.sms_code = make_password(sms_code)
             user.save()
             # send_sms(user.phone, sms_code)
             return Response(status=status.HTTP_200_OK)
@@ -68,7 +69,8 @@ class UserLogingView(APIView):
             phone = serializer.validated_data['phone']
             sms_code = serializer.validated_data['sms_code']
             user = User.objects.filter(phone=phone)
-            if user.exists() and check_password(user.first().sms_code, sms_code):
+            # if user.exists() and check_password(user.first().sms_code, sms_code):
+            if user.exists() and user.first().sms_code == sms_code:
                 refresh = RefreshToken.for_user(user.first())
                 return Response(status=status.HTTP_200_OK,
                                 data={'refresh': str(refresh), 'access': str(refresh.access_token)})
