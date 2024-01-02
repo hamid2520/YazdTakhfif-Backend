@@ -1,5 +1,5 @@
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
@@ -13,7 +13,7 @@ from .filters import IsOwnerOrSuperUserCoupon, IsOwnerOrSuperUserLineCoupon, Pri
     BusinessFilter, CategoryFilter
 from .serializers import CategorySerializer, CouponSerializer, CouponCreateSerializer, LineCouponSerializer, \
     RateSerializer, CommentSerializer, CouponImageSerializer, LineCouponShowSerializer
-from .permissions import IsSuperUserOrOwner
+from .permissions import IsSuperUserOrOwner, IsSuperUserOrReadOnly
 from src.basket.models import ProductValidationCode
 from src.basket.serializers import ProductValidationCodeSerializer, ProductValidationCodeShowSerializer
 from rest_framework import pagination
@@ -26,8 +26,8 @@ class CategoryViewSet(ModelViewSet):
     serializer_class = CategorySerializer
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
-    permission_classes = [IsAuthenticated, ]
-    filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserCoupon, SearchFilter]
+    permission_classes = [IsSuperUserOrReadOnly, ]
+    filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter]
     search_fields = ['title', ]
     pagination_class = pagination.LimitOffsetPagination
 
