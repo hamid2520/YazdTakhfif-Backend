@@ -46,7 +46,7 @@ class Transaction(models.Model):
         (2, 'موفق'),
         (3, 'ناموفق')
     )
-    user = models.ForeignKey(User, models.CASCADE, verbose_name='کاربر')
+    user = models.ForeignKey(User, models.CASCADE, verbose_name='کاربر',null=True, blank=True)
     type = models.SmallIntegerField(verbose_name='نوع', choices=TYPE_CHOICES)
     status = models.SmallIntegerField(verbose_name='وضعیت', choices=TYPE_CHOICES, default=1)
     amount = models.BigIntegerField(verbose_name='مبلغ')
