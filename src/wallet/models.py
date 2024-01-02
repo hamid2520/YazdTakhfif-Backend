@@ -53,14 +53,14 @@ class Transaction(models.Model):
     amount = models.BigIntegerField(verbose_name='مبلغ')
     datetime = models.DateTimeField(verbose_name='تاریخ ایجاد', auto_now_add=True)
 
-    # def __str__(self):
-    #     return 'from:{} to:{} amount:{}'.format(
-    #         self.from_account.owner.get_full_name(
-    #         ) if self.from_account.owner else str(self.from_account.pk),
-    #         self.to_account.owner.get_full_name(
-    #         ) if self.to_account.owner else str(self.to_account.pk),
-    #         str(self.amount),
-    #     )
+    def __str__(self):
+        return 'from:{} to:{} amount:{}'.format(
+            self.from_account.owner.get_full_name(
+            ) if self.from_account.owner else str(self.from_account.pk),
+            self.to_account.owner.get_full_name(
+            ) if self.to_account.owner else str(self.to_account.pk),
+            str(self.amount),
+        )
 
     def total_deposit(self, user):
         user_acc, created = Account.objects.get_or_create(
