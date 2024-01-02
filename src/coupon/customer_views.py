@@ -1,5 +1,6 @@
 from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.filters import SearchFilter
+from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from src.utils.custom_api_views import ListRetrieveAPIView
 from .models import Category, Coupon
@@ -24,13 +25,23 @@ class CouponAPIView(ListRetrieveAPIView):
                                                               BusinessFilter, CategoryFilter, IsAvailableFilter,
                                                               HotSellsFilter, PriceQueryFilter]
     search_fields = ['title', "linecoupon__title"]
-    ordering_fields = ['linecoupon__offer_percent', 'linecoupon__price', 'created','coupon_rate']
+    ordering_fields = ['linecoupon__offer_percent', 'linecoupon__price', 'created', 'coupon_rate']
 
     def get(self, request, *args, **kwargs):
         if kwargs.get("slug"):
             return self.retrieve(request, *args, **kwargs)
         return self.list(request, *args, **kwargs)
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset()).distinct()
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 class LineCouponAPIView(ListAPIView):
     serializer_class = LineCouponShowSerializer
@@ -38,5 +49,5 @@ class LineCouponAPIView(ListAPIView):
     search_fields = ['title', "coupon__title"]
 
     def get_queryset(self):
-        coupon = get_object_or_404(Coupon,slug=self.kwargs.get("coupon_slug"))
-        return coupon.linecoupon_set.all()
+        coupon = get_object_or_404(Coupon, slug=self.kwargs.get("coupon_slug"))
+        return coupon.linecoupon_set.all().distinct()

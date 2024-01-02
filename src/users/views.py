@@ -1,3 +1,4 @@
+from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.request import Request
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -10,6 +11,7 @@ from src.users.models import User
 from src.users.permissions import IsUserOrReadOnly
 from src.users.serializers import CreateUserSerializer, UserSerializer, SignInSerializer, LoginSerializer
 from rest_framework import pagination
+from django.utils.crypto import get_random_string
 
 
 class UserViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -39,41 +41,36 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.Cre
                 return Response({'error': 'Wrong auth token' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_401_UNAUTHORIZED)
 
+
 class UserSignInView(APIView):
-    def post(self, request : Request):
+    def post(self, request: Request):
         serializer = SignInSerializer(data=request.data)
         if serializer.is_valid():
             phone = serializer.validated_data['phone']
-            if phone :
-               user, created = User.objects.get_or_create(phone=phone, username=phone)
-               user.sms_code ='12345'
-               user.save()
-               return Response(status=status.HTTP_200_OK)
-                
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        
+            user = User.objects.filter(phone=phone)
+            if not user.exists():
+                user = User.objects.create_user(username=phone, phone=phone, email='')
+            sms_code = get_random_string(length=4, allowed_chars='1234567890')
+            user.sms_code = make_password(sms_code)
+            user.save()
+            # send_sms(user.phone, sms_code)
+            return Response(status=status.HTTP_200_OK)
+
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-
-
 class UserLogingView(APIView):
-    def post(self,request : Request):
+    def post(self, request: Request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             phone = serializer.validated_data['phone']
             sms_code = serializer.validated_data['sms_code']
-            user = User.objects.filter(phone=phone, sms_code=sms_code).first()
-
-            if user :
+            user = User.objects.filter(phone=phone)
+            if user.exists() and check_password(user.sms_code, sms_code):
                 refresh = RefreshToken.for_user(user)
-                return Response({
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token)},
-                    status=status.HTTP_202_ACCEPTED
-                    )
-
-            else :
+                return Response(status=status.HTTP_200_OK,
+                                data={'refresh': str(refresh), 'access': str(refresh.access_token)})
+            else:
                 return Response(status=status.HTTP_404_NOT_FOUND)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
