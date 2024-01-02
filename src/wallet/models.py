@@ -3,6 +3,7 @@ from django.db import models
 from src.users.models import User
 
 
+
 # from core.util.extend import raise_not_field_error
 class Account(models.Model):
     class Meta:

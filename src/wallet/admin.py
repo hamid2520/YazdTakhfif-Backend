@@ -28,7 +28,7 @@ class AccountAdmin(admin.ModelAdmin):
 
 
 try:
-    admin.site.register(models.Transaction, TransactionAdmin)
+    admin.site.register(models.Transaction)
     admin.site.register(models.Account, AccountAdmin)
 
     # admin.site.register(models.Exercise, ExerciseAdmin)
