@@ -134,9 +134,9 @@ class CouponCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Coupon
-        fields = ["title", "business", "expire_date", "category", "description", "terms_of_use", "formatted_created",
+        fields = ["slug", "title", "business", "expire_date", "category", "description", "terms_of_use", "formatted_created",
                   "formatted_expire_date"]
-
+        read_only_fields = ['slug',]
 
 class LineCouponSerializer(serializers.ModelSerializer):
     coupon = serializers.SlugRelatedField(slug_field="slug", queryset=Coupon.objects.all())
