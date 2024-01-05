@@ -29,7 +29,7 @@ from azbankgateways.exceptions import AZBankGatewaysException
 
 from ..business.models import Business
 from .filters import TimeFilter
-
+from ..coupon.models import Coupon
 
 
 class WalletView(APIView):
@@ -49,10 +49,14 @@ class WalletCouponsView(ListAPIView):
     search_fields = ['business__title', 'category__title', 'linecoupon__title', 'title']
 
     def get_queryset(self):
-        user_id = self.request.user.id
-        business = get_object_or_404(Business, admin_id=user_id)
+        user = self.request.user
+        if user.is_superuser:
+            business = Business.objects.all()
+        else:
+            business = Business.objects.filter(admin_id=user.id)
         sold_coupons = (
-            business.coupon_set.filter(linecoupon__closedbasketdetail__closedbasket__status=3).distinct("id").annotate(
+            Coupon.objects.filter(business__in=business, linecoupon__closedbasketdetail__closedbasket__status=3)
+            .distinct("id").annotate(
                 days_left=F('expire_date'),
                 user_first_name=F('linecoupon__closedbasketdetail__closedbasket__user__first_name'),
                 user_last_name=F('linecoupon__closedbasketdetail__closedbasket__user__last_name'),
