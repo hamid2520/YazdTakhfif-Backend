@@ -53,7 +53,7 @@ class BasketViewSet(ModelViewSet):
     @swagger_auto_schema(responses={200: BasketDetailSerializer(many=True), })
     @action(detail=False, methods=["GET"], url_path="get-basket-slug", url_name="get_basket_slug")
     def get_basket_slug(self, request):
-        current_basket = Basket.objects.filter(user_id=self.request.user.id)
+        current_basket = Basket.objects.filter(user_id=self.request.user.id, status=1)
         if current_basket.exists():
             return Response(data={'slug': current_basket.last().slug}, status=status.HTTP_200_OK)
 
@@ -65,7 +65,7 @@ class BasketViewSet(ModelViewSet):
     @action(detail=False, methods=["POST", ], url_path="add-to-basket", url_name="add_to_basket",
             serializer_class=AddToBasketSerializer)
     def add_to_basket(self, request):
-        basket, created = Basket.objects.get_or_create(user_id=request.user.id)
+        basket, created = Basket.objects.get_or_create(user_id=request.user.id, status=1)
         add_serializer = AddToBasketSerializer(data=request.data)
         if add_serializer.is_valid():
             data = add_serializer.validated_data
@@ -239,7 +239,7 @@ class UserBasketProductCount(APIView):
 
     def get(self, request):
         current_user = self.request.user.id
-        user_basket = Basket.objects.filter(user=current_user).first()
+        user_basket = Basket.objects.filter(user=current_user, status=1).first()
         if user_basket:
             product_count = user_basket.product.all().count()
             return Response(data={'product_count': product_count}, status=status.HTTP_200_OK)
