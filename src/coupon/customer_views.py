@@ -45,7 +45,6 @@ class CouponAPIView(ListRetrieveAPIView):
 
 class LineCouponAPIView(ListAPIView):
     serializer_class = LineCouponShowSerializer
-    permission_classes = []
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter, PriceFilter]
     search_fields = ['title', "coupon__title"]
 
