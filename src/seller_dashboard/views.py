@@ -29,8 +29,11 @@ class SellerDashboardCouponsAPIView(ListAPIView):
     serializer_class = SoldCouponsSerializer
     permission_classes = [IsAuthenticated, ]
     def get_queryset(self):
-        business = get_object_or_404(Business, admin_id=self.request.user.id)
-        sold_coupons = ClosedBasketDetail.objects.filter(line_coupon__coupon__business_id=business.id).order_by(
+        if self.request.user.is_superuser:
+            businesses = Business.objects.all()
+        else:
+            businesses = Business.objects.filter(admin_id=self.request.user.id)
+        sold_coupons = ClosedBasketDetail.objects.filter(line_coupon__coupon__business_id__in=businesses).order_by(
             'closedbasket__payment_datetime')
         return sold_coupons
 
