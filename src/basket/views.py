@@ -40,13 +40,12 @@ class BasketViewSet(ModelViewSet):
         if not queryset.exists():
             basket = Basket.objects.create(user_id=self.request.user.id)
             basket.save()
-            queryset = self.filter_queryset(self.get_queryset())
         return super().list(request, *args, **kwargs)
 
     @swagger_auto_schema(responses={200: BasketDetailSerializer(many=True), })
     @action(detail=False, methods=["GET"], url_path="products-list", url_name="products_list")
     def get_products_list(self, request):
-        basket_products = self.filter_queryset(self.get_queryset()).first().product.all()
+        basket_products = self.filter_queryset(self.get_queryset()).filter(status=1).first().product.all()
         serializer = BasketDetailShowSerializer(instance=basket_products, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
