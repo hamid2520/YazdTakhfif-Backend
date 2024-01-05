@@ -239,7 +239,7 @@ class UserBasketProductCount(APIView):
 
     def get(self, request):
         current_user = self.request.user.id
-        user_basket = Basket.objects.filter(user=current_user).first()
+        user_basket = Basket.objects.filter(user=current_user, status=1).first()
         if user_basket:
             product_count = user_basket.product.all().count()
             return Response(data={'product_count': product_count}, status=status.HTTP_200_OK)
