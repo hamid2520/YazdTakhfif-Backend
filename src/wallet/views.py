@@ -78,9 +78,11 @@ from .filters import TimeFilter
 #         return settlement.add_request_settlement(user, amount)
 class WalletView(APIView):
     def get(self, request):
-        user_id = request.user.id
-        businesses = get_object_or_404(Business, admin_id=user_id)
-        serializer = WalletSerializer(instance=businesses, context={'user_id': user_id})
+        if request.user.is_superuser:
+            businesses = Business.objects.all()
+        else:
+            businesses = Business.objects.filter(admin_id=request.user.id)
+        serializer = WalletSerializer(instance=businesses, many=True, context={'user_id': request.user.id})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

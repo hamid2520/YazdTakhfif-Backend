@@ -17,8 +17,11 @@ from ..basket.models import ClosedBasketDetail
 class SellerDashboardAPIView(APIView):
 
     def get(self, request):
-        business = get_object_or_404(Business, admin_id=request.user.id)
-        serializer = SellerDashboardSerializer(instance=business)
+        if request.user.is_superuser:
+            businesses = Business.objects.all()
+        else:
+            businesses = Business.objects.filter(admin_id=request.user.id)
+        serializer = SellerDashboardSerializer(instance=businesses, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
