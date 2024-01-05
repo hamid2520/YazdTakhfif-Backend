@@ -110,10 +110,9 @@ class LineCoupon(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.slug is None:
             self.slug = f"{self.__class__.__name__.lower()}-{uuid.uuid4()}"
-        self.price_with_offer = self.price - (self.price * (self.offer_percent / 100))
+        self.offer_percent = ((self.price - self.price_with_offer)/self.price) * 100
         self.full_clean(exclude=None, validate_unique=True)
         return super().save(force_insert, force_update, using, update_fields)
-
     def __str__(self):
         return f"{self.coupon}({self.title})"
 
