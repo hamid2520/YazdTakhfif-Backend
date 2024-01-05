@@ -155,7 +155,7 @@ class LineCouponSerializer(serializers.ModelSerializer):
         model = LineCoupon
         fields = ["slug", "title", "coupon", "is_main", "count", "price", "offer_percent", "price_with_offer",
                   "sell_count"]
-        read_only_fields = ["slug", "price_with_offer", "sell_count"]
+        read_only_fields = ["slug", "offer_percent", "sell_count"]
 
 
 class LineCouponShowSerializer(serializers.ModelSerializer):
