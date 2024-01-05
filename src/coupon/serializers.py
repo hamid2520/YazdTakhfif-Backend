@@ -123,9 +123,10 @@ class CouponCreateSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(slug_field="slug", queryset=Category.objects.all(), many=True)
     formatted_created = serializers.SerializerMethodField()
     formatted_expire_date = serializers.SerializerMethodField()
+    expire_date = serializers.DateField()
 
     def get_business(self, obj):
-        return Business.objects.filter(admin=self.context['request'].user).first().slug
+        return Business.objects.filter(admin=self.context['request'].user).first()
 
     def get_formatted_created(self, obj):
         datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created)
