@@ -174,7 +174,8 @@ class LineCouponShowSerializer(serializers.ModelSerializer):
         return True if available_count > 0 else False
 
     def get_basket_detail_count(self, obj: LineCoupon):
-        basket_detail = BasketDetail.objects.filter(line_coupon_id=obj.id)
+        basket_detail = BasketDetail.objects.filter(line_coupon_id=obj.id,
+                                                    basket__user__id=self.context['request'].user.id)
         if basket_detail.exists():
             return basket_detail.first().count
         return 0
