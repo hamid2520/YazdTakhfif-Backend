@@ -69,7 +69,7 @@ class BasketDetailShowSerializer(serializers.ModelSerializer):
     class Meta:
         model = BasketDetail
         exclude = ["id", "payment_price", "payment_price_with_offer", "payment_offer_percent", "total_price",
-                   "total_price_with_offer", "coupon_slug"]
+                   "total_price_with_offer"]
         read_only_fields = ["slug", "payment_price", "payment_offer_percent", "payment_price_with_offer", "total_price",
                             "total_price_with_offer", 'coupon_slug']
 
