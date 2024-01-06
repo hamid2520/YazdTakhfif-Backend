@@ -1,16 +1,14 @@
 import jdatetime
-from django.db import IntegrityError
 from django.db.models import Count, Q, Sum
-from rest_framework import serializers
 from django.utils import timezone
-from django.db.models import F
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+
 from src.business.serializers import BusinessSerializer
-from .models import Category, Coupon, LineCoupon, Rate, Comment, CouponImage
 from .exceptions import MaximumNumberOfDeletableObjectsError
+from .models import Category, Coupon, LineCoupon, Rate, Comment, CouponImage
 from ..basket.models import BasketDetail
 from ..business.models import Business
-from ..users.models import User
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -119,14 +117,11 @@ class CouponSerializer(serializers.ModelSerializer):
 
 
 class CouponCreateSerializer(serializers.ModelSerializer):
-    business = serializers.SerializerMethodField(required=False)
+    business = serializers.SlugRelatedField(slug_field="title", required=False, queryset=Business.objects.all())
     category = serializers.SlugRelatedField(slug_field="slug", queryset=Category.objects.all(), many=True)
     formatted_created = serializers.SerializerMethodField()
     formatted_expire_date = serializers.SerializerMethodField()
     expire_date = serializers.DateField()
-
-    def get_business(self, obj):
-        return Business.objects.filter(admin=self.context['request'].user).first()
 
     def get_formatted_created(self, obj):
         datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created)
@@ -136,11 +131,22 @@ class CouponCreateSerializer(serializers.ModelSerializer):
         datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.expire_date)
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
+    def save(self, **kwargs):
+        user_id = self.context.get('request').user.id
+        business = Business.objects.filter(admin_id=user_id)
+        if not business.exists():
+            raise ValidationError({"business": "Business not found!"})
+        business = business.first()
+        self.validated_data["business"] = business
+        return super().save(**kwargs)
+
     class Meta:
         model = Coupon
-        fields = ["slug", "title", "business", "expire_date", "category", "description", "terms_of_use", "formatted_created",
+        fields = ["slug", "title", "business", "expire_date", "category", "description", "terms_of_use",
+                  "formatted_created",
                   "formatted_expire_date"]
-        read_only_fields = ['slug',]
+        read_only_fields = ['slug', ]
+
 
 class LineCouponSerializer(serializers.ModelSerializer):
     coupon = serializers.SlugRelatedField(slug_field="slug", queryset=Coupon.objects.all())
