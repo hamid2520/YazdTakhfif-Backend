@@ -32,10 +32,6 @@ class BasketDetailShowSerializer(serializers.ModelSerializer):
     max = serializers.SerializerMethodField()
     min = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField()
-    coupon_slug = serializers.SerializerMethodField()
-
-    def get_coupon_slug(self, obj):
-        return Coupon.objects.get(linecoupon__slug=obj.line_coupon_slug).slug
 
     def get_in_stock(self, obj: BasketDetail):
         line_coupon = obj.line_coupon
@@ -68,17 +64,10 @@ class BasketDetailShowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BasketDetail
-        line_coupon = serializers.SlugRelatedField(slug_field="title", read_only=True)
-        line_coupon_slug = serializers.SlugField(read_only=True, source="line_coupon.slug")
-        in_stock = serializers.SerializerMethodField()
-        imagesrc = serializers.SerializerMethodField()
-        max = serializers.SerializerMethodField()
-        min = serializers.SerializerMethodField()
-        price = serializers.SerializerMethodField()
-        coupon_slug = serializers.SerializerMethodField()
-        fields = ["slug", "line_coupon", "line_coupon_slug", "in_stock", "imagesrc", "max", "min", "price", 'coupon_slug']
+        exclude = ["id", "payment_price", "payment_price_with_offer", "payment_offer_percent", "total_price",
+                   "total_price_with_offer"]
         read_only_fields = ["slug", "payment_price", "payment_offer_percent", "payment_price_with_offer", "total_price",
-                            "total_price_with_offer", 'coupon_slug']
+                            "total_price_with_offer", ]
 
 
 class BasketSerializer(serializers.ModelSerializer):
