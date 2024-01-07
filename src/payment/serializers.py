@@ -58,7 +58,7 @@ class PaymentSerializer(serializers.ModelSerializer):
         read_only_fields = ["slug", "basket", "created_at", "total_price", "total_price_with_offer"]
 
 
-class GiftSerializer(serializers.ModelSerializer):
+class GiftSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=64)
     last_name = serializers.CharField(max_length=64)
     email = serializers.EmailField(max_length=256)

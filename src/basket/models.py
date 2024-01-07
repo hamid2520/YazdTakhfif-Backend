@@ -86,7 +86,7 @@ class BaseBasket(models.Model):
     )
     slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="کاربر")
-    payer_user = models.UUIDField(blank=True, null=True, verbose_name="پرداخت کننده")
+    gifted = models.CharField(max_length=11, blank=True, null=True, verbose_name="هدیه به")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد سبد خرید")
     payment_datetime = models.DateTimeField(blank=True, null=True, verbose_name="تاریخ پرداخت سبد خرید")
     is_paid = models.BooleanField(default=False, verbose_name="پرداخت شده / نشده")
@@ -111,7 +111,6 @@ class BaseBasket(models.Model):
 
 class Basket(BaseBasket):
     product = models.ManyToManyField(BasketDetail, blank=True, null=True, verbose_name="محصولات")
-    payer_user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="پرداخت کننده")
 
     def final_count_validation(self):
         errors = []

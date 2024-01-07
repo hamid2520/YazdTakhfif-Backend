@@ -95,8 +95,8 @@ class LineCoupon(models.Model):
                                   help_text="در هر کوپن فقط 1 لاین میتواند اصلی باشد!")
     count = models.PositiveIntegerField(verbose_name="تعداد")
     price = models.PositiveIntegerField(verbose_name="قیمت")
-    offer_percent = models.PositiveSmallIntegerField(verbose_name="درصد تخفیف")
-    price_with_offer = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت با تخفیف")
+    offer_percent = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name="درصد تخفیف")
+    price_with_offer = models.PositiveIntegerField(verbose_name="قیمت با تخفیف")
     sell_count = models.PositiveIntegerField(blank=True, default=0, verbose_name="تعداد فروخته شده")
 
     def validate_unique(self, exclude=None):
