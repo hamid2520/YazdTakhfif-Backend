@@ -58,10 +58,10 @@ class Coupon(models.Model):
     rate_count = models.PositiveIntegerField(default=0, blank=True, verbose_name="تعداد رای دهندگان")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        super().save(force_insert, force_update, using, update_fields)
-        self.slug = slugify(self.title, allow_unicode=True)
-        while Coupon.objects.exclude(id=self.id).filter(slug=self.slug).exists():
-            self.slug += generate_random_code()
+        if not self.slug:
+            self.slug = slugify(self.title, allow_unicode=True)
+            while Coupon.objects.exclude(id=self.id).filter(slug=self.slug).exists():
+                self.slug += generate_random_code()
         if not self.expire_date:
             self.expire_date = timezone.now() + timedelta(days=10)
         return super().save(force_insert, force_update, using, update_fields)
