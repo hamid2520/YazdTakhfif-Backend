@@ -2,8 +2,8 @@ import jdatetime
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from src.basket.models import Basket, ClosedBasket, ClosedBasketDetail
 from .models import Payment, get_instance_values
-from src.basket.models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail
 
 
 class PaymentSerializer(serializers.ModelSerializer):
@@ -56,3 +56,10 @@ class PaymentSerializer(serializers.ModelSerializer):
         fields = ["slug", "user", "basket", "basket_id", "total_price", "total_price_with_offer", "created_at",
                   "formatted_created_at"]
         read_only_fields = ["slug", "basket", "created_at", "total_price", "total_price_with_offer"]
+
+
+class GiftSerializer(serializers.Serializer):
+    first_name = serializers.CharField(max_length=64)
+    last_name = serializers.CharField(max_length=64)
+    email = serializers.EmailField(max_length=256)
+    phone = serializers.CharField(max_length=11)

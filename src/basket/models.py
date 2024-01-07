@@ -3,11 +3,11 @@ import string
 import uuid
 
 from django.core.exceptions import ValidationError
-from django.db import models
 from django.core.validators import MaxValueValidator
+from django.db import models
 
-from src.users.models import User
 from src.coupon.models import LineCoupon
+from src.users.models import User
 
 
 def generate_random_string(prefix="", length=8):
@@ -86,6 +86,7 @@ class BaseBasket(models.Model):
     )
     slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="کاربر")
+    gifted = models.CharField(max_length=11, blank=True, null=True, verbose_name="هدیه به")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد سبد خرید")
     payment_datetime = models.DateTimeField(blank=True, null=True, verbose_name="تاریخ پرداخت سبد خرید")
     is_paid = models.BooleanField(default=False, verbose_name="پرداخت شده / نشده")
