@@ -1,4 +1,5 @@
 import jdatetime
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Count, Q, Sum
 from django.utils import timezone
 from rest_framework import serializers
@@ -131,6 +132,12 @@ class CouponCreateSerializer(serializers.ModelSerializer):
         datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.expire_date)
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
+    def validate_category(self, value):
+        for category in value:
+            if not category.parent:
+                raise ValidationError("You can not add main categories!")
+        return value
+
     def save(self, **kwargs):
         user_id = self.context.get('request').user.id
         business = Business.objects.filter(admin_id=user_id)
@@ -156,6 +163,8 @@ class LineCouponSerializer(serializers.ModelSerializer):
             return super().save(**kwargs)
         except MaximumNumberOfDeletableObjectsError:
             raise ValidationError({"count": "There is no more coupon codes available for deletion!"})
+        except DjangoValidationError:
+            raise ValidationError({"is_main": "Just one line coupon can be main!"})
 
     class Meta:
         model = LineCoupon
