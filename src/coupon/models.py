@@ -1,18 +1,17 @@
 import uuid
-import random
-import string
 from datetime import timedelta
 
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator
 from django.db import models
+from django.db.models import Avg, Count
 from django.utils import timezone
 from django.utils.text import slugify
-from django.db.models import Avg, Count
-from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator, MaxValueValidator
 
 # from src.basket.models import ClosedBasket
 from src.business.models import Business
 from src.users.models import User
+from src.utils.generate_random_string import generate_random_code
 
 
 class Category(models.Model):
@@ -51,7 +50,7 @@ class Coupon(models.Model):
     slug = models.SlugField(max_length=256, db_index=True, allow_unicode=True, editable=False, blank=True)
     business = models.ForeignKey(to=Business, on_delete=models.CASCADE, verbose_name="کسب و کار")
     created = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد کوپن")
-    expire_date = models.DateTimeField(null=True, blank=True, verbose_name="تاریخ انقضا")
+    expire_date = models.DateField(null=True, blank=True, verbose_name="تاریخ انقضا")
     category = models.ManyToManyField(to=Category, verbose_name="دسته بندی")
     description = models.CharField(max_length=1000, blank=True, null=True, verbose_name="توضیحات")
     terms_of_use = models.TextField(blank=True, null=True, verbose_name="شرایط استفاده")
@@ -59,10 +58,13 @@ class Coupon(models.Model):
     rate_count = models.PositiveIntegerField(default=0, blank=True, verbose_name="تعداد رای دهندگان")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super().save(force_insert, force_update, using, update_fields)
         self.slug = slugify(self.title, allow_unicode=True)
+        while Coupon.objects.exclude(id=self.id).filter(slug=self.slug).exists():
+            self.slug += generate_random_code()
         if not self.expire_date:
             self.expire_date = timezone.now() + timedelta(days=10)
-        super().save(force_insert=False, force_update=False, using=None, update_fields=None)
+        return super().save(force_insert, force_update, using, update_fields)
 
     def get_main_line_coupon(self):
         return self.linecoupon_set.filter(is_main=True).first()
@@ -104,15 +106,16 @@ class LineCoupon(models.Model):
             lines = LineCoupon.objects.filter(coupon__id=self.coupon.id, is_main=True)
             if lines.exists():
                 if not lines.first().id == self.id:
-                    raise ValidationError({"is_main": "Only one line can be active!"})
+                    raise ValidationError({"is_main": "فقط یک لاین کوپن می تواند اصلی باشد!"})
         return super().validate_unique(exclude)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.slug is None:
             self.slug = f"{self.__class__.__name__.lower()}-{uuid.uuid4()}"
-        self.offer_percent = ((self.price - self.price_with_offer)/self.price) * 100
+        self.offer_percent = ((self.price - self.price_with_offer) / self.price) * 100
         self.full_clean(exclude=None, validate_unique=True)
         return super().save(force_insert, force_update, using, update_fields)
+
     def __str__(self):
         return f"{self.coupon}({self.title})"
 
