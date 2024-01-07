@@ -32,6 +32,7 @@ class BasketDetailShowSerializer(serializers.ModelSerializer):
     max = serializers.SerializerMethodField()
     min = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField()
+    coupon_slug = serializers.SerializerMethodField()
 
     def get_in_stock(self, obj: BasketDetail):
         line_coupon = obj.line_coupon
@@ -61,6 +62,9 @@ class BasketDetailShowSerializer(serializers.ModelSerializer):
             "total_price": obj.total_price,
             "total_price_with_offer": obj.total_price_with_offer,
         }
+
+    def get_coupon_slug(self, obj: BasketDetail):
+        return Coupon.objects.get(id=obj.line_coupon.coupon.id).slug
 
     class Meta:
         model = BasketDetail
