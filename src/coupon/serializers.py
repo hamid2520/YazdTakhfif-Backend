@@ -269,8 +269,10 @@ class CustomerCommentSerializer(serializers.ModelSerializer):
         return f"{obj.user.first_name} {obj.user.last_name}" if name_valid else obj.user.username
 
     def get_profile_picture(self, obj):
-        return obj.user.profile_picture.url
-
+        if obj.user.profile_picture:
+            return obj.user.profile_picture.url
+        else:
+            return ""
     def get_formatted_created_at(self, obj):
         datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created_at)
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
