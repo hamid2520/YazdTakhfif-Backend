@@ -258,6 +258,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class CustomerCommentSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
+    profile_picture = serializers.SerializerMethodField(read_only=True)
     coupon = serializers.SlugRelatedField(slug_field="slug", queryset=Coupon.objects.all())
     formatted_created_at = serializers.SerializerMethodField()
     sub_comment = serializers.SerializerMethodField()
@@ -266,6 +267,9 @@ class CustomerCommentSerializer(serializers.ModelSerializer):
     def get_user(self, obj):
         name_valid = bool(obj.user.first_name and obj.user.last_name)
         return f"{obj.user.first_name} {obj.user.last_name}" if name_valid else obj.user.username
+
+    def get_profile_picture(self, obj):
+        return obj.user.profile_picture
 
     def get_formatted_created_at(self, obj):
         datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created_at)
