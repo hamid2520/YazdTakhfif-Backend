@@ -33,7 +33,7 @@ class ValidateGiftAPIView(APIView):
             last_name = gift_serializer.validated_data.get("last_name")
             basket_user = request.user
             basket, created = Basket.objects.get_or_create(user_id=basket_user.id)
-            if not (basket_user.phone or basket_user.username) == phone:
+            if (basket_user.phone != phone) and (basket_user.username != phone):
                 gifted_user, created = User.objects.get_or_create(username=phone)
                 gifted_user.save()
                 basket.gifted = gifted_user.username
