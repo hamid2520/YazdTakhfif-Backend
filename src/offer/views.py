@@ -31,7 +31,7 @@ class OfferViewSet(ModelViewSet):
                     "error": "Offer is expired"
                 }
                 return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-            basket = Basket.objects.get(user_id=self.request.user.id, status=1)
+            basket = Basket.objects.get(user_id=self.request.user.id)
             total_basket_price_with_offer = basket.product.all().aggregate(
                 total_basket_price_with_offer=Sum("total_price_with_offer"))["total_basket_price_with_offer"] or 0
             products_total_price_with_offer = basket.product.filter(
