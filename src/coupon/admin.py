@@ -58,7 +58,7 @@ class LineCouponAdmin(admin.ModelAdmin):
     list_filter = ["is_main", ]
     search_fields = ["title", "coupon__title"]
     autocomplete_fields = ["coupon", ]
-    readonly_fields = ["price_with_offer", ]
+    readonly_fields = ["offer_percent", ]
 
 
 @admin.register(Rate)
