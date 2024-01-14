@@ -110,7 +110,7 @@ class BasketViewSet(ModelViewSet):
         basket.save()
         return Response(status=status.HTTP_200_OK)
 
-    @swagger_auto_schema(request_body=BasketSerializer, responses={200: BasketShowSerializer(), })
+    @swagger_auto_schema(responses={200: BasketShowSerializer(), })
     @action(detail=False, methods=["GET"], url_path="create-anonymous-basket", url_name="create_anonymous_basket",
             permission_classes=[], serializer_class=BasketSerializer)
     def create_anonymous_basket(self, request):
@@ -118,7 +118,7 @@ class BasketViewSet(ModelViewSet):
         basket.save()
         return Response(data={"basket_slug": basket.slug}, status=status.HTTP_201_CREATED)
 
-    @swagger_auto_schema(methods=["GET", "POST"], request_body=AddToBasketSerializer,
+    @swagger_auto_schema(methods=["GET", "POST"], query_serializer=AddToBasketSerializer(),
                          responses={200: BasketShowSerializer(), })
     @action(detail=True, methods=["GET", "POST"], url_path="anonymous-basket", url_name="anonymous_basket",
             permission_classes=[], serializer_class=AddToBasketSerializer)
