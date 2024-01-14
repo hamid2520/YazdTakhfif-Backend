@@ -12,7 +12,7 @@ from django.views import View
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 from src.utils.custom_api_views import ListRetrieveAPIView
@@ -45,14 +45,14 @@ class BasketViewSet(ModelViewSet):
     @swagger_auto_schema(responses={200: BasketDetailSerializer(many=True), })
     @action(detail=False, methods=["GET"], url_path="products-list", url_name="products_list")
     def get_products_list(self, request):
-        basket_products = self.filter_queryset(self.get_queryset()).filter(status=1).first().product.all()
+        basket_products = self.filter_queryset(self.get_queryset()).first().product.all()
         serializer = BasketDetailShowSerializer(instance=basket_products, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(responses={200: BasketDetailSerializer(many=True), })
     @action(detail=False, methods=["GET"], url_path="get-basket-slug", url_name="get_basket_slug")
     def get_basket_slug(self, request):
-        current_basket = Basket.objects.filter(user_id=self.request.user.id, status=1)
+        current_basket = Basket.objects.filter(user_id=self.request.user.id)
         if current_basket.exists():
             return Response(data={'slug': current_basket.last().slug}, status=status.HTTP_200_OK)
 
@@ -64,7 +64,7 @@ class BasketViewSet(ModelViewSet):
     @action(detail=False, methods=["POST", ], url_path="add-to-basket", url_name="add_to_basket",
             serializer_class=AddToBasketSerializer)
     def add_to_basket(self, request):
-        basket, created = Basket.objects.get_or_create(user_id=request.user.id, status=1)
+        basket, created = Basket.objects.get_or_create(user_id=request.user.id)
         add_serializer = AddToBasketSerializer(data=request.data)
         if add_serializer.is_valid():
             data = add_serializer.validated_data
@@ -103,12 +103,81 @@ class BasketViewSet(ModelViewSet):
 
     @action(detail=False, methods=["GET"], url_path="reset-basket-price", url_name="reset_basket_price", )
     def reset_basket_price(self, request):
-        basket = Basket.objects.get(user_id=request.user.id, status=1)
+        basket = Basket.objects.get(user_id=request.user.id)
         basket_total_price_with_offer = basket.product.all().aggregate(total_price=Sum("total_price_with_offer"))[
             "total_price"]
         basket.total_price_with_offer = basket_total_price_with_offer if basket_total_price_with_offer else 0
         basket.save()
         return Response(status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(request_body=BasketSerializer, responses={200: BasketShowSerializer(), })
+    @action(detail=False, methods=["GET"], url_path="create-anonymous-basket", url_name="create_anonymous_basket",
+            permission_classes=[], serializer_class=BasketSerializer)
+    def create_anonymous_basket(self, request):
+        basket = Basket.objects.create()
+        basket.save()
+        return Response(data={"basket_slug": basket.slug}, status=status.HTTP_201_CREATED)
+
+    @swagger_auto_schema(methods=["GET", "POST"], request_body=AddToBasketSerializer,
+                         responses={200: BasketShowSerializer(), })
+    @action(detail=True, methods=["GET", "POST"], url_path="anonymous-basket", url_name="anonymous_basket",
+            permission_classes=[], serializer_class=AddToBasketSerializer)
+    def anonymous_basket(self, request, slug):
+        basket = get_object_or_404(Basket, slug=slug)
+        if request.method == "GET":
+            serializer = BasketShowSerializer(instance=basket)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        add_serializer = AddToBasketSerializer(data=request.data)
+        if add_serializer.is_valid():
+            data = add_serializer.validated_data
+            line_coupon = LineCoupon.objects.get(slug=data.get("line_coupon_slug"))
+            product = basket.product.filter(line_coupon_id=line_coupon.id)
+            product_count = data.get("basket_detail_count")
+            if product.exists():
+                product = product.first()
+                if product_count == 0:
+                    basket.product.remove(product)
+                    product.delete()
+                    basket.save()
+                else:
+                    product.count = product_count
+                    product.save()
+            else:
+                if product_count:
+                    product = BasketDetail.objects.create(line_coupon_id=line_coupon.id, count=product_count)
+                    product.save()
+                    basket.product.add(product)
+                    basket.save()
+            add_serializer.context["basket_id"] = basket.id
+            return Response(data=add_serializer.data, status=status.HTTP_200_OK)
+        return Response(data=add_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(request_body=BasketSerializer, responses={200: BasketShowSerializer(), })
+    @action(detail=False, methods=["POST"], url_path="set-user-anonymous-basket", url_name="set_user_anonymous_basket",
+            permission_classes=[], serializer_class=BasketSerializer)
+    def set_user_anonymous_basket(self, request):
+        basket_slug = request.data.get("basket_slug")
+        basket = get_object_or_404(Basket, slug=basket_slug)
+        user_basket = Basket.objects.filter(user_id=request.user.id)
+        if not user_basket.exists():
+            basket.user_id = request.user.id
+            basket.save()
+            serializer = BasketShowSerializer(instance=basket)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        user_basket = user_basket.first()
+        for product in basket.product.all():
+            user_basket_product = user_basket.product.filter(line_coupon_id=product.line_coupon_id)
+            if user_basket_product.exists():
+                user_basket_product = user_basket_product.first()
+                user_basket_product.count += product.count
+                user_basket_product.save()
+            else:
+                user_basket.product.add(product)
+            basket.product.remove(product)
+        user_basket.save()
+        basket.delete()
+        serializer = BasketShowSerializer(instance=user_basket)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
 class BasketDetailViewSet(ModelViewSet):
@@ -238,7 +307,7 @@ class UserBasketProductCount(APIView):
 
     def get(self, request):
         current_user = self.request.user.id
-        user_basket = Basket.objects.filter(user=current_user, status=1).first()
+        user_basket = Basket.objects.filter(user=current_user).first()
         if user_basket:
             product_count = user_basket.product.all().count()
             return Response(data={'product_count': product_count}, status=status.HTTP_200_OK)

@@ -182,9 +182,9 @@ class LineCouponShowSerializer(serializers.ModelSerializer):
     days_left = serializers.SerializerMethodField(read_only=True)
 
     def get_days_left(self, obj):
-        time_now = timezone.now()
+        time_now = timezone.now().date()
         if obj.coupon.expire_date > time_now:
-            return (obj.coupon.expire_date - timezone.now()).days
+            return (obj.coupon.expire_date - time_now).days
         else:
             return -1
 

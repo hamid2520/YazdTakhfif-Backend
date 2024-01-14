@@ -78,14 +78,8 @@ class ClosedBasketDetail(BaseBasketDetail):
 
 # Basket
 class BaseBasket(models.Model):
-    status_choices = (
-        (1, "ایجاد شده"),
-        (2, "پرداخت شده"),
-        (3, "تایید شده"),
-        (4, "لغو شده"),
-    )
     slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="کاربر")
+    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, verbose_name="کاربر")
     gifted = models.CharField(max_length=11, blank=True, null=True, verbose_name="هدیه به")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد سبد خرید")
     payment_datetime = models.DateTimeField(blank=True, null=True, verbose_name="تاریخ پرداخت سبد خرید")
@@ -95,7 +89,6 @@ class BaseBasket(models.Model):
     total_offer_percent = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(100), ],
                                                       verbose_name="تخفیف کل")
     total_price_with_offer = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت کل با تخفیف")
-    status = models.PositiveIntegerField(choices=status_choices, default=1, blank=True, verbose_name="وضعیت")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.slug is None:
@@ -130,11 +123,16 @@ class Basket(BaseBasket):
 
 
 class ClosedBasket(BaseBasket):
+    status_choices = (
+        (1, "ایجاد شده"),
+        (2, "پرداخت شده"),
+        (3, "تایید شده"),
+        (4, "لغو شده"),
+    )
     product = models.ManyToManyField(ClosedBasketDetail, blank=True, null=True, verbose_name="محصولات")
+    status = models.PositiveIntegerField(choices=status_choices, default=2, blank=True, verbose_name="وضعیت")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        if self.status == 1:
-            self.status = 2
         self.is_paid = True
         return super().save(force_insert=False, force_update=False, using=None, update_fields=None)
 
