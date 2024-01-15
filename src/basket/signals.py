@@ -8,7 +8,7 @@ from ..wallet.models import Transaction
 @receiver(post_save, sender=ClosedBasket)
 def make_transaction_for_each_product(sender, **kwargs):
     closed_basket: ClosedBasket = kwargs['instance']
-    if Transaction.objects.filter(closed_basket=closed_basket).exists():
+    if not Transaction.objects.filter(closed_basket=closed_basket).exists():
         if closed_basket.status == 2:
             for product in closed_basket.product.all():
                 transaction = Transaction(user=product.line_coupon.coupon.business.admin,
