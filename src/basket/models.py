@@ -60,6 +60,7 @@ class BasketDetail(BaseBasketDetail):
                             update_fields)
 
     class Meta:
+        ordering = ['slug', ]
         verbose_name = "محصول سبد خرید"
         verbose_name_plural = "محصولات سبد خرید"
 
