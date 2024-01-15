@@ -45,7 +45,13 @@ class BasketViewSet(ModelViewSet):
     @swagger_auto_schema(responses={200: BasketDetailSerializer(many=True), })
     @action(detail=False, methods=["GET"], url_path="products-list", url_name="products_list")
     def get_products_list(self, request):
-        basket_products = self.filter_queryset(self.get_queryset()).first().product.all()
+        current_basket = self.filter_queryset(self.get_queryset())
+        if current_basket.exists():
+            current_basket = current_basket.first()
+        else:
+            current_basket = Basket.objects.create(user_id=self.request.user.id)
+            current_basket.save()
+        basket_products = current_basket.product.all()
         serializer = BasketDetailShowSerializer(instance=basket_products, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
