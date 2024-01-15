@@ -14,7 +14,7 @@ class Business(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.title, allow_unicode=True)
-        super().save(force_insert=False, force_update=False, using=None, update_fields=None)
+        return super().save(force_insert=False, force_update=False, using=None, update_fields=None)
 
     def __str__(self):
         return self.title.capitalize()

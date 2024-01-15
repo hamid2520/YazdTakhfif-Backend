@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django import forms
+from django.core.exceptions import ValidationError
 
 from .models import Category, Coupon, CouponImage, LineCoupon, FAQ, Rate, Comment
 
@@ -24,6 +26,13 @@ class ImageInline(admin.TabularInline):
     model = CouponImage
 
 
+# class CouponForm(forms.ModelForm):
+#     def clean_category(self):
+#         categories = self.cleaned_data.get("category")
+#         if categories and categories.filter(parent__isnull=True).exists():
+#             raise ValidationError("شما مجاز به انتخاب دسته بندی های والد نمی باشید!")
+
+
 @admin.register(Coupon)
 class CouponAdmin(admin.ModelAdmin):
     list_display = ["title", "business", "created", "expire_date"]
@@ -32,6 +41,7 @@ class CouponAdmin(admin.ModelAdmin):
     autocomplete_fields = ["business", "category"]
     readonly_fields = ["coupon_rate", "rate_count"]
     inlines = [ImageInline, ]
+    # form = CouponForm
 
 
 @admin.register(CouponImage)
@@ -43,12 +53,12 @@ class CouponImageAdmin(admin.ModelAdmin):
 
 @admin.register(LineCoupon)
 class LineCouponAdmin(admin.ModelAdmin):
-    list_display = ["title", "coupon", "is_main", "count", "price", "offer_percent", "price_with_offer","sell_count" ]
-    list_editable = ["is_main", "price", "offer_percent", "count","sell_count"]
+    list_display = ["title", "coupon", "is_main", "count", "price", "offer_percent", "price_with_offer", "sell_count"]
+    list_editable = ["is_main", "price", "offer_percent", "count", "sell_count"]
     list_filter = ["is_main", ]
     search_fields = ["title", "coupon__title"]
     autocomplete_fields = ["coupon", ]
-    readonly_fields = ["price_with_offer", ]
+    readonly_fields = ["offer_percent", ]
 
 
 @admin.register(Rate)

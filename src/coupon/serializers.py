@@ -1,16 +1,15 @@
 import jdatetime
-from django.db import IntegrityError
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Count, Q, Sum
-from rest_framework import serializers
 from django.utils import timezone
-from django.db.models import F
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+
 from src.business.serializers import BusinessSerializer
-from .models import Category, Coupon, LineCoupon, Rate, Comment, CouponImage
 from .exceptions import MaximumNumberOfDeletableObjectsError
+from .models import Category, Coupon, LineCoupon, Rate, Comment, CouponImage
 from ..basket.models import BasketDetail
 from ..business.models import Business
-from ..users.models import User
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -119,10 +118,11 @@ class CouponSerializer(serializers.ModelSerializer):
 
 
 class CouponCreateSerializer(serializers.ModelSerializer):
-    business = serializers.SlugRelatedField(slug_field="slug", queryset=Business.objects.all())
+    business = serializers.SlugRelatedField(slug_field="title", required=False, queryset=Business.objects.all())
     category = serializers.SlugRelatedField(slug_field="slug", queryset=Category.objects.all(), many=True)
     formatted_created = serializers.SerializerMethodField()
     formatted_expire_date = serializers.SerializerMethodField()
+    expire_date = serializers.DateField()
 
     def get_formatted_created(self, obj):
         datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created)
@@ -132,10 +132,27 @@ class CouponCreateSerializer(serializers.ModelSerializer):
         datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.expire_date)
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
+    def validate_category(self, value):
+        for category in value:
+            if not category.parent:
+                raise ValidationError("You can not add main categories!")
+        return value
+
+    def save(self, **kwargs):
+        user_id = self.context.get('request').user.id
+        business = Business.objects.filter(admin_id=user_id)
+        if not business.exists():
+            raise ValidationError({"business": "Business not found!"})
+        business = business.first()
+        self.validated_data["business"] = business
+        return super().save(**kwargs)
+
     class Meta:
         model = Coupon
-        fields = ["title", "business", "expire_date", "category", "description", "terms_of_use", "formatted_created",
+        fields = ["slug", "title", "business", "expire_date", "category", "description", "terms_of_use",
+                  "formatted_created",
                   "formatted_expire_date"]
+        read_only_fields = ['slug', ]
 
 
 class LineCouponSerializer(serializers.ModelSerializer):
@@ -146,12 +163,14 @@ class LineCouponSerializer(serializers.ModelSerializer):
             return super().save(**kwargs)
         except MaximumNumberOfDeletableObjectsError:
             raise ValidationError({"count": "There is no more coupon codes available for deletion!"})
+        except DjangoValidationError:
+            raise ValidationError({"is_main": "Just one line coupon can be main!"})
 
     class Meta:
         model = LineCoupon
         fields = ["slug", "title", "coupon", "is_main", "count", "price", "offer_percent", "price_with_offer",
                   "sell_count"]
-        read_only_fields = ["slug", "price_with_offer", "sell_count"]
+        read_only_fields = ["slug", "offer_percent", "sell_count"]
 
 
 class LineCouponShowSerializer(serializers.ModelSerializer):
@@ -163,9 +182,9 @@ class LineCouponShowSerializer(serializers.ModelSerializer):
     days_left = serializers.SerializerMethodField(read_only=True)
 
     def get_days_left(self, obj):
-        time_now = timezone.now()
+        time_now = timezone.now().date()
         if obj.coupon.expire_date > time_now:
-            return (obj.coupon.expire_date - timezone.now()).days
+            return (obj.coupon.expire_date - time_now).days
         else:
             return -1
 
@@ -174,7 +193,8 @@ class LineCouponShowSerializer(serializers.ModelSerializer):
         return True if available_count > 0 else False
 
     def get_basket_detail_count(self, obj: LineCoupon):
-        basket_detail = BasketDetail.objects.filter(line_coupon_id=obj.id)
+        basket_detail = BasketDetail.objects.filter(line_coupon_id=obj.id,
+                                                    basket__user__id=self.context['request'].user.id)
         if basket_detail.exists():
             return basket_detail.first().count
         return 0
@@ -247,6 +267,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class CustomerCommentSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
+    profile_picture = serializers.SerializerMethodField(read_only=True)
     coupon = serializers.SlugRelatedField(slug_field="slug", queryset=Coupon.objects.all())
     formatted_created_at = serializers.SerializerMethodField()
     sub_comment = serializers.SerializerMethodField()
@@ -256,17 +277,22 @@ class CustomerCommentSerializer(serializers.ModelSerializer):
         name_valid = bool(obj.user.first_name and obj.user.last_name)
         return f"{obj.user.first_name} {obj.user.last_name}" if name_valid else obj.user.username
 
+    def get_profile_picture(self, obj):
+        if obj.user.profile_picture:
+            return obj.user.profile_picture.url
+        else:
+            return ""
     def get_formatted_created_at(self, obj):
         datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created_at)
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
     def get_sub_comment(self, obj):
-        sub_comment = CustomerCommentSerializer(instance=obj.comment_set.all(), many=True)
+        sub_comment = CustomerCommentSerializer(instance=obj.comment_set.filter(verified=True), many=True)
         return sub_comment.data
 
     def get_rate(self, obj: Comment):
         user_id = obj.user.id
-        rate = obj.coupon.rate_set.filter(user_id=user_id).first()
+        rate = Rate.objects.filter(coupon=obj.coupon, user_id=user_id).first()
         return rate.rate if rate else 0
 
     class Meta:

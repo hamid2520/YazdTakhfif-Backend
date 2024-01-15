@@ -7,13 +7,11 @@ from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, Prod
 
 @admin.register(Basket)
 class BasketAdmin(admin.ModelAdmin):
-    list_display = ["user", "created_at", "status", "total_price", "total_offer_percent", "total_price_with_offer"]
-    list_editable = ["status", ]
-    list_filter = ["created_at", "status"]
+    list_display = ["user", "created_at", "total_price", "total_offer_percent", "total_price_with_offer"]
+    list_filter = ["created_at"]
     search_fields = ["user__username", "user__email", "total_price", "total_price_with_offer"]
     autocomplete_fields = ["user", "product"]
-    readonly_fields = ["count", "total_price", "total_offer_percent", "total_price_with_offer", "payment_datetime",
-                       "status"]
+    readonly_fields = ["count", "total_price", "total_offer_percent", "total_price_with_offer", "payment_datetime"]
 
 
 @admin.register(BasketDetail)

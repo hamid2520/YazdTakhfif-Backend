@@ -1,8 +1,10 @@
 from rest_framework.routers import SimpleRouter
-
-from .views import PaymentViewSet
+from django.urls import path
+from .views import PaymentViewSet,ValidateGiftAPIView
 
 router = SimpleRouter()
 router.register("payments", PaymentViewSet, "payment")
 
-urlpatterns = router.urls
+urlpatterns = [
+    path("validate-gift/", ValidateGiftAPIView.as_view(), name="validate_gift")
+              ] + router.urls

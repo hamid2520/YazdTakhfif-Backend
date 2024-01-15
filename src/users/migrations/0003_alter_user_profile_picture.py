@@ -2,6 +2,7 @@
 
 from django.db import migrations
 import easy_thumbnails.fields
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):

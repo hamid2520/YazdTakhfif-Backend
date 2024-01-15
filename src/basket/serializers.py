@@ -1,14 +1,10 @@
 import jdatetime
-
-from django.db.models import Sum
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from rest_framework import serializers
-from django.core.exceptions import ValidationError
-from datetime import datetime, timedelta
-from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, ProductValidationCode
+
 from src.coupon.models import LineCoupon, Coupon, CouponImage
-from src.coupon.serializers import LineCouponSerializer
-from ..users.models import User
+from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, ProductValidationCode
 
 
 class BasketDetailSerializer(serializers.ModelSerializer):
@@ -30,12 +26,13 @@ class BasketDetailSerializer(serializers.ModelSerializer):
 
 class BasketDetailShowSerializer(serializers.ModelSerializer):
     line_coupon = serializers.SlugRelatedField(slug_field="title", read_only=True)
-    line_coupon_slug = serializers.SlugField(read_only=True,source="line_coupon.slug")
+    line_coupon_slug = serializers.SlugField(read_only=True, source="line_coupon.slug")
     in_stock = serializers.SerializerMethodField()
     imagesrc = serializers.SerializerMethodField()
     max = serializers.SerializerMethodField()
     min = serializers.SerializerMethodField()
     price = serializers.SerializerMethodField()
+    coupon_slug = serializers.SerializerMethodField()
 
     def get_in_stock(self, obj: BasketDetail):
         line_coupon = obj.line_coupon
@@ -65,6 +62,9 @@ class BasketDetailShowSerializer(serializers.ModelSerializer):
             "total_price": obj.total_price,
             "total_price_with_offer": obj.total_price_with_offer,
         }
+
+    def get_coupon_slug(self, obj: BasketDetail):
+        return Coupon.objects.get(id=obj.line_coupon.coupon.id).slug
 
     class Meta:
         model = BasketDetail
@@ -98,7 +98,7 @@ class BasketSerializer(serializers.ModelSerializer):
 
     def save(self, **kwargs):
         user = self.validated_data.get("user")
-        basket = Basket.objects.filter(user_id=user.id, is_paid=False)
+        basket = Basket.objects.filter(user_id=user.id)
         if basket.exists():
             self.instance = basket.first()
         super().save(**kwargs)
@@ -129,7 +129,7 @@ class BasketShowSerializer(serializers.ModelSerializer):
 
     def save(self, **kwargs):
         user = self.validated_data.get("user")
-        basket = Basket.objects.filter(user_id=user.id, is_paid=False)
+        basket = Basket.objects.filter(user_id=user.id)
         if basket.exists():
             self.instance = basket.first()
         super().save(**kwargs)
@@ -264,10 +264,10 @@ class ProductValidationCodeShowSerializer(serializers.ModelSerializer):
     coupon_title = serializers.SerializerMethodField()
 
     def get_closed_basket(self, obj):
-        try :
+        try:
             datetime_obj = jdatetime.datetime.fromgregorian(datetime=obj.closed_basket.payment_datetime)
             return f"{obj.closed_basket.user.username}({datetime_obj.strftime('%Y/%m/%d %H:%M:%S')})"
-        except :
+        except:
             return f"{obj.closed_basket.user.username}"
 
     def get_coupon_title(self, obj):

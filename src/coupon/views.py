@@ -1,5 +1,5 @@
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
@@ -13,7 +13,7 @@ from .filters import IsOwnerOrSuperUserCoupon, IsOwnerOrSuperUserLineCoupon, Pri
     BusinessFilter, CategoryFilter
 from .serializers import CategorySerializer, CouponSerializer, CouponCreateSerializer, LineCouponSerializer, \
     RateSerializer, CommentSerializer, CouponImageSerializer, LineCouponShowSerializer
-from .permissions import IsSuperUserOrOwner
+from .permissions import IsSuperUserOrOwner, IsSuperUserOrReadOnly
 from src.basket.models import ProductValidationCode
 from src.basket.serializers import ProductValidationCodeSerializer, ProductValidationCodeShowSerializer
 from rest_framework import pagination
@@ -26,8 +26,8 @@ class CategoryViewSet(ModelViewSet):
     serializer_class = CategorySerializer
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
-    permission_classes = [IsAuthenticated, ]
-    filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [IsOwnerOrSuperUserCoupon, SearchFilter]
+    permission_classes = [IsSuperUserOrReadOnly, ]
+    filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter]
     search_fields = ['title', ]
     pagination_class = pagination.LimitOffsetPagination
 
@@ -68,7 +68,7 @@ class CouponViewSet(ModelViewSet):
         return Response(data={"Error": "No images with this id!"}, status=status.HTTP_404_NOT_FOUND)
 
     @swagger_auto_schema(request_body=RateSerializer, responses={200: RateSerializer(), })
-    @action(detail=True, methods=["POST", ], serializer_class=RateSerializer, url_path="rate-coupon",
+    @action(detail=True, methods=["POST", ], serializer_class=RateSerializer, filter_backends=[], url_path="rate-coupon",
             url_name="rate_coupon")
     def rate_coupon(self, request, slug):
         coupon = self.get_object()
@@ -87,7 +87,7 @@ class CouponViewSet(ModelViewSet):
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(request_body=CommentSerializer, responses={200: CommentSerializer(), })
-    @action(detail=True, methods=["POST", ], serializer_class=CommentSerializer, url_path="add-comment",
+    @action(detail=True, methods=["POST", ], serializer_class=CommentSerializer, filter_backends=[], url_path="add-comment",
             url_name="add_comment", )
     def add_comment(self, request, slug):
         if 'text' in request.data:
