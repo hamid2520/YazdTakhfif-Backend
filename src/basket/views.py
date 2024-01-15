@@ -180,6 +180,7 @@ class BasketViewSet(ModelViewSet):
             else:
                 user_basket.product.add(product)
             basket.product.remove(product)
+        user_basket.update_basket()
         user_basket.save()
         basket.delete()
         serializer = BasketShowSerializer(instance=user_basket)

@@ -5,6 +5,7 @@ import uuid
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator
 from django.db import models
+from django.db.models import Count, Sum, Avg
 
 from src.coupon.models import LineCoupon
 from src.users.models import User
@@ -116,6 +117,17 @@ class Basket(BaseBasket):
         if len(errors) > 0:
             return errors
         return None
+
+    def update_basket(self):
+        stats = self.product.all().aggregate(count=Avg("count"),
+                                             total_price=Sum("total_price"),
+                                             total_offer_percent=Sum("line_coupon__offer_percent"),
+                                             total_price_with_offer=Sum("total_price_with_offer"))
+        self.count = stats["count"]
+        self.total_price = stats["total_price"]
+        self.total_offer_percent = stats["total_offer_percent"]
+        self.total_price_with_offer = stats["total_price_with_offer"]
+        self.save()
 
     class Meta:
         verbose_name = "سبد خرید"
