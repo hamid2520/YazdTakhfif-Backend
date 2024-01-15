@@ -33,15 +33,15 @@ class OfferViewSet(ModelViewSet):
                 return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
             basket = Basket.objects.get(user_id=self.request.user.id)
             total_basket_price_with_offer = basket.product.all().aggregate(
-                total_basket_price_with_offer=Sum("total_price_with_offer"))["total_basket_price_with_offer"] or 0
+                total_basket_price_with_offer=Sum("total_price_with_offer"))["total_basket_price_with_offer"]
+            total_basket_price_with_offer = total_basket_price_with_offer if total_basket_price_with_offer else 0
             products_total_price_with_offer = basket.product.filter(
                 line_coupon__coupon__business__in=offer.limited_businesses.all()).aggregate(
-                total_offered_products_price=Sum("total_price_with_offer"))["total_offered_products_price"] or 0
-            total_basket_price_with_offer= total_basket_price_with_offer if total_basket_price_with_offer else 0
-            products_total_price_with_offer= products_total_price_with_offer if products_total_price_with_offer else 0
+                total_offered_products_price=Sum("total_price_with_offer"))["total_offered_products_price"]
+            products_total_price_with_offer = products_total_price_with_offer if products_total_price_with_offer else 0
             offer_price = ((products_total_price_with_offer * offer.percent) // 100)
-            offered_price = total_basket_price_with_offer - (
-                offer_price if offer_price < offer.maximum_offer_price else offer.maximum_offer_price)
+            offer_price = offer_price if offer_price < offer.maximum_offer_price else offer.maximum_offer_price
+            offered_price = total_basket_price_with_offer - offer_price
             data = {
                 "offer_percent": offer.percent,
                 "offered_price": offer_price,
