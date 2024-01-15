@@ -21,7 +21,7 @@ class Transaction(models.Model):
     status = models.SmallIntegerField(verbose_name='وضعیت', choices=STATUS_CHOICES, default=1)
     amount = models.BigIntegerField(verbose_name='مبلغ')
     datetime = models.DateTimeField(verbose_name='تاریخ ایجاد', auto_now_add=True)
-    buyer_phone = models.CharField(null=True, blank=True, max_length=11)
+    customer = models.CharField(null=True, blank=True, max_length=150)
 
     def __str__(self):
         return 'from:{} to:{} amount:{}'
