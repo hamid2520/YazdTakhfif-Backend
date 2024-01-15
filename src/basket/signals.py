@@ -8,14 +8,18 @@ from ..wallet.models import Transaction
 @receiver(post_save, sender=ClosedBasket)
 def make_transaction_for_each_product(sender, **kwargs):
     closed_basket: ClosedBasket = kwargs['instance']
-    if closed_basket.status == 2:
-        for product in closed_basket.product.all():
-            transaction = Transaction(user=product.line_coupon.coupon.business.admin,
-                                      amount=product.total_price_with_offer,
-                                      customer=closed_basket.user.username,
-                                      type=1,
-                                      status=1)
-            transaction.save()
+    if Transaction.objects.filter(closed_basket=closed_basket).exists():
+        if closed_basket.status == 2:
+            for product in closed_basket.product.all():
+                transaction = Transaction(user=product.line_coupon.coupon.business.admin,
+                                          amount=product.total_price_with_offer,
+                                          price_with_out_offer=product.total_price,
+                                          customer=closed_basket.user.username,
+                                          coupon_id=product.line_coupon.coupon_id,
+                                          line_coupon_id=product.line_coupon_id,
+                                          type=1,
+                                          status=1)
+                transaction.save()
 
 
 @receiver(m2m_changed, sender=Basket.product.through)
