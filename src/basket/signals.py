@@ -12,6 +12,7 @@ def make_transaction_for_each_product(sender, **kwargs):
         for product in closed_basket.product.all():
             transaction = Transaction(user=product.line_coupon.coupon.business.admin,
                                       amount=product.total_price_with_offer,
+                                      buyer_phone=closed_basket.user.username,
                                       type=1,
                                       status=2)
             transaction.save()

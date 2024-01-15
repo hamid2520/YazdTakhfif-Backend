@@ -3,7 +3,6 @@ from django.db import models
 from src.users.models import User
 
 
-
 # from core.util.extend import raise_not_field_error
 class Account(models.Model):
     class Meta:
@@ -34,6 +33,7 @@ class Account(models.Model):
     def __str__(self):
         return self.owner.get_full_name() if self.owner else str(self.pk)
 
+
 class Transaction(models.Model):
     TYPE_DEPOSIT_COMMISSION = 1
     TYPE_WITHDRAW_COMMISSION = 2
@@ -52,6 +52,7 @@ class Transaction(models.Model):
     status = models.SmallIntegerField(verbose_name='وضعیت', choices=TYPE_CHOICES, default=1)
     amount = models.BigIntegerField(verbose_name='مبلغ')
     datetime = models.DateTimeField(verbose_name='تاریخ ایجاد', auto_now_add=True)
+    buyer_phone = models.CharField(null=True, blank=True, max_length=11)
 
     def __str__(self):
         return 'from:{} to:{} amount:{}'.format(
