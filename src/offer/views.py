@@ -44,7 +44,7 @@ class OfferViewSet(ModelViewSet):
                 offer_price if offer_price < offer.maximum_offer_price else offer.maximum_offer_price)
             data = {
                 "offer_percent": offer.percent,
-                "offered_price": offered_price,
+                "offered_price": offer_price,
             }
             if ser_data.get("apply_to_basket", False):
                 basket.total_price_with_offer = offered_price
