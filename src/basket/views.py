@@ -160,7 +160,7 @@ class BasketViewSet(ModelViewSet):
 
     @swagger_auto_schema(request_body=BasketSerializer, responses={200: BasketShowSerializer(), })
     @action(detail=False, methods=["POST"], url_path="set-user-anonymous-basket", url_name="set_user_anonymous_basket",
-            permission_classes=[], serializer_class=BasketSerializer)
+            serializer_class=BasketSerializer)
     def set_user_anonymous_basket(self, request):
         basket_slug = request.data.get("basket_slug")
         basket = get_object_or_404(Basket, slug=basket_slug)
