@@ -1,8 +1,25 @@
 from django.db.models import Sum
 from django.dispatch import receiver
 from django.db.models.signals import m2m_changed, post_save, pre_delete
+from .models import Basket, BasketDetail, ClosedBasket
+from ..wallet.models import Transaction
 
-from .models import Basket, BasketDetail
+
+@receiver(post_save, sender=ClosedBasket)
+def make_transaction_for_each_product(sender, **kwargs):
+    closed_basket: ClosedBasket = kwargs['instance']
+    if not Transaction.objects.filter(closed_basket=closed_basket).exists():
+        if closed_basket.status == 2:
+            for product in closed_basket.product.all():
+                transaction = Transaction(user=product.line_coupon.coupon.business.admin,
+                                          amount=product.total_price_with_offer,
+                                          price_with_out_offer=product.total_price,
+                                          customer=closed_basket.user.username,
+                                          coupon_id=product.line_coupon.coupon_id,
+                                          line_coupon_id=product.line_coupon_id,
+                                          type=1,
+                                          status=1)
+                transaction.save()
 
 
 @receiver(m2m_changed, sender=Basket.product.through)
