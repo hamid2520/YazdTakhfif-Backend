@@ -22,7 +22,7 @@ class NewsLetter(models.Model):
     email = models.EmailField(verbose_name="ایمیل")
 
     def __str__(self):
-        return f"{self.user} {self.email}"
+        return f"{self.user if self.user else ''} {self.email}"
 
     class Meta:
         verbose_name = "خبرنامه"
