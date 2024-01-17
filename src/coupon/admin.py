@@ -12,6 +12,7 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields = ["title", ]
     autocomplete_fields = ["parent", ]
     list_filter = ["parent", ]
+    readonly_fields = ["slug", ]
 
 
 @admin.register(FAQ)
@@ -26,22 +27,14 @@ class ImageInline(admin.TabularInline):
     model = CouponImage
 
 
-# class CouponForm(forms.ModelForm):
-#     def clean_category(self):
-#         categories = self.cleaned_data.get("category")
-#         if categories and categories.filter(parent__isnull=True).exists():
-#             raise ValidationError("شما مجاز به انتخاب دسته بندی های والد نمی باشید!")
-
-
 @admin.register(Coupon)
 class CouponAdmin(admin.ModelAdmin):
     list_display = ["title", "business", "created", "expire_date"]
     list_filter = ["category", "created", "expire_date", "coupon_rate"]
     search_fields = ["title", "business__admin__username"]
     autocomplete_fields = ["business", "category"]
-    readonly_fields = ["coupon_rate", "rate_count"]
+    readonly_fields = ["slug", "coupon_rate", "rate_count"]
     inlines = [ImageInline, ]
-    # form = CouponForm
 
 
 @admin.register(CouponImage)
@@ -58,7 +51,7 @@ class LineCouponAdmin(admin.ModelAdmin):
     list_filter = ["is_main", ]
     search_fields = ["title", "coupon__title"]
     autocomplete_fields = ["coupon", ]
-    readonly_fields = ["offer_percent", ]
+    readonly_fields = ["slug", "offer_percent"]
 
 
 @admin.register(Rate)

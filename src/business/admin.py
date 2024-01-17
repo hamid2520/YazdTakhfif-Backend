@@ -8,3 +8,4 @@ class BusinessAdmin(admin.ModelAdmin):
     list_display = ["title", "admin"]
     search_fields = ["title", "admin__username"]
     autocomplete_fields = ["admin"]
+    readonly_fields = ["slug", ]

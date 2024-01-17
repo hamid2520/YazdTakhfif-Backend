@@ -16,7 +16,8 @@ from src.utils.generate_random_string import generate_random_code
 
 class Category(models.Model):
     title = models.CharField(max_length=128, unique=True, verbose_name="عنوان")
-    slug = models.SlugField(max_length=256, db_index=True, allow_unicode=True, editable=False, blank=True)
+    slug = models.SlugField(max_length=256, db_index=True, allow_unicode=True, editable=False, blank=True,
+                            verbose_name="اسلاگ")
     parent = models.ForeignKey(to="Category", on_delete=models.CASCADE, null=True, blank=True,
                                verbose_name="دسته بندی والد")
 
@@ -47,14 +48,15 @@ class FAQ(models.Model):
 
 class Coupon(models.Model):
     title = models.CharField(max_length=128, verbose_name="عنوان")
-    slug = models.SlugField(max_length=256, db_index=True, allow_unicode=True, editable=False, blank=True)
+    slug = models.SlugField(max_length=256, db_index=True, allow_unicode=True, editable=False, blank=True,
+                            verbose_name="اسلاگ")
     business = models.ForeignKey(to=Business, on_delete=models.CASCADE, verbose_name="کسب و کار")
     created = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد کوپن")
     expire_date = models.DateField(null=True, blank=True, verbose_name="تاریخ انقضا")
     category = models.ManyToManyField(to=Category, verbose_name="دسته بندی")
     description = models.CharField(max_length=1000, blank=True, null=True, verbose_name="توضیحات")
     terms_of_use = models.TextField(blank=True, null=True, verbose_name="شرایط استفاده")
-    coupon_rate = models.DecimalField(default=0, null=True, max_digits=2, decimal_places=1, verbose_name="امتیاز کوپن")
+    coupon_rate = models.DecimalField(default=0, blank=True, max_digits=2, decimal_places=1, verbose_name="امتیاز کوپن")
     rate_count = models.PositiveIntegerField(default=0, blank=True, verbose_name="تعداد رای دهندگان")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
@@ -90,14 +92,14 @@ class CouponImage(models.Model):
 
 
 class LineCoupon(models.Model):
-    slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
+    slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True, verbose_name="اسلاگ")
     title = models.CharField(max_length=128, verbose_name="عنوان")
     coupon = models.ForeignKey(to=Coupon, on_delete=models.CASCADE, verbose_name="کوپن")
     is_main = models.BooleanField(default=False, verbose_name="اصلی هست / نیست",
                                   help_text="در هر کوپن فقط 1 لاین میتواند اصلی باشد!")
     count = models.PositiveIntegerField(verbose_name="تعداد")
     price = models.PositiveIntegerField(verbose_name="قیمت")
-    offer_percent = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name="درصد تخفیف")
+    offer_percent = models.PositiveSmallIntegerField(blank=True, default=0, verbose_name="درصد تخفیف")
     price_with_offer = models.PositiveIntegerField(verbose_name="قیمت با تخفیف")
     sell_count = models.PositiveIntegerField(blank=True, default=0, verbose_name="تعداد فروخته شده")
 

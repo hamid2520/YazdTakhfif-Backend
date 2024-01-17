@@ -6,7 +6,8 @@ from src.users.models import User
 
 class Business(models.Model):
     title = models.CharField(max_length=128, unique=True, verbose_name="عنوان")
-    slug = models.SlugField(max_length=256, db_index=True, allow_unicode=True, editable=False, blank=True)
+    slug = models.SlugField(max_length=256, db_index=True, allow_unicode=True, editable=False, blank=True,
+                            verbose_name="اسلاگ")
     admin = models.ForeignKey(to=User, on_delete=models.CASCADE, verbose_name="ادمین ")
     description = models.TextField(blank=True, null=True, verbose_name="توضیحات")
     address = models.TextField(blank=True, null=True, verbose_name="آدرس")
