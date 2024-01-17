@@ -1,5 +1,7 @@
 from django.db import models
 
+from src.users.models import User
+
 
 class Advertise(models.Model):
     title = models.CharField(max_length=128, verbose_name="عنوان")
@@ -13,3 +15,15 @@ class Advertise(models.Model):
     class Meta:
         verbose_name = "تبلیغات"
         verbose_name_plural = "تبلیغات"
+
+
+class NewsLetter(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="کاربر")
+    email = models.EmailField(verbose_name="ایمیل")
+
+    def __str__(self):
+        return f"{self.user if self.user else ''} {self.email}"
+
+    class Meta:
+        verbose_name = "خبرنامه"
+        verbose_name_plural = "خبرنامه"

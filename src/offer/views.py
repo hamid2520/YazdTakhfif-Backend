@@ -20,7 +20,8 @@ class OfferViewSet(ModelViewSet):
     filter_backends = [IsSuperUserOrOwner, ]
     pagination_class = pagination.LimitOffsetPagination
 
-    @action(detail=False, methods=["POST", ], url_path="validate-offer", url_name="validate_offer")
+    @action(detail=False, methods=["POST", ], url_path="validate-offer", url_name="validate_offer",
+            permission_classes=[])
     def validate_offer(self, request):
         serializer = OfferValidatorSerializer(data=self.request.data)
         if serializer.is_valid():

@@ -16,6 +16,7 @@ class CategoryAPIView(ListAPIView):
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter, ]
     search_fields = ['title', ]
 
+
 class CouponAPIView(ListRetrieveAPIView):
     queryset = Coupon.objects.all()
     serializer_class = CouponSerializer
@@ -43,6 +44,7 @@ class CouponAPIView(ListRetrieveAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+
 class LineCouponAPIView(ListAPIView):
     serializer_class = LineCouponShowSerializer
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter, PriceFilter]
@@ -51,3 +53,8 @@ class LineCouponAPIView(ListAPIView):
     def get_queryset(self):
         coupon = get_object_or_404(Coupon, slug=self.kwargs.get("coupon_slug"))
         return coupon.linecoupon_set.all().distinct()
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["basket_slug"] = self.request.query_params.get("basket_slug")
+        return context

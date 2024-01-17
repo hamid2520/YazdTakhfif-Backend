@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError
 from src.business.serializers import BusinessSerializer
 from .exceptions import MaximumNumberOfDeletableObjectsError
 from .models import Category, Coupon, LineCoupon, Rate, Comment, CouponImage
-from ..basket.models import BasketDetail
+from ..basket.models import BasketDetail, Basket
 from ..business.models import Business
 
 
@@ -193,6 +193,13 @@ class LineCouponShowSerializer(serializers.ModelSerializer):
         return True if available_count > 0 else False
 
     def get_basket_detail_count(self, obj: LineCoupon):
+        if self.context['request'].user.is_anonymous:
+            basket_slug = self.context.get('basket_slug')
+            if basket_slug:
+                basket_detail = BasketDetail.objects.filter(line_coupon_id=obj.id, basket__slug=basket_slug)
+                if basket_detail.exists():
+                    return basket_detail.first().count
+            return 0
         basket_detail = BasketDetail.objects.filter(line_coupon_id=obj.id,
                                                     basket__user__id=self.context['request'].user.id)
         if basket_detail.exists():
@@ -282,6 +289,7 @@ class CustomerCommentSerializer(serializers.ModelSerializer):
             return obj.user.profile_picture.url
         else:
             return ""
+
     def get_formatted_created_at(self, obj):
         datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created_at)
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
