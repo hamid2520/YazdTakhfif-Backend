@@ -186,6 +186,12 @@ class BasketViewSet(ModelViewSet):
         serializer = BasketShowSerializer(instance=user_basket)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=["GET"], url_path="get-anonymous-basket-count", url_name="get_anonymous_basket_count")
+    def set_user_anonymous_basket(self, request, slug):
+        basket_products_count = get_object_or_404(Basket, slug=slug).product.all().count()
+        return Response(data={'product_count': basket_products_count if basket_products_count else 0},
+                        status=status.HTTP_200_OK)
+
 
 class BasketDetailViewSet(ModelViewSet):
     queryset = BasketDetail.objects.all()

@@ -10,4 +10,4 @@ class PaymentAdmin(admin.ModelAdmin):
     search_fields = ["user__username", "basket__product__line_coupon__title",
                      "basket__product__line_coupon__coupon__title"]
     autocomplete_fields = ["user", "basket"]
-    readonly_fields = ["created_at"]
+    readonly_fields = ["slug", "created_at"]

@@ -18,15 +18,16 @@ def generate_random_string(prefix="", length=8):
 
 # Basket Products
 class BaseBasketDetail(models.Model):
-    slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True, max_length=128)
+    slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True, max_length=128,
+                            verbose_name="اسلاگ")
     line_coupon = models.ForeignKey(LineCoupon, on_delete=models.CASCADE, verbose_name="لاین کوپن")
     count = models.PositiveSmallIntegerField(verbose_name="تعداد")
-    payment_price = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت تمام شده")
-    payment_offer_percent = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(100), ],
+    payment_price = models.PositiveIntegerField(blank=True, default=0, verbose_name="قیمت تمام شده")
+    payment_offer_percent = models.PositiveIntegerField(blank=True, default=0, validators=[MaxValueValidator(100), ],
                                                         verbose_name="تخفیف تمام شده")
-    payment_price_with_offer = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت تمام شده با تخفیف")
-    total_price = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت کل")
-    total_price_with_offer = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت کل با تخفیف")
+    payment_price_with_offer = models.PositiveIntegerField(blank=True, default=0, verbose_name="قیمت تمام شده با تخفیف")
+    total_price = models.PositiveIntegerField(blank=True, default=0, verbose_name="قیمت کل")
+    total_price_with_offer = models.PositiveIntegerField(blank=True, default=0, verbose_name="قیمت کل با تخفیف")
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
@@ -80,17 +81,17 @@ class ClosedBasketDetail(BaseBasketDetail):
 
 # Basket
 class BaseBasket(models.Model):
-    slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
+    slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True, verbose_name="اسلاگ")
     user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, verbose_name="کاربر")
     gifted = models.CharField(max_length=11, blank=True, null=True, verbose_name="هدیه به")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد سبد خرید")
     payment_datetime = models.DateTimeField(blank=True, null=True, verbose_name="تاریخ پرداخت سبد خرید")
     is_paid = models.BooleanField(default=False, verbose_name="پرداخت شده / نشده")
-    count = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name="تعداد")
-    total_price = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت کل")
-    total_offer_percent = models.PositiveIntegerField(blank=True, null=True, validators=[MaxValueValidator(100), ],
+    count = models.PositiveSmallIntegerField(blank=True, default=0, verbose_name="تعداد")
+    total_price = models.PositiveIntegerField(blank=True, default=0, verbose_name="قیمت کل")
+    total_offer_percent = models.PositiveIntegerField(blank=True, default=0, validators=[MaxValueValidator(100), ],
                                                       verbose_name="تخفیف کل")
-    total_price_with_offer = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت کل با تخفیف")
+    total_price_with_offer = models.PositiveIntegerField(blank=True, default=0, verbose_name="قیمت کل با تخفیف")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.slug is None:

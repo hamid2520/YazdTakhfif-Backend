@@ -42,11 +42,11 @@ def payment_done(closed_basket_id):
 
 
 class Payment(models.Model):
-    slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True)
+    slug = models.SlugField(db_index=True, blank=True, null=True, editable=False, unique=True, verbose_name="اسلاگ")
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="کاربر")
     basket = models.ForeignKey(ClosedBasket, on_delete=models.CASCADE, null=True, blank=True, verbose_name="سبد خرید")
-    total_price = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت کل")
-    total_price_with_offer = models.PositiveIntegerField(blank=True, null=True, verbose_name="قیمت کل با تخفیف")
+    total_price = models.PositiveIntegerField(blank=True, default=0, verbose_name="قیمت کل")
+    total_price_with_offer = models.PositiveIntegerField(blank=True, default=0, verbose_name="قیمت کل با تخفیف")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
 
     def save(self, force_insert=False, force_update=False, using=None,
