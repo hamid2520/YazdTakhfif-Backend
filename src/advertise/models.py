@@ -18,11 +18,11 @@ class Advertise(models.Model):
 
 
 class NewsLetter(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, verbose_name="کاربر")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="کاربر")
     email = models.EmailField(verbose_name="ایمیل")
 
     def __str__(self):
-        return self.user if self.user else self.email
+        return f"{self.user} {self.email}"
 
     class Meta:
         verbose_name = "خبرنامه"
