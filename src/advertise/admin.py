@@ -13,5 +13,5 @@ class AdvertiseAdmin(admin.ModelAdmin):
 
 @admin.register(NewsLetter)
 class NewsLetterAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "email", "user"]
+    list_display = ["email", "user"]
     search_fields = ["email", "user"]
