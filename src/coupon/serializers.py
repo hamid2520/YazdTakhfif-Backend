@@ -212,9 +212,17 @@ class LineCouponShowSerializer(serializers.ModelSerializer):
 
     def get_line_coupon_count(self, obj: LineCoupon):
         try:
-            basket_detail: BasketDetail = BasketDetail.objects.filter(line_coupon_id=obj.id,
-                                                                      basket__user=self.context['request'].user).first()
-            return basket_detail.count
+            if self.context['request'].user.is_anonymous:
+                basket_slug = self.context.get('basket_slug')
+                if basket_slug:
+                    basket_detail = BasketDetail.objects.filter(line_coupon_id=obj.id, basket__slug=basket_slug)
+                    if basket_detail.exists():
+                        return basket_detail.first().count
+                return 0
+            else:
+                basket_detail = BasketDetail.objects.filter(line_coupon_id=obj.id,
+                                                                          basket__user=self.context['request'].user).first()
+                return basket_detail.count
         except:
             return 0
 
