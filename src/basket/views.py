@@ -1,13 +1,13 @@
-from django.core.files.base import ContentFile
+from qrcode.constants import ERROR_CORRECT_L
+from qrcode.main import QRCode
 from django.db.models import Q, Sum, F
 from rest_framework.permissions import IsAuthenticated
-from src.utils.qrcode_generator import text_to_qrcode
 from django.urls import reverse
 from rest_framework import status
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.http import HttpResponseNotFound
+from django.http import HttpResponse
 from django.views import View
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
@@ -22,7 +22,7 @@ from src.coupon.models import LineCoupon, Coupon
 from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, ProductValidationCode
 from .filters import IsOwnerOrSuperUserBasket, IsOwnerOrSuperUserBasketDetail
 from .serializers import BasketSerializer, BasketDetailSerializer, AddToBasketSerializer, ClosedBasketSerializer, \
-    ClosedBasketDetailSerializer, ClosedBasketDetailValidatorSerializer, QRCodeSerializer, QRCodeGetSerializer, \
+    ClosedBasketDetailSerializer, ClosedBasketDetailValidatorSerializer, QRCodeGetSerializer, \
     UserBoughtCodesSerializer, BasketDetailShowSerializer, BasketShowSerializer
 
 
@@ -186,7 +186,8 @@ class BasketViewSet(ModelViewSet):
         serializer = BasketShowSerializer(instance=user_basket)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=["GET"], url_path="get-anonymous-basket-count", url_name="get_anonymous_basket_count", permission_classes=[])
+    @action(detail=True, methods=["GET"], url_path="get-anonymous-basket-count", url_name="get_anonymous_basket_count",
+            permission_classes=[])
     def get_anonymous_basket_count(self, request, slug):
         basket_products_count = get_object_or_404(Basket, slug=slug).product.all().count()
         return Response(data={'product_count': basket_products_count if basket_products_count else 0},
@@ -275,19 +276,36 @@ class ClosedBasketDetailValidatorAPIView(APIView):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-class GetQRCode(APIView):
-    permission_classes = [IsAuthenticated, ]
+def generate_qrcode(request, slug):
+    if request.method == 'GET':
+        product = get_object_or_404(ProductValidationCode, code=slug)
+        # Get the URL from the POST data
+        url = request.build_absolute_uri(reverse(viewname="verify_qrcode", args=[product.code, ]))
+        print(url)
+        # Generate the QR code
+        qr = QRCode(
+            version=1,
+            error_correction=ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(url)
+        qr.make(fit=True)
 
-    def get(self, request, slug):
-        product_code = ProductValidationCode.objects.filter(code=slug)
-        if product_code.exists():
-            product_code = product_code.first()
-            data = {"code": text_to_qrcode(
-                request.build_absolute_uri(reverse("verify_qrcode", args=[product_code.code, ]))),
-                "used": product_code.used}
-            serializer = QRCodeSerializer(instance=data)
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        # Create an image from the QR code
+        img = qr.make_image(fill_color="black", back_color="white")
+
+        # Create a response with the image content
+        response = HttpResponse(content_type='image/png')
+        img.save(response, kind='PNG')
+
+        # Set a filename for the response (optional)
+        response['Content-Disposition'] = 'attachment; filename="qrcode.png"'
+
+        return response
+    else:
+        # Handle other HTTP methods if needed
+        return HttpResponse(status=405)
 
 
 class VerifyQRCode(View):
@@ -301,15 +319,15 @@ class VerifyQRCode(View):
                 serializer = QRCodeGetSerializer(instance=code)
                 code.used = True
                 code.save()
-                return render(request, "basket/validationpage.html", context={
+                return render(request, template_name="basket/validationpage.html", context={
                     "status_code": 200,
                     "text": "!وضعیت کد تخفیف به استفاده شده تغییر کرد",
                 })
-            return render(request, "basket/validationpage.html", context={
+            return render(request, template_name="basket/validationpage.html", context={
                 "status_code": 400,
                 "text": "!کد تخفیف قبلا استفاده شده است",
             })
-        return render(request, "basket/validationpage.html", context={
+        return render(request, template_name="basket/validationpage.html", context={
             "status_code": 404,
             "text": "!کد تخفیف یافت نشد",
         })
