@@ -281,7 +281,7 @@ def generate_qrcode(request, slug):
         product = get_object_or_404(ProductValidationCode, code=slug)
         # Get the URL from the POST data
         url = request.build_absolute_uri(reverse(viewname="verify_qrcode", args=[product.code, ]))
-        print(url)
+
         # Generate the QR code
         qr = QRCode(
             version=1,
