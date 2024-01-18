@@ -61,5 +61,5 @@ class PaymentSerializer(serializers.ModelSerializer):
 class GiftSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=64)
     last_name = serializers.CharField(max_length=64)
-    email = serializers.EmailField(max_length=256, required=False)
+    email = serializers.EmailField(max_length=256, required=False, allow_blank=True, allow_null=True)
     phone = serializers.CharField(max_length=11)
