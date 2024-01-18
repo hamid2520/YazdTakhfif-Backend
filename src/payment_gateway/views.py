@@ -29,7 +29,7 @@ GATEWAY_ERRORS = {
     GATEWAY_STATUS_SUCCESS: "پرداخت موفق",
     GATEWAY_STATUS_NOT_SUCCESS: "!پرداخت ناموفق",
     GATEWAY_STATUS_NOT_SUCCESS_PAYMENT: """پرداخت موفق نبوده است.
-     اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.""",
+     درصورت کسر مبلغ از حساب شما ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.""",
     GATEWAY_NOT_VALID: "!درگاه وارد شده معتبر نیست",
     BASKET_NOT_FOUND: "!سبد خرید یافت نشد",
     INVOICE_NOT_FOUND: "!فاکتور یافت نشد"
