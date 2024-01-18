@@ -1,11 +1,17 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import generics
 from rest_framework import pagination
-from .models import Advertise
-from .serializers import AdvertiseSerializer
+from .models import Advertise, NewsLetter
+from .serializers import AdvertiseSerializer, NewsLetterSerializer
 from .permissions import IsSuperUserOrReadOnly
 from src.utils.get_bool import get_boolean
 
+
+class NewsLetterViewSet(ModelViewSet):
+    queryset = NewsLetter.objects.all()
+    serializer_class = NewsLetterSerializer
+    permission_classes = []
+    pagination_class = pagination.LimitOffsetPagination
 
 class AdvertiseViewSet(ModelViewSet):
     queryset = Advertise.objects.all()
