@@ -2,8 +2,8 @@ from django.urls import path
 from rest_framework.routers import SimpleRouter
 
 from .views import BasketViewSet, BasketDetailViewSet, ClosedBasketAPIView, PaidClosedBasketListAPIView, \
-    PaidClosedBasketDetailListAPIView, ClosedBasketDetailValidatorAPIView, GetQRCode, VerifyQRCode, \
-    UserBasketProductCount,UserBoughtCodesAPIView
+    PaidClosedBasketDetailListAPIView, ClosedBasketDetailValidatorAPIView, generate_qrcode, VerifyQRCode, \
+    UserBasketProductCount, UserBoughtCodesAPIView
 
 router = SimpleRouter()
 router.register(prefix="baskets", viewset=BasketViewSet, basename="basket", )
@@ -18,7 +18,7 @@ urlpatterns = [
                        name="paid_closed_basket_details_list"),
                   path("paid-closed-basket-detail-validator/<slug:slug>/", ClosedBasketDetailValidatorAPIView.as_view(),
                        name="paid_closed_basket_detail_validator"),
-                  path("get-qrcode/<slug:slug>/", GetQRCode.as_view(),
+                  path("get-qrcode/<slug:slug>/", generate_qrcode,
                        name="get_qrcode"),
                   path("verify-qrcode/<slug>/", VerifyQRCode.as_view(),
                        name="verify_qrcode"),
