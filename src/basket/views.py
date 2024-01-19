@@ -42,6 +42,15 @@ class BasketViewSet(ModelViewSet):
             basket.save()
         return super().list(request, *args, **kwargs)
 
+    @action(detail=False, methods=["GET"], url_path="update-basket", url_name="update_basket")
+    def update_basket(self, request):
+        current_basket = self.filter_queryset(self.get_queryset())
+        if current_basket.exists():
+            current_basket = current_basket.first()
+            current_basket.update_basket()
+            return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
     @swagger_auto_schema(responses={200: BasketDetailSerializer(many=True), })
     @action(detail=False, methods=["GET"], url_path="products-list", url_name="products_list")
     def get_products_list(self, request):
