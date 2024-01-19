@@ -135,7 +135,7 @@ class CouponCreateSerializer(serializers.ModelSerializer):
     def validate_category(self, value):
         for category in value:
             if not category.parent:
-                raise ValidationError("You can not add main categories!")
+                raise ValidationError("!شما نمی توانید دسته بندی اصلی را انتخاب کنید")
         return value
 
     def save(self, **kwargs):

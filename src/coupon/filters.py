@@ -2,7 +2,15 @@ from django.db.models import Q, Sum
 from rest_framework import filters
 
 from src.utils.get_bool import get_boolean
-from .models import Business
+from .models import Business, Category
+
+
+class SubCategory(filters.BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        sub = request.query_params.get('sub')
+        if sub == "true":
+            return queryset.filter(parent__isnull=False)
+        return queryset
 
 
 class IsOwnerOrSuperUserCoupon(filters.BaseFilterBackend):
