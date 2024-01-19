@@ -354,7 +354,7 @@ class UserBoughtCodesAPIView(APIView):
             address=F('business__address'),
             phone_number=F('business__phone_number'),
             days_left=F('expire_date')
-        ).order_by("title")
+        ).order_by("title").distinct()
         serializer = UserBoughtCodesSerializer(instance=coupon_codes, many=True,
                                                context={"user_id": self.request.user.id})
         return Response(serializer.data, status=status.HTTP_200_OK)
