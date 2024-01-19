@@ -1,5 +1,6 @@
 import jdatetime
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -195,8 +196,10 @@ class LineCouponWithCodesSerializer(serializers.ModelSerializer):
     coupon_codes = serializers.SerializerMethodField()
 
     def get_coupon_codes(self, obj: LineCoupon):
-        user_id = self.context.get("user_id")
-        coupon_codes = ProductValidationCode.objects.filter(product_id=obj.id, closed_basket__user_id=user_id)
+        user = self.context.get("user")
+        coupon_codes = ProductValidationCode.objects.filter(Q(product_id=obj.id),
+                                                            Q(closed_basket__user_id=user.id) |
+                                                            Q(closed_basket__gifted=user.username))
         serializer = ProductValidationCodeSerializer(instance=coupon_codes, many=True)
         return serializer.data
 
@@ -223,10 +226,11 @@ class UserBoughtCodesSerializer(serializers.ModelSerializer):
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
     def get_line_coupons(self, obj):
-        user_id = self.context.get("user_id")
-        line_coupons = LineCoupon.objects.filter(coupon_id=obj.id, closedbasketdetail__closedbasket__status=3,
-                                                 closedbasketdetail__closedbasket__user_id=user_id)
-        serializer = LineCouponWithCodesSerializer(instance=line_coupons, many=True, context={"user_id": user_id})
+        user = self.context.get("user")
+        line_coupons = LineCoupon.objects.filter(Q(coupon_id=obj.id, closedbasketdetail__closedbasket__status=3),
+                                                 Q(closedbasketdetail__closedbasket__user_id=user.id) |
+                                                 Q(closedbasketdetail__closedbasket__gifted=user.username))
+        serializer = LineCouponWithCodesSerializer(instance=line_coupons, many=True, context={"user": user})
         return serializer.data
 
     def get_days_left(self, obj):
