@@ -348,13 +348,14 @@ class UserBasketProductCount(APIView):
 
 class UserBoughtCodesAPIView(APIView):
     def get(self, request):
-        coupon_codes = Coupon.objects.filter(
-            linecoupon__closedbasketdetail__closedbasket__user_id=request.user.id).annotate(
+        coupon_codes = Coupon.objects.filter(Q(linecoupon__closedbasketdetail__closedbasket__status=3),
+                                             Q(linecoupon__closedbasketdetail__closedbasket__user_id=request.user.id) |
+                                             Q(linecoupon__closedbasketdetail__closedbasket__gifted=request.user.username)).annotate(
             business_title=F('business__title'),
             address=F('business__address'),
             phone_number=F('business__phone_number'),
             days_left=F('expire_date')
         ).order_by("title").distinct()
         serializer = UserBoughtCodesSerializer(instance=coupon_codes, many=True,
-                                               context={"user_id": self.request.user.id})
+                                               context={"user": self.request.user})
         return Response(serializer.data, status=status.HTTP_200_OK)
