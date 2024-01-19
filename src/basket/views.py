@@ -349,7 +349,8 @@ class UserBasketProductCount(APIView):
 class UserBoughtCodesAPIView(APIView):
     def get(self, request):
         coupon_codes = Coupon.objects.filter(Q(linecoupon__closedbasketdetail__closedbasket__status=3),
-                                             Q(linecoupon__closedbasketdetail__closedbasket__user_id=request.user.id) |
+                                             Q(linecoupon__closedbasketdetail__closedbasket__user_id=request.user.id,
+                                               linecoupon__closedbasketdetail__closedbasket__gifted=None) |
                                              Q(linecoupon__closedbasketdetail__closedbasket__gifted=request.user.username)).annotate(
             business_title=F('business__title'),
             address=F('business__address'),
