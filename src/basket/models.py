@@ -72,7 +72,7 @@ class ClosedBasketDetail(BaseBasketDetail):
         (2, "تایید شده"),
         (3, "لغو شده"),
     )
-    status = models.PositiveIntegerField(choices=status_choices, default=1, blank=True, verbose_name="وضعیت")
+    status = models.PositiveIntegerField(choices=status_choices, default=2, blank=True, verbose_name="وضعیت")
 
     class Meta:
         verbose_name = "محصول سبد خرید بسته شده"
@@ -144,7 +144,7 @@ class ClosedBasket(BaseBasket):
         (4, "لغو شده"),
     )
     product = models.ManyToManyField(ClosedBasketDetail, blank=True, null=True, verbose_name="محصولات")
-    status = models.PositiveIntegerField(choices=status_choices, default=2, blank=True, verbose_name="وضعیت")
+    status = models.PositiveIntegerField(choices=status_choices, default=3, blank=True, verbose_name="وضعیت")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.is_paid = True
