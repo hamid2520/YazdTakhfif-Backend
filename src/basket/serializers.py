@@ -198,7 +198,8 @@ class LineCouponWithCodesSerializer(serializers.ModelSerializer):
     def get_coupon_codes(self, obj: LineCoupon):
         user = self.context.get("user")
         coupon_codes = ProductValidationCode.objects.filter(Q(product_id=obj.id),
-                                                            Q(closed_basket__user_id=user.id) |
+                                                            Q(closed_basket__user_id=user.id,
+                                                              closed_basket__gifted=None) |
                                                             Q(closed_basket__gifted=user.username))
         serializer = ProductValidationCodeSerializer(instance=coupon_codes, many=True)
         return serializer.data
@@ -228,7 +229,8 @@ class UserBoughtCodesSerializer(serializers.ModelSerializer):
     def get_line_coupons(self, obj):
         user = self.context.get("user")
         line_coupons = LineCoupon.objects.filter(Q(coupon_id=obj.id, closedbasketdetail__closedbasket__status=3),
-                                                 Q(closedbasketdetail__closedbasket__user_id=user.id) |
+                                                 Q(closedbasketdetail__closedbasket__user_id=user.id,
+                                                   closedbasketdetail__closedbasket__gifted=None) |
                                                  Q(closedbasketdetail__closedbasket__gifted=user.username))
         serializer = LineCouponWithCodesSerializer(instance=line_coupons, many=True, context={"user": user})
         return serializer.data
