@@ -1,6 +1,9 @@
 from django.contrib import admin
 from django.apps import apps
 from django.contrib.admin.sites import AlreadyRegistered
-from . import models
+from .models import Transaction
 
 
+@admin.register(Transaction)
+class TransactionAdmin(admin.ModelAdmin):
+    list_display = ["user", "type", "amount", "status", "customer"]
