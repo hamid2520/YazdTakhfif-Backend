@@ -30,7 +30,7 @@ class Transaction(models.Model):
     coupon = models.ForeignKey(Coupon, models.CASCADE, verbose_name='کوپن', null=True, blank=True)
 
     def __str__(self):
-        return 'from:{} to:{} amount:{}'
+        return f'{self.user}({self.type})'
 
     class Meta:
         verbose_name = "تراکنش"
