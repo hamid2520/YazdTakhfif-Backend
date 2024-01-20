@@ -5,7 +5,7 @@ from django.utils import timezone
 from rest_framework import settings
 from rest_framework.reverse import reverse_lazy
 
-from src.basket.models import Basket
+from src.basket.models import Basket, ClosedBasket
 from src.users.models import User
 from src.payment.models import Payment
 from src.payment_gateway.utils import zarinpal
@@ -77,6 +77,8 @@ class OnlinePayment(models.Model):
     response = models.JSONField(default=dict, null=True, blank=True, verbose_name="دیتای دریافتی از درگاه")
     ref_id = models.CharField(max_length=64, blank=True, null=True, default=None, verbose_name="کد رهگیری خرید")
     payment = models.ForeignKey(Basket, on_delete=models.SET_NULL, null=True, verbose_name="سبد خرید پرداختی")
+    closed_basket = models.ForeignKey(ClosedBasket, on_delete=models.SET_NULL, null=True,
+                                      verbose_name="سبد خرید بسته شده")
     paid_at = models.DateTimeField(null=True, blank=True, default=None, verbose_name="تاریخ پرداخت")
 
     def __str__(self):

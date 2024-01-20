@@ -4,6 +4,7 @@ from rest_framework.exceptions import ValidationError
 
 from src.basket.models import Basket, ClosedBasket, ClosedBasketDetail
 from .models import Payment, get_instance_values
+from ..payment_gateway.models import OnlinePayment
 
 
 class PaymentSerializer(serializers.ModelSerializer):
@@ -44,7 +45,11 @@ class PaymentSerializer(serializers.ModelSerializer):
                 closed_basket.product.add(closed_basket_product)
             closed_basket.save()
             # delete basket and it's products
+            op = OnlinePayment.objects.filter(payment_id=basket.id, status=OnlinePayment.STATUS_SUCCESS)
+            if op.exists():
+                op = op.first()
             basket.delete()
+            op.closed_basket_id = closed_basket.id
             # value field basket and create model payment
             del self.validated_data["basket_id"]
             self.validated_data["basket"] = closed_basket
