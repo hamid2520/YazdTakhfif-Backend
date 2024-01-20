@@ -167,6 +167,53 @@ class ClosedBasketDetailSerializer(serializers.ModelSerializer):
         exclude = ["id", ]
 
 
+class ClosedBasketDetailShowSerializer(serializers.ModelSerializer):
+    line_coupon = serializers.SlugRelatedField(slug_field="title", read_only=True)
+    line_coupon_slug = serializers.SlugField(read_only=True, source="line_coupon.slug")
+    in_stock = serializers.SerializerMethodField()
+    imagesrc = serializers.SerializerMethodField()
+    max = serializers.SerializerMethodField()
+    min = serializers.SerializerMethodField()
+    price = serializers.SerializerMethodField()
+    coupon_slug = serializers.SerializerMethodField()
+
+    def get_in_stock(self, obj: BasketDetail):
+        line_coupon = obj.line_coupon
+        available_count = line_coupon.count - line_coupon.sell_count
+        return True if available_count > 0 else False
+
+    def get_imagesrc(self, obj: BasketDetail):
+        image: CouponImage = CouponImage.objects.filter(coupon_id=obj.line_coupon.coupon.id).first()
+        if image:
+            return image.image.url
+        return ""
+
+    def get_max(self, obj: BasketDetail):
+        line_coupon = obj.line_coupon
+        available_count = line_coupon.count - line_coupon.sell_count
+        return available_count
+
+    def get_min(self, obj: BasketDetail):
+        return 1 if self.get_in_stock(obj) else 0
+
+    def get_price(self, obj: BasketDetail):
+        line_coupon = obj.line_coupon
+        return {
+            "price": line_coupon.price,
+            "discounted_price": line_coupon.price_with_offer,
+            "discounted_percentage": line_coupon.offer_percent,
+            "total_price": obj.total_price,
+            "total_price_with_offer": obj.total_price_with_offer,
+        }
+
+    def get_coupon_slug(self, obj: BasketDetail):
+        return Coupon.objects.get(id=obj.line_coupon.coupon.id).slug
+
+    class Meta:
+        model = ClosedBasketDetail
+        exclude = ["id", ]
+
+
 class ClosedBasketSerializer(serializers.ModelSerializer):
     product = ClosedBasketDetailSerializer(many=True)
     status = serializers.SerializerMethodField()
@@ -178,7 +225,32 @@ class ClosedBasketSerializer(serializers.ModelSerializer):
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
     def get_formatted_payment_datetime(self, obj):
-        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.payment_datetime)
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created_at)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
+
+    class Meta:
+        model = ClosedBasket
+        exclude = ["id", ]
+
+    def get_status(self, obj):
+        try:
+            return ClosedBasket.status_choices[int(obj.status) - 1][1]
+        except:
+            return 'نامشخص'
+
+
+class ClosedBasketShowSerializer(serializers.ModelSerializer):
+    product = ClosedBasketDetailShowSerializer(many=True)
+    status = serializers.SerializerMethodField()
+    formatted_created_at = serializers.SerializerMethodField()
+    formatted_payment_datetime = serializers.SerializerMethodField()
+
+    def get_formatted_created_at(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created_at)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
+
+    def get_formatted_payment_datetime(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created_at)
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
     class Meta:
