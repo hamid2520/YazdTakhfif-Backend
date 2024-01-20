@@ -22,7 +22,7 @@ class Transaction(models.Model):
     type = models.SmallIntegerField(verbose_name='نوع', choices=TYPE_CHOICES)
     status = models.SmallIntegerField(verbose_name='وضعیت', choices=STATUS_CHOICES, default=1)
     amount = models.BigIntegerField(verbose_name='مبلغ')
-    price_with_out_offer = models.BigIntegerField(verbose_name='مبلغ بدون نخفیف',null=True, blank=True)
+    price_with_out_offer = models.BigIntegerField(verbose_name='مبلغ بدون نخفیف', null=True, blank=True)
     datetime = models.DateTimeField(verbose_name='تاریخ ایجاد', auto_now_add=True)
     customer = models.CharField(null=True, blank=True, max_length=150)
     closed_basket = models.ForeignKey(ClosedBasket, models.CASCADE, verbose_name='سبد خرید', null=True, blank=True)
@@ -30,4 +30,8 @@ class Transaction(models.Model):
     coupon = models.ForeignKey(Coupon, models.CASCADE, verbose_name='کوپن', null=True, blank=True)
 
     def __str__(self):
-        return 'from:{} to:{} amount:{}'
+        return f'{self.user}({self.type})'
+
+    class Meta:
+        verbose_name = "تراکنش"
+        verbose_name_plural = "تراکنش ها"

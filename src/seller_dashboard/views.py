@@ -55,4 +55,4 @@ class UserCommentList(ListAPIView):
         else:
             return Comment.objects.filter(verified=True, coupon__business__admin=self.request.user,
                                           parent=None).order_by(
-                "created_at")
+                "-created_at")
