@@ -7,3 +7,4 @@ from .models import Transaction
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
     list_display = ["user", "type", "amount", "status", "customer"]
+    list_editable = ["type", "status"]
