@@ -15,22 +15,24 @@
             {% if status == 3 %}
                 <div class="alert alert-success" role="alert">
                     <h4 class="alert-heading">{{ message }}</h4>
-                    <p>کد پیگیری: {{ ref_id }}</p>
+                    <p class="text-right">:کد پیگیری</p>
+                    <p>{{ ref_id }}</p>
                     <a href="/couponha">مشاهده کوپن ها</a>
-{#                    <p>{{ message }}</p>#}
+                    {#                    <p>{{ message }}</p>#}
                 </div>
             {% else %}
                 <div class="alert alert-danger" role="alert">
                     <h4 class="alert-heading">{{ message }}</h4>
                     {% if ref_id %}
-                        <p>{{ ref_id }}:کد پیگیری </p>
+                        <p class="text-right">:کد پیگیری</p>
+                        <p>{{ ref_id }}</p>
                         <a href="http://158.255.74.252:3000/cart">بازگشت به سبد خرید</a>
                     {% endif %}
-{#                    <p>{{ message }}</p>#}
+                    {#                    <p>{{ message }}</p>#}
                 </div>
             {% endif %}
         </div>
-    <p>{{ errors }}</p>
+        <p>{{ errors }}</p>
     </div>
 </div>
 
