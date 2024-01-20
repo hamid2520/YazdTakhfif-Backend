@@ -38,7 +38,10 @@ class WalletView(APIView):
             businesses = Business.objects.all()
         else:
             businesses = Business.objects.filter(admin_id=request.user.id)
-        serializer = WalletSerializer(instance=businesses, many=True, context={'user_id': request.user.id})
+            if not businesses.exists():
+                return 404
+
+        serializer = WalletSerializer(instance=businesses.first(), context={'user_id': request.user.id})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
