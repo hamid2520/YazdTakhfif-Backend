@@ -75,7 +75,7 @@ class UserBoughtCodesSerializer(serializers.ModelSerializer):
     def get_days_left(self, obj):
         time_now = timezone.now().date()
         if obj.days_left > time_now:
-            return (obj.days_left - timezone.now()).days
+            return (obj.days_left - timezone.now().date()).days
         else:
             return -1
 
