@@ -21,6 +21,8 @@ class SellerDashboardAPIView(APIView):
             businesses = Business.objects.all()
         else:
             businesses = Business.objects.filter(admin_id=request.user.id)
+            if not businesses.exists():
+                return 404
         serializer = SellerDashboardSerializer(instance=businesses, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
