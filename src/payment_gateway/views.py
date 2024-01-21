@@ -124,6 +124,7 @@ class PaymentResultAPIView(APIView):
                         "ref_id": op.ref_id,
                         "datetime": str(op.paid_at) if op.paid_at else '',
                         "status": payment_status,
+                        "gifted": op.payment.gifted if op.payment else op.closed_basket.gifted,
                         "message": GATEWAY_ERRORS[payment_status],
                         "user": {
                             "first_name": user.first_name,
