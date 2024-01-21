@@ -22,7 +22,7 @@ class BasketDetailSerializer(serializers.ModelSerializer):
         model = BasketDetail
         exclude = ["id", ]
         read_only_fields = ["slug", "payment_price", "payment_offer_percent", "payment_price_with_offer", "total_price",
-                            "total_price_with_offer", ]
+                            "total_price_with_offer"]
 
 
 class BasketDetailShowSerializer(serializers.ModelSerializer):
@@ -95,7 +95,8 @@ class BasketSerializer(serializers.ModelSerializer):
         model = Basket
         exclude = ["id", ]
         read_only_fields = ["slug", "created_at", "payment_datetime", "is_paid", "count", "total_price",
-                            "total_offer_percent", "total_price_with_offer", ]
+                            "total_offer_percent", "total_price_with_offer", "basket_offer_price",
+                            "basket_offer_percent"]
 
     def save(self, **kwargs):
         user = self.validated_data.get("user")
@@ -126,7 +127,8 @@ class BasketShowSerializer(serializers.ModelSerializer):
         model = Basket
         exclude = ["id", ]
         read_only_fields = ["slug", "created_at", "payment_datetime", "is_paid", "count", "total_price",
-                            "total_offer_percent", "total_price_with_offer", ]
+                            "total_offer_percent", "total_price_with_offer", "basket_offer_price",
+                            "basket_offer_percent"]
 
     def save(self, **kwargs):
         user = self.validated_data.get("user")

@@ -92,6 +92,8 @@ class BaseBasket(models.Model):
     total_offer_percent = models.PositiveIntegerField(blank=True, default=0, validators=[MaxValueValidator(100), ],
                                                       verbose_name="تخفیف کل")
     total_price_with_offer = models.PositiveIntegerField(blank=True, default=0, verbose_name="قیمت کل با تخفیف")
+    basket_offer_price = models.PositiveIntegerField(blank=True, default=0, verbose_name="قیمت تخفیف سبد خرید")
+    basket_offer_percent = models.PositiveSmallIntegerField(blank=True, default=0, verbose_name="تخفیف سبد خرید")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.slug is None:
@@ -121,9 +123,9 @@ class Basket(BaseBasket):
         return None
 
     def update_basket(self):
-        stats = self.product.all().aggregate(count=Avg("count"),
+        stats = self.product.all().aggregate(count=Sum("count"),
                                              total_price=Sum("total_price"),
-                                             total_offer_percent=Sum("line_coupon__offer_percent"),
+                                             total_offer_percent=Avg("line_coupon__offer_percent"),
                                              total_price_with_offer=Sum("total_price_with_offer"))
         self.count = stats["count"]
         self.total_price = stats["total_price"]
