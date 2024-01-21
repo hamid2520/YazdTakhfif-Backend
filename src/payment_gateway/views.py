@@ -16,7 +16,7 @@ from .permissions import IsOwnerOrSuperUser
 from ..basket.models import Basket
 from ..basket.serializers import BasketShowSerializer, ClosedBasketShowSerializer
 
-HostUrl = 'http://localhost:3000'
+HostUrl = 'http://158.255.74.252:3000'
 GATEWAY_STATUS_TOKEN_INVALID = 1
 GATEWAY_STATUS_PROBLEM_CONNECT_GATEWAY = 2
 GATEWAY_STATUS_SUCCESS = 3
@@ -122,7 +122,7 @@ class PaymentResultAPIView(APIView):
                 if op.user_id == request.user.id or request.user.is_superuser:
                     context = {
                         "ref_id": op.ref_id,
-                        "datetime": op.ref_id,
+                        "datetime": str(op.paid_at) if op.paid_at else '',
                         "status": payment_status,
                         "message": GATEWAY_ERRORS[payment_status],
                         "user": {
