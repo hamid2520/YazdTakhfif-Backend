@@ -48,9 +48,9 @@ class PaymentSerializer(serializers.ModelSerializer):
             op = OnlinePayment.objects.filter(payment_id=basket.id, status=OnlinePayment.STATUS_SUCCESS)
             if op.exists():
                 op = op.first()
-            basket.delete()
             op.closed_basket_id = closed_basket.id
             op.save()
+            basket.delete()
             # value field basket and create model payment
             del self.validated_data["basket_id"]
             self.validated_data["basket"] = closed_basket
