@@ -50,6 +50,7 @@ class PaymentSerializer(serializers.ModelSerializer):
                 op = op.first()
             basket.delete()
             op.closed_basket_id = closed_basket.id
+            op.save()
             # value field basket and create model payment
             del self.validated_data["basket_id"]
             self.validated_data["basket"] = closed_basket
