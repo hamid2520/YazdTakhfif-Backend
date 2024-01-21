@@ -16,6 +16,7 @@ from .permissions import IsOwnerOrSuperUser
 from ..basket.models import Basket
 from ..basket.serializers import BasketShowSerializer, ClosedBasketShowSerializer
 
+HostUrl = 'http://localhost:3000'
 GATEWAY_STATUS_TOKEN_INVALID = 1
 GATEWAY_STATUS_PROBLEM_CONNECT_GATEWAY = 2
 GATEWAY_STATUS_SUCCESS = 3
@@ -41,7 +42,7 @@ def go_to_gateway_view_v2(request, slug):
     try:
         basket = Basket.objects.get(slug=slug)
     except ObjectDoesNotExist:
-        return redirect(f"http://158.255.74.252:3000/factor?status={BASKET_NOT_FOUND}")
+        return redirect(f"{ HostUrl }/factor?status={BASKET_NOT_FOUND}")
     basket_count_validation_status = basket.final_count_validation()
     if basket_count_validation_status:
         return redirect(reverse(viewname='final_count_validation', args=[basket.slug, ]))
@@ -49,7 +50,7 @@ def go_to_gateway_view_v2(request, slug):
     try:
         gateway = Gateway.objects.get(name="IDPAY", active=True)
     except ObjectDoesNotExist:
-        return redirect(f"http://158.255.74.252:3000/factor?status={GATEWAY_NOT_VALID}")
+        return redirect(f"{ HostUrl }/factor?status={GATEWAY_NOT_VALID}")
     op = OnlinePayment.objects.exclude(status=OnlinePayment.STATUS_SUCCESS).filter(user__id=basket.user_id,
                                                                                    payment_id=basket.id)
     if op.exists():
@@ -65,7 +66,7 @@ def go_to_gateway_view_v2(request, slug):
     try:
         bank = factory.create(bank_type=op.gateway.gateway)
         bank.set_request(request)
-        bank.set_amount(amount)
+        bank.set_amount(amount*10)
         bank.set_client_callback_url(client_callback_url)
         bank.set_mobile_number(user_mobile_number)
         bank_record = bank.ready()
@@ -73,24 +74,24 @@ def go_to_gateway_view_v2(request, slug):
     except AZBankGatewaysException as e:
         print(e)
         return redirect(
-            f"http://158.255.74.252:3000/factor?status={GATEWAY_STATUS_PROBLEM_CONNECT_GATEWAY}")
+            f"{ HostUrl }/factor?status={GATEWAY_STATUS_PROBLEM_CONNECT_GATEWAY}")
 
 
 def callback_gateway_view_v2(request, token):
     try:
         op = OnlinePayment.objects.get(token=token)
     except ObjectDoesNotExist:
-        return redirect(f"http://158.255.74.252:3000/factor?status={INVOICE_NOT_FOUND}")
+        return redirect(f"{ HostUrl }/factor?status={INVOICE_NOT_FOUND}")
     if True:
         tracking_code = request.GET.get(settings.TRACKING_CODE_QUERY_PARAM)
         if not tracking_code:
             logging.debug("این لینک معتبر نیست.")
-            return redirect(f"http://158.255.74.252:3000/factor?status={INVOICE_NOT_FOUND}")
+            return redirect(f"{ HostUrl }/factor?status={INVOICE_NOT_FOUND}")
         try:
             bank_record = bank_models.Bank.objects.get(tracking_code=tracking_code)
         except bank_models.Bank.DoesNotExist:
             logging.debug("این لینک معتبر نیست.")
-            return redirect(f"http://158.255.74.252:3000/factor?status={INVOICE_NOT_FOUND}")
+            return redirect(f"{ HostUrl }/factor?status={INVOICE_NOT_FOUND}")
         # در این قسمت باید از طریق داده هایی که در بانک رکورد وجود دارد، رکورد متناظر یا هر اقدام مقتضی دیگر را انجام دهیم
         if bank_record.is_success:
             response = {"pre_confirm": {"Status": "OK", "Authority": ""}, "post_confirm": {
@@ -98,7 +99,7 @@ def callback_gateway_view_v2(request, token):
             op.response = response
             op.status = op.STATUS_SUCCESS
             op.save()
-            return redirect(f"http://158.255.74.252:3000/factor?status={GATEWAY_STATUS_SUCCESS}")
+            return redirect(f"{ HostUrl }/factor?status={GATEWAY_STATUS_SUCCESS}")
 
         op.status = op.STATUS_NOT_SUCCESS
         response = {"pre_confirm": {"Status": bank_record.is_success, "Authority": ""}, "post_confirm": {
@@ -106,7 +107,7 @@ def callback_gateway_view_v2(request, token):
         op.response = response
         op.save()
         # پرداخت موفق نبوده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.
-        return redirect(f"http://158.255.74.252:3000/factor?status={GATEWAY_STATUS_NOT_SUCCESS_PAYMENT}")
+        return redirect(f"{ HostUrl }/factor?status={GATEWAY_STATUS_NOT_SUCCESS_PAYMENT}")
 
 
 class PaymentResultAPIView(APIView):
