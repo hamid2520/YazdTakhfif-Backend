@@ -49,6 +49,8 @@ class OfferViewSet(ModelViewSet):
                 "maximum_offer_price": offer.maximum_offer_price,
             }
             if ser_data.get("apply_to_basket", False):
+                basket.basket_offer_price = offer_price
+                basket.basket_offer_percent = offer.percent
                 basket.total_price_with_offer = offered_price
                 basket.save()
             return Response(data=data, status=status.HTTP_200_OK)
