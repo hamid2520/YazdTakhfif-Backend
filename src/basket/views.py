@@ -310,7 +310,7 @@ def generate_qrcode(request, slug):
         img.save(response, kind='PNG')
 
         # Set a filename for the response (optional)
-        response['Content-Disposition'] = f"attachment; filename=\"{product.code}.png\""
+        response['Content-Disposition'] = f"attachment; filename=\"code-{product.code}.png\""
 
         return response
     else:
