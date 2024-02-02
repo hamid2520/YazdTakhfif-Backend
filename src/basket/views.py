@@ -289,7 +289,8 @@ def generate_qrcode(request, slug):
     if request.method == 'GET':
         product = get_object_or_404(ProductValidationCode, code=slug)
         # Get the URL from the POST data
-        url = request.build_absolute_uri(reverse(viewname="verify_qrcode", args=[product.code, ]))
+        # url = request.build_absolute_uri(reverse(viewname="verify_qrcode", args=[product.code, ]))
+        url = f"http://158.255.74.252:3000/verify-code/?token={product.code}"
 
         # Generate the QR code
         qr = QRCode(
@@ -309,7 +310,7 @@ def generate_qrcode(request, slug):
         img.save(response, kind='PNG')
 
         # Set a filename for the response (optional)
-        response['Content-Disposition'] = 'attachment; filename="qrcode.png"'
+        response['Content-Disposition'] = f"attachment; filename=\"code-{product.code}.png\""
 
         return response
     else:
