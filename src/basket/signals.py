@@ -17,8 +17,7 @@ def make_transaction_for_each_product(sender, **kwargs):
                                           customer=closed_basket.user.username,
                                           coupon_id=product.line_coupon.coupon_id,
                                           line_coupon_id=product.line_coupon_id,
-                                          type=1,
-                                          status=1)
+                                          type=1)
                 transaction.save()
 
 
