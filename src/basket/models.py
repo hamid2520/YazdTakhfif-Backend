@@ -127,10 +127,10 @@ class Basket(BaseBasket):
                                              total_price=Sum("total_price"),
                                              total_offer_percent=Avg("line_coupon__offer_percent"),
                                              total_price_with_offer=Sum("total_price_with_offer"))
-        self.count = stats["count"]
-        self.total_price = stats["total_price"]
-        self.total_offer_percent = stats["total_offer_percent"]
-        self.total_price_with_offer = stats["total_price_with_offer"]
+        self.count = stats["count"] if stats['count'] else 0
+        self.total_price = stats["total_price"] if stats['total_price'] else 0
+        self.total_offer_percent = stats["total_offer_percent"] if stats['total_offer_percent'] else 0
+        self.total_price_with_offer = stats["total_price_with_offer"] if stats['total_price_with_offer'] else 0
         self.save()
 
     class Meta:
