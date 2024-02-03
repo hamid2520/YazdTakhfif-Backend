@@ -13,7 +13,7 @@ def make_transaction_for_each_product(sender, **kwargs):
             for product in closed_basket.product.all():
                 transaction = Transaction(user=product.line_coupon.coupon.business.admin,
                                           amount=product.total_price_with_offer,
-                                          price_with_out_offer=product.total_price,
+                                          price_without_offer=product.total_price,
                                           customer=closed_basket.user.username,
                                           coupon_id=product.line_coupon.coupon_id,
                                           line_coupon_id=product.line_coupon_id,
