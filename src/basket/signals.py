@@ -9,7 +9,7 @@ from ..wallet.models import Transaction
 def make_transaction_for_each_product(sender, **kwargs):
     closed_basket: ClosedBasket = kwargs['instance']
     if not Transaction.objects.filter(closed_basket=closed_basket).exists():
-        if closed_basket.status == 2:
+        if closed_basket.status == 3:
             for product in closed_basket.product.all():
                 transaction = Transaction(user=product.line_coupon.coupon.business.admin,
                                           amount=product.total_price_with_offer,

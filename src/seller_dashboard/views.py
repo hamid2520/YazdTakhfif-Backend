@@ -36,7 +36,7 @@ class SellerDashboardCouponsAPIView(ListAPIView):
         else:
             businesses = Business.objects.filter(admin_id=self.request.user.id)
         sold_coupons = ClosedBasketDetail.objects.filter(line_coupon__coupon__business_id__in=businesses).order_by(
-            'closedbasket__payment_datetime')
+            '-closedbasket__created_at')
         return sold_coupons
 
 
