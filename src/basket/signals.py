@@ -15,6 +15,7 @@ def make_transaction_for_each_product(sender, **kwargs):
                                           amount=product.total_price_with_offer,
                                           price_without_offer=product.total_price,
                                           customer=closed_basket.user.username,
+                                          closed_basket_id=closed_basket.id,
                                           coupon_id=product.line_coupon.coupon_id,
                                           line_coupon_id=product.line_coupon_id,
                                           type=1)
