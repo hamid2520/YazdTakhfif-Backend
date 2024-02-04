@@ -37,10 +37,10 @@ class WalletView(APIView):
         if request.user.is_superuser:
             businesses, created = Business.objects.get_or_create(admin_id=request.user.id, title="یزد تخفیف")
         else:
-            businesses = Business.objects.filter(admin_id=request.user.id).first()
+            businesses = Business.objects.filter(admin_id=request.user.id)
             if not businesses.exists():
                 return Response(status=status.HTTP_404_NOT_FOUND)
-
+            businesses = businesses.first()
         serializer = WalletSerializer(instance=businesses,
                                       context={'user_id': request.user.id, 'superuser': request.user.is_superuser})
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -84,12 +84,3 @@ class WalletCouponsView(ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
-    # def get(self, request):
-    #     user_id = request.user.id
-    #     business = get_object_or_404(Business, admin_id=user_id)
-    #     sold_coupons = (
-    #         business.coupon_set.filter(linecoupon__closedbasketdetail__closedbasket__status=3).distinct("id").annotate(
-    #             days_left=F('expire_date')
-    #         ))
-    #     serializer = UserBoughtCodesSerializer(instance=sold_coupons, many=True, context={"user_id": user_id})
-    #     return Response(serializer.data, status=status.HTTP_200_OK)

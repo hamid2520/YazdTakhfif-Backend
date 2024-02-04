@@ -20,9 +20,10 @@ class SellerDashboardAPIView(APIView):
         if request.user.is_superuser:
             businesses, created = Business.objects.get_or_create(admin_id=request.user.id, title="یزد تخفیف")
         else:
-            businesses = Business.objects.filter(admin_id=request.user.id).first()
+            businesses = Business.objects.filter(admin_id=request.user.id)
             if not businesses.exists():
                 return Response(status=status.HTTP_404_NOT_FOUND)
+            businesses = businesses.first()
         serializer = SellerDashboardSerializer(instance=businesses,
                                                context={'user_id': request.user.id,
                                                         'superuser': request.user.is_superuser})
