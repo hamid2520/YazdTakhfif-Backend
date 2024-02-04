@@ -49,7 +49,8 @@ class UserBoughtCodesSerializer(serializers.ModelSerializer):
     total_sell_count = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
-
+    def validate(self, attrs):
+        print(self.instance)
     def get_user(self, obj):
         return f'{obj.user_first_name} {obj.user_last_name}'
 

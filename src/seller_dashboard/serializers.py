@@ -54,10 +54,16 @@ class SellerDashboardSerializer(serializers.ModelSerializer):
         return total_sell_price if total_sell_price else 0
 
     def get_total_active_coupons(self, obj: Business):
-        return Coupon.objects.all().count()
+        if self.context["superuser"]:
+            return Coupon.objects.all().count()
+        else:
+            return obj.coupon_set.count()
 
     def get_verified_comments(self, obj):
-        comments_count = Comment.objects.filter(verified=True).count()
+        if self.context["superuser"]:
+            comments_count = Comment.objects.filter(verified=True).count()
+        else:
+            comments_count = Comment.objects.filter(coupon__business_id=obj.id, verified=True).count()
         return comments_count
 
     # def get_recently_sold_coupons(self, obj):
