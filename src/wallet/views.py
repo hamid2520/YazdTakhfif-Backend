@@ -35,13 +35,14 @@ from ..coupon.models import Coupon
 class WalletView(APIView):
     def get(self, request):
         if request.user.is_superuser:
-            businesses = Business.objects.all()
+            businesses, created = Business.objects.get_or_create(admin_id=request.user.id, title="یزد تخفیف")
         else:
-            businesses = Business.objects.filter(admin_id=request.user.id)
+            businesses = Business.objects.filter(admin_id=request.user.id).first()
             if not businesses.exists():
-                return 404
+                return Response(status=status.HTTP_404_NOT_FOUND)
 
-        serializer = WalletSerializer(instance=businesses, many=True, context={'user_id': request.user.id})
+        serializer = WalletSerializer(instance=businesses,
+                                      context={'user_id': request.user.id, 'superuser': request.user.is_superuser})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -72,6 +73,17 @@ class WalletCouponsView(ListAPIView):
         context = super().get_serializer_context()
         context['user_id'] = user_id
         return context
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset()).distinct()
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     # def get(self, request):
     #     user_id = request.user.id
