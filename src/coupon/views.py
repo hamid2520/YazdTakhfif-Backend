@@ -1,4 +1,6 @@
+from django.db.models import Case, Value, BooleanField, When
 from rest_framework import status
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -150,17 +152,21 @@ class LineCouponViewSet(ModelViewSet):
         serializer = ProductValidationCodeSerializer(instance=coupon_codes, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-    @swagger_auto_schema(responses={200: ProductValidationCodeSerializer(), })
+    @swagger_auto_schema(responses={200: ProductValidationCodeShowSerializer(), })
     @action(detail=False, methods=["POST"], url_path="line-coupon-code-validation",
-            url_name="line_coupon_code_validation")
+            url_name="line_coupon_code_validation", permission_classes=[])
     def line_coupon_codes_validation(self, request):
         code = request.data.get("code")
-        code_object = ProductValidationCode.objects.filter(code=code)
-        if code_object.exists():
-            code_object = code_object.first()
-            data = ProductValidationCodeShowSerializer(instance=code_object).data
-            if get_boolean(request.data.get('used', False)) and not code_object.used:
-                code_object.used = True
-                code_object.save()
-            return Response(data=data, status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        code_object = get_object_or_404(ProductValidationCode, code=code)
+        res_status = status.HTTP_200_OK
+        if get_boolean(request.data.get('used', False)) and not code_object.used:
+            if self.request.user.is_authenticated:
+                if code_object.product.coupon.business.admin_id == request.user.id or request.user.is_superuser:
+                    code_object.used = True
+                    code_object.save()
+                else:
+                    res_status = status.HTTP_403_FORBIDDEN
+            else:
+                res_status = status.HTTP_403_FORBIDDEN
+        data = ProductValidationCodeShowSerializer(instance=code_object).data
+        return Response(data=data, status=res_status)

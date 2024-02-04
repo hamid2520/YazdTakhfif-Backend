@@ -4,11 +4,12 @@ from jdatetime import datetime
 from rest_framework import serializers
 
 from .models import *
-from ..basket.models import ProductValidationCode
+from ..basket.models import ProductValidationCode, ClosedBasketDetail
 from ..basket.serializers import ProductValidationCodeSerializer
 from ..business.models import Business
 from ..coupon.models import LineCoupon, Coupon
 from ..utils.get_bool import get_boolean
+from .filters import CustomTimeFilter
 
 
 class LineCouponWithCodesSerializer(serializers.ModelSerializer):
@@ -19,19 +20,28 @@ class LineCouponWithCodesSerializer(serializers.ModelSerializer):
 
     def get_coupon_codes(self, obj: LineCoupon):
         user_id = self.context.get("user_id")
-        coupon_codes = (ProductValidationCode.objects.
-                        filter(product_id=obj.id,
-                               closed_basket__product__line_coupon__coupon__business__admin_id=user_id))
+        coupon_codes = CustomTimeFilter.filter_product_codes(
+            queryset=ProductValidationCode.objects.filter(product_id=obj.id),
+            time=self.context['request'].query_params.get(
+                'time')).distinct()
         serializer = ProductValidationCodeSerializer(instance=coupon_codes, many=True)
         return serializer.data
 
     def get_total_sell_price(self, obj: LineCoupon):
-        total_sell_price = obj.closedbasketdetail_set.filter(status=2).aggregate(total=Sum('total_price_with_offer'))[
+        closed_basket_details = CustomTimeFilter.filter_basket_detail(
+            queryset=obj.closedbasketdetail_set.filter(status=2),
+            time=self.context['request'].query_params.get(
+                'time')).distinct()
+        total_sell_price = closed_basket_details.aggregate(total=Sum('total_price_with_offer'))[
             "total"]
         return total_sell_price if total_sell_price else 0
 
     def get_total_sell_count(self, obj: LineCoupon):
-        total_sell_count = obj.closedbasketdetail_set.filter(status=2).aggregate(total=Sum('count'))[
+        closed_basket_details = CustomTimeFilter.filter_basket_detail(
+            queryset=obj.closedbasketdetail_set.filter(status=2),
+            time=self.context['request'].query_params.get(
+                'time')).distinct()
+        total_sell_count = closed_basket_details.aggregate(total=Sum('count'))[
             "total"]
         return total_sell_count if total_sell_count else 0
 
@@ -68,8 +78,10 @@ class UserBoughtCodesSerializer(serializers.ModelSerializer):
 
     def get_line_coupons(self, obj: Coupon):
         user_id = self.context.get("user_id")
-        line_coupons = obj.linecoupon_set.filter(closedbasketdetail__closedbasket__status=3).distinct("slug")
-        serializer = LineCouponWithCodesSerializer(instance=line_coupons, many=True, context={"user_id": user_id})
+        line_coupons = CustomTimeFilter.filter_line_coupon(queryset=obj.linecoupon_set.all(),
+                                                           time=self.context['request'].query_params.get(
+                                                               'time')).distinct("slug")
+        serializer = LineCouponWithCodesSerializer(instance=line_coupons, many=True, context=self.context)
         return serializer.data
 
     def get_days_left(self, obj):
@@ -80,13 +92,27 @@ class UserBoughtCodesSerializer(serializers.ModelSerializer):
             return -1
 
     def get_total_sell_price(self, obj: Coupon):
-        total_sell_price = obj.linecoupon_set.filter(closedbasketdetail__closedbasket__status=3).aggregate(
-            total_price=Sum("closedbasketdetail__total_price_with_offer"))["total_price"]
+        line_coupons = CustomTimeFilter.filter_line_coupon(queryset=obj.linecoupon_set.all(),
+                                                           time=self.context['request'].query_params.get(
+                                                               'time')).distinct()
+        closed_basket_details = CustomTimeFilter.filter_basket_detail(
+            queryset=ClosedBasketDetail.objects.filter(line_coupon_id__in=line_coupons),
+            time=self.context['request'].query_params.get(
+                'time')).distinct()
+        total_sell_price = closed_basket_details.aggregate(
+            total_price=Sum("total_price_with_offer"))["total_price"]
         return total_sell_price if total_sell_price else 0
 
     def get_total_sell_count(self, obj: Coupon):
-        total_sell_count = obj.linecoupon_set.filter(closedbasketdetail__closedbasket__status=3).aggregate(
-            total_count=Sum("closedbasketdetail__count"))["total_count"]
+        line_coupons = CustomTimeFilter.filter_line_coupon(queryset=obj.linecoupon_set.all(),
+                                                           time=self.context['request'].query_params.get(
+                                                               'time')).distinct()
+        closed_basket_details = CustomTimeFilter.filter_basket_detail(
+            queryset=ClosedBasketDetail.objects.filter(line_coupon_id__in=line_coupons),
+            time=self.context['request'].query_params.get(
+                'time')).distinct()
+        total_sell_count = closed_basket_details.aggregate(
+            total_count=Sum("count"))["total_count"]
         return total_sell_count if total_sell_count else 0
 
     class Meta:
@@ -95,20 +121,9 @@ class UserBoughtCodesSerializer(serializers.ModelSerializer):
 
 
 class WalletSerializer(serializers.ModelSerializer):
-    # sold_coupons = serializers.SerializerMethodField()
     total_sell = serializers.SerializerMethodField()
     total_withdraw = serializers.SerializerMethodField()
     balance = serializers.SerializerMethodField()
-
-    # def get_sold_coupons(self, obj: Business):
-    #     user_id = self.context.get("user_id")
-    #     sold_coupons = (
-    #         obj.coupon_set.filter(linecoupon__closedbasketdetail__closedbasket__status=3).distinct("id").annotate(
-    #             days_left=F('expire_date')
-    #         ))
-    #     serializer = UserBoughtCodesSerializer(instance=sold_coupons, many=True, context={"user_id": user_id})
-    #
-    #     return serializer.data
 
     def get_total_sell(self, obj: Business):
         if self.context["superuser"]:
