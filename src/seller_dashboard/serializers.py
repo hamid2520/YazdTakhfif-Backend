@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.db.models import Sum
 from src.basket.models import ClosedBasketDetail, ClosedBasket
 from src.business.models import Business
-from src.coupon.models import Comment, LineCoupon
+from src.coupon.models import Comment, LineCoupon, Coupon
 from src.coupon.serializers import CommentSerializer
 from src.users.models import User
 
@@ -42,17 +42,28 @@ class SellerDashboardSerializer(serializers.ModelSerializer):
 
     def get_total_sell_price(self, obj: Business):
         user = obj.admin
-        total_sell_price = \
-            ClosedBasketDetail.objects.filter(line_coupon__coupon__business_id=obj.id, status=2,
-                                              closedbasket__status=3).aggregate(
-                total=Sum('total_price_with_offer'))['total']
+        if self.context["superuser"]:
+            total_sell_price = \
+                ClosedBasketDetail.objects.filter(status=2, closedbasket__status=3).aggregate(
+                    total=Sum('total_price_with_offer'))['total']
+        else:
+            total_sell_price = \
+                ClosedBasketDetail.objects.filter(line_coupon__coupon__business_id=obj.id, status=2,
+                                                  closedbasket__status=3).aggregate(
+                    total=Sum('total_price_with_offer'))['total']
         return total_sell_price if total_sell_price else 0
 
     def get_total_active_coupons(self, obj: Business):
-        return obj.coupon_set.count()
+        if self.context["superuser"]:
+            return Coupon.objects.all().count()
+        else:
+            return obj.coupon_set.count()
 
     def get_verified_comments(self, obj):
-        comments_count = Comment.objects.filter(coupon__business_id=obj.id, verified=True).count()
+        if self.context["superuser"]:
+            comments_count = Comment.objects.filter(verified=True).count()
+        else:
+            comments_count = Comment.objects.filter(coupon__business_id=obj.id, verified=True).count()
         return comments_count
 
     # def get_recently_sold_coupons(self, obj):

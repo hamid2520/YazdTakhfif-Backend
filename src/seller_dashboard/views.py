@@ -18,18 +18,21 @@ class SellerDashboardAPIView(APIView):
 
     def get(self, request):
         if request.user.is_superuser:
-            businesses = Business.objects.all()
+            businesses, created = Business.objects.get_or_create(admin_id=request.user.id, title="یزد تخفیف")
         else:
-            businesses = Business.objects.filter(admin_id=request.user.id)
+            businesses = Business.objects.filter(admin_id=request.user.id).first()
             if not businesses.exists():
-                return 404
-        serializer = SellerDashboardSerializer(instance=businesses, many=True)
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = SellerDashboardSerializer(instance=businesses,
+                                               context={'user_id': request.user.id,
+                                                        'superuser': request.user.is_superuser})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class SellerDashboardCouponsAPIView(ListAPIView):
     serializer_class = SoldCouponsSerializer
     permission_classes = [IsAuthenticated, ]
+
     def get_queryset(self):
         if self.request.user.is_superuser:
             businesses = Business.objects.all()
@@ -38,14 +41,6 @@ class SellerDashboardCouponsAPIView(ListAPIView):
         sold_coupons = ClosedBasketDetail.objects.filter(line_coupon__coupon__business_id__in=businesses).order_by(
             '-closedbasket__created_at')
         return sold_coupons
-
-
-    # def get(self, request):
-    #     business = get_object_or_404(Business, admin_id=request.user.id)
-    #     sold_coupons = ClosedBasketDetail.objects.filter(line_coupon__coupon__business_id=business.id).order_by(
-    #         'closedbasket__payment_datetime')
-    #     serializer = SoldCouponsSerializer(instance=sold_coupons, many=True)
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserCommentList(ListAPIView):
