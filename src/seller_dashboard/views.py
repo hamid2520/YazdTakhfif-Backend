@@ -1,14 +1,14 @@
-from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView
-from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from django.utils import timezone
-from rest_framework.request import Request
+from rest_framework.filters import SearchFilter
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.db.models import F
+from rest_framework.settings import api_settings
+from rest_framework.views import APIView
+
 from src.business.models import Business
 from src.coupon.models import Comment
+from .filters import TimeFilter
 from .serializers import CommentSerializer
 from .serializers import SellerDashboardSerializer, SoldCouponsSerializer
 from ..basket.models import ClosedBasketDetail
@@ -33,6 +33,8 @@ class SellerDashboardAPIView(APIView):
 class SellerDashboardCouponsAPIView(ListAPIView):
     serializer_class = SoldCouponsSerializer
     permission_classes = [IsAuthenticated, ]
+    filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter, TimeFilter]
+    search_fields = ['line_coupon__coupon__business__title', 'line_coupon__title', 'line_coupon__coupon__title']
 
     def get_queryset(self):
         if self.request.user.is_superuser:

@@ -1,5 +1,4 @@
 from datetime import timedelta
-import jdatetime
 
 from django.utils import timezone
 from rest_framework.filters import BaseFilterBackend
@@ -34,7 +33,6 @@ class CustomTimeFilter:
     @staticmethod
     def filter_line_coupon(queryset, time):
         now = timezone.now()
-        print(now)
         tomorrow = now + timedelta(days=1)
         if now.month == 12:
             next_month = now.replace(year=now.year + 1, month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -58,7 +56,6 @@ class CustomTimeFilter:
     @staticmethod
     def filter_basket_detail(queryset, time):
         now = timezone.now()
-        print(now)
         tomorrow = now + timedelta(days=1)
         if now.month == 12:
             next_month = now.replace(year=now.year + 1, month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -82,7 +79,6 @@ class CustomTimeFilter:
     @staticmethod
     def filter_product_codes(queryset, time):
         now = timezone.now()
-        print(now)
         tomorrow = now + timedelta(days=1)
         if now.month == 12:
             next_month = now.replace(year=now.year + 1, month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -98,7 +94,7 @@ class CustomTimeFilter:
             elif time.lower() == 'month':
                 queryset = queryset.filter(
                     closed_basket__created_at__date__gte=now.replace(day=1, hour=0,
-                                                                    minute=0, second=0,
-                                                                    microsecond=0),
+                                                                     minute=0, second=0,
+                                                                     microsecond=0),
                     closed_basket__created_at__date__lte=next_month)
         return queryset.filter(closed_basket__status=3)
