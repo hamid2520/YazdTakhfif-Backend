@@ -18,10 +18,22 @@ class UserShowSerializer(serializers.ModelSerializer):
 class SoldCouponsSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()
     payment_datetime = serializers.SerializerMethodField()
+    customer = serializers.SerializerMethodField()
+    coupon = serializers.SerializerMethodField()
+    business = serializers.SerializerMethodField()
     line_coupon = serializers.SlugRelatedField(slug_field="title", read_only=True)
 
     def get_payment_datetime(self, obj: ClosedBasketDetail):
         return datetime.fromgregorian(datetime=obj.closedbasket_set.first().created_at).strftime("%Y/%m/%d")
+
+    def get_customer(self, obj: ClosedBasketDetail):
+        return obj.closedbasket_set.first().user.username
+
+    def get_coupon(self, obj: ClosedBasketDetail):
+        return obj.line_coupon.coupon.title
+
+    def get_business(self, obj: ClosedBasketDetail):
+        return obj.line_coupon.coupon.business.title
 
     def get_status(self, obj):
         status = ["در انتظار تایید", "موفق", "ناموفق"]

@@ -1,4 +1,7 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Sum
+
 from src.basket.models import ClosedBasket
 from src.coupon.models import LineCoupon, Coupon
 
@@ -28,6 +31,23 @@ class Transaction(models.Model):
     closed_basket = models.ForeignKey(ClosedBasket, models.CASCADE, verbose_name='سبد خرید', null=True, blank=True)
     line_coupon = models.ForeignKey(LineCoupon, models.CASCADE, verbose_name='لاین کوپن', null=True, blank=True)
     coupon = models.ForeignKey(Coupon, models.CASCADE, verbose_name='کوپن', null=True, blank=True)
+
+    def clean(self):
+        if self.type == 2:
+            deposit = Transaction.objects.filter(user_id=self.user.id, type=1, status=2).aggregate(Sum("amount"))[
+                "amount__sum"]
+            deposit = deposit if deposit else 0
+            withdraw = Transaction.objects.filter(user_id=self.user.id, type=2, status=2).aggregate(Sum("amount"))[
+                "amount__sum"]
+            withdraw = withdraw if withdraw else 0
+            if deposit < withdraw + self.amount:
+                raise ValidationError({"amount": "موجودی کسب و کار جهت برداشت کافی نیست!"})
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        self.full_clean()
+        return super().save(force_insert, force_update, using,
+                            update_fields)
 
     def __str__(self):
         return f'{self.user}({self.type})'
