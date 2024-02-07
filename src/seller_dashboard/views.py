@@ -9,9 +9,9 @@ from rest_framework.views import APIView
 from src.business.models import Business
 from src.coupon.models import Comment
 from .filters import TimeFilter
-from .serializers import CommentSerializer
+from .serializers import CommentSerializer, SoldCouponsClosedBasketSerializer
 from .serializers import SellerDashboardSerializer, SoldCouponsSerializer
-from ..basket.models import ClosedBasketDetail
+from ..basket.models import ClosedBasketDetail, ClosedBasket
 
 
 class SellerDashboardAPIView(APIView):
@@ -31,7 +31,8 @@ class SellerDashboardAPIView(APIView):
 
 
 class SellerDashboardCouponsAPIView(ListAPIView):
-    serializer_class = SoldCouponsSerializer
+    # serializer_class = SoldCouponsSerializer
+    serializer_class = SoldCouponsClosedBasketSerializer
     permission_classes = [IsAuthenticated, ]
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter, TimeFilter]
     search_fields = ['line_coupon__coupon__business__title', 'line_coupon__title', 'line_coupon__coupon__title']
@@ -41,8 +42,8 @@ class SellerDashboardCouponsAPIView(ListAPIView):
             businesses = Business.objects.all()
         else:
             businesses = Business.objects.filter(admin_id=self.request.user.id)
-        sold_coupons = ClosedBasketDetail.objects.filter(line_coupon__coupon__business_id__in=businesses).order_by(
-            '-closedbasket__created_at')
+        sold_coupons = ClosedBasket.objects.filter(product__line_coupon__coupon__business_id__in=businesses).order_by(
+            '-created_at').distinct()
         return sold_coupons
 
 
