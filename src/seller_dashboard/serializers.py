@@ -1,11 +1,10 @@
-from rest_framework import serializers
-from jdatetime import datetime
-from django.utils import timezone
 from django.db.models import Sum
+from jdatetime import datetime
+from rest_framework import serializers
+
 from src.basket.models import ClosedBasketDetail, ClosedBasket
 from src.business.models import Business
-from src.coupon.models import Comment, LineCoupon, Coupon
-from src.coupon.serializers import CommentSerializer
+from src.coupon.models import Comment, Coupon
 from src.users.models import User
 
 
@@ -42,6 +41,19 @@ class SoldCouponsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClosedBasketDetail
         exclude = ["id", "payment_price", "payment_offer_percent", "payment_price_with_offer", "total_price"]
+
+
+class SoldCouponsClosedBasketSerializer(serializers.ModelSerializer):
+    product = SoldCouponsSerializer(many=True, read_only=True)
+    user = serializers.SlugRelatedField(slug_field="username", read_only=True)
+    payment_datetime = serializers.SerializerMethodField()
+
+    def get_payment_datetime(self, obj: ClosedBasket):
+        return datetime.fromgregorian(datetime=obj.created_at).strftime("%Y/%m/%d")
+
+    class Meta:
+        model = ClosedBasket
+        exclude = ["id"]
 
 
 class SellerDashboardSerializer(serializers.ModelSerializer):

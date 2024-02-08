@@ -1,25 +1,23 @@
-from django.db.models import Case, Value, BooleanField, When
+from django.utils import timezone
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import pagination
 from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import action
 from rest_framework.response import Response
-from drf_yasg.utils import swagger_auto_schema
-from rest_framework.filters import SearchFilter
-
-from rest_framework.viewsets import ModelViewSet
 from rest_framework.settings import api_settings
+from rest_framework.viewsets import ModelViewSet
 
-from .models import Category, Coupon, LineCoupon, Rate, Comment, CouponImage
-from .filters import IsOwnerOrSuperUserCoupon, IsOwnerOrSuperUserLineCoupon, PriceFilter, OfferFilter, RateFilter, \
-    BusinessFilter, CategoryFilter, SubCategory
-from .serializers import CategorySerializer, CouponSerializer, CouponCreateSerializer, LineCouponSerializer, \
-    RateSerializer, CommentSerializer, CouponImageSerializer, LineCouponShowSerializer
-from .permissions import IsSuperUserOrOwner, IsSuperUserOrReadOnly
 from src.basket.models import ProductValidationCode
 from src.basket.serializers import ProductValidationCodeSerializer, ProductValidationCodeShowSerializer
-from rest_framework import pagination
-from .exceptions import MaximumNumberOfDeletableObjectsError
+from .filters import IsOwnerOrSuperUserCoupon, IsOwnerOrSuperUserLineCoupon, PriceFilter, OfferFilter, RateFilter, \
+    BusinessFilter, CategoryFilter, SubCategory
+from .models import Category, Coupon, LineCoupon, Rate, Comment, CouponImage
+from .permissions import IsSuperUserOrOwner, IsSuperUserOrReadOnly
+from .serializers import CategorySerializer, CouponSerializer, CouponCreateSerializer, LineCouponSerializer, \
+    RateSerializer, CommentSerializer, CouponImageSerializer, LineCouponShowSerializer
 from ..utils.get_bool import get_boolean
 
 
@@ -158,15 +156,15 @@ class LineCouponViewSet(ModelViewSet):
     def line_coupon_codes_validation(self, request):
         code = request.data.get("code")
         code_object = get_object_or_404(ProductValidationCode, code=code)
-        res_status = status.HTTP_200_OK
         if get_boolean(request.data.get('used', False)) and not code_object.used:
-            if self.request.user.is_authenticated:
-                if code_object.product.coupon.business.admin_id == request.user.id or request.user.is_superuser:
-                    code_object.used = True
-                    code_object.save()
-                else:
-                    res_status = status.HTTP_403_FORBIDDEN
+            if code_object.product.coupon.business.admin_id == request.user.id or request.user.is_superuser:
+                time_now = timezone.now().date()
+                expire_date = code_object.product.coupon.expire_date
+                if expire_date < time_now:
+                    return Response(data={"error": "!کد تخفیف منقضی شده است"}, status=status.HTTP_400_BAD_REQUEST)
+                code_object.used = True
+                code_object.save()
             else:
-                res_status = status.HTTP_403_FORBIDDEN
+                return Response(status=status.HTTP_403_FORBIDDEN)
         data = ProductValidationCodeShowSerializer(instance=code_object).data
-        return Response(data=data, status=res_status)
+        return Response(data=data, status=status.HTTP_200_OK)
