@@ -8,5 +8,5 @@ from .models import Transaction
 class TransactionAdmin(admin.ModelAdmin):
     list_display = ["user", "type", "amount", "status", "customer"]
     list_editable = ["type", "status"]
-    search_fields = ["user__phone", "user__username", ]
+    search_fields = ["user__phone", "user__username", "customer"]
     list_filter = ["datetime", ]
