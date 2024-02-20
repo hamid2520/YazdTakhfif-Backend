@@ -33,7 +33,7 @@ class CouponAdmin(admin.ModelAdmin):
     list_filter = ["category", "created", "expire_date", "coupon_rate"]
     search_fields = ["title", "business__admin__username"]
     autocomplete_fields = ["business", "category"]
-    readonly_fields = ["slug", "coupon_rate", "rate_count"]
+    readonly_fields = ["slug", "rate_count"]
     inlines = [ImageInline, ]
 
 
