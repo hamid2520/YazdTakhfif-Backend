@@ -347,39 +347,39 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 AZ_IRANIAN_BANK_GATEWAYS = {
     'GATEWAYS': {
-        'BMI': {
-            'MERCHANT_CODE': '<YOUR MERCHANT CODE>',
-            'TERMINAL_CODE': '<YOUR TERMINAL CODE>',
-            'SECRET_KEY': '<YOUR SECRET CODE>',
-        },
-        'SEP': {
-            'MERCHANT_CODE': '<YOUR MERCHANT CODE>',
-            'TERMINAL_CODE': '<YOUR TERMINAL CODE>',
-        },
-        'ZARINPAL': {
-            'MERCHANT_CODE': '111111111111111111111111111111111111',
-            'SANDBOX': 1,  # 0 disable, 1 active
-        },
-        'IDPAY': {
-            'MERCHANT_CODE': '11f5e4e5-6711-45a8-81fe-59dd08481794',
-            'METHOD': 'POST',  # GET or POST
-            'X_SANDBOX': 1,  # 0 disable, 1 active
-        },
+        # 'BMI': {
+        #     'MERCHANT_CODE': '<YOUR MERCHANT CODE>',
+        #     'TERMINAL_CODE': '<YOUR TERMINAL CODE>',
+        #     'SECRET_KEY': '<YOUR SECRET CODE>',
+        # },
+        # 'SEP': {
+        #     'MERCHANT_CODE': '<YOUR MERCHANT CODE>',
+        #     'TERMINAL_CODE': '<YOUR TERMINAL CODE>',
+        # },
+        # 'ZARINPAL': {
+        #     'MERCHANT_CODE': '111111111111111111111111111111111111',
+        #     'SANDBOX': 1,  # 0 disable, 1 active
+        # },
+        # 'IDPAY': {
+        #     'MERCHANT_CODE': '11f5e4e5-6711-45a8-81fe-59dd08481794',
+        #     'METHOD': 'POST',  # GET or POST
+        #     'X_SANDBOX': 1,  # 0 disable, 1 active
+        # },
         'MELLAT': {
-            'TERMINAL_CODE': '<YOUR TERMINAL CODE>',
-            'USERNAME': '<YOUR USERNAME>',
-            'PASSWORD': '<YOUR PASSWORD>',
+            'TERMINAL_CODE': os.getenv('GATEWAY_TERMINAL_CODE'),
+            'USERNAME': os.getenv('GATEWAY_USERNAME'),
+            'PASSWORD': os.getenv('GATEWAY_PASSWORD'),
         },
-        'ZIBAL': {
-            'MERCHANT_CODE': 'zibal',
-        },
-        'BAHAMTA': {
-            'MERCHANT_CODE': '<YOUR MERCHANT CODE>',
-        },
-        'PAYV1': {
-            'MERCHANT_CODE': '<YOUR MERCHANT CODE>',
-            'X_SANDBOX': 0,  # 0 disable, 1 active
-        },
+        # 'ZIBAL': {
+        #     'MERCHANT_CODE': 'zibal',
+        # },
+        # 'BAHAMTA': {
+        #     'MERCHANT_CODE': '<YOUR MERCHANT CODE>',
+        # },
+        # 'PAYV1': {
+        #     'MERCHANT_CODE': '<YOUR MERCHANT CODE>',
+        #     'X_SANDBOX': 0,  # 0 disable, 1 active
+        # },
     },
     'IS_SAMPLE_FORM_ENABLE': False,  # اختیاری و پیش فرض غیر فعال است
     'DEFAULT': 'IDPAY',

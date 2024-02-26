@@ -50,7 +50,7 @@ def go_to_gateway_view_v2(request, slug):
         return redirect(reverse(viewname='final_count_validation', args=[basket.slug, ]))
     gateway_name = request.GET.get("gateway")
     try:
-        gateway = Gateway.objects.get(name="IDPAY", active=True)
+        gateway = Gateway.objects.get(name="MELLAT", active=True)
     except ObjectDoesNotExist:
         return redirect(f"{HostUrl}/factor?status={GATEWAY_NOT_VALID}")
     op = OnlinePayment.objects.exclude(status=OnlinePayment.STATUS_SUCCESS).filter(user__id=basket.user_id,
@@ -66,7 +66,7 @@ def go_to_gateway_view_v2(request, slug):
     client_callback_url = reverse(viewname='callback-gateway-v2', args=[op.token])
     factory = bankfactories.BankFactory()
     try:
-        bank = factory.create(bank_type=op.gateway.gateway)
+        bank = factory.create(bank_type="MELLAT")
         bank.set_request(request)
         bank.set_amount(amount * 10)
         bank.set_client_callback_url(client_callback_url)
