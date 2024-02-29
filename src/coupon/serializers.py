@@ -118,7 +118,7 @@ class CouponSerializer(serializers.ModelSerializer):
 
 
 class CouponCreateSerializer(serializers.ModelSerializer):
-    business = serializers.SlugRelatedField(slug_field="title", required=False, queryset=Business.objects.all())
+    business = serializers.SlugRelatedField(slug_field="slug", required=False, queryset=Business.objects.all())
     category = serializers.SlugRelatedField(slug_field="slug", queryset=Category.objects.all(), many=True)
     formatted_created = serializers.SerializerMethodField()
     formatted_expire_date = serializers.SerializerMethodField()
