@@ -159,10 +159,6 @@ class CouponCreateSerializer(serializers.ModelSerializer):
 class LineCouponSerializer(serializers.ModelSerializer):
     coupon = serializers.SlugRelatedField(slug_field="slug", queryset=Coupon.objects.all())
 
-    def validate(self, attrs):
-        if attrs["commission"] >= attrs["price_with_offer"]:
-            raise ValidationError({"commission": "Commission must be lower than price with offer!"})
-
     def save(self, **kwargs):
         try:
             return super().save(**kwargs)
