@@ -1,4 +1,5 @@
 from django.contrib.auth.hashers import make_password, check_password
+from rest_framework.generics import ListAPIView
 from rest_framework.request import Request
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -7,6 +8,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from src.business.models import Business
+from src.business.serializers import BusinessSerializer
 from src.users.models import User
 from src.users.permissions import IsUserOrReadOnly
 from src.users.serializers import CreateUserSerializer, UserSerializer, SignInSerializer, LoginSerializer
@@ -80,6 +84,15 @@ class UserLogingView(APIView):
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
+
+class UserBusiness(ListAPIView):
+    serializer_class = BusinessSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return Business.objects.all()
+        else:
+            return Business.objects.filter(admin=self.request.user)
 
 '''
 {

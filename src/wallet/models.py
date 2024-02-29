@@ -25,7 +25,6 @@ class Transaction(models.Model):
     type = models.SmallIntegerField(verbose_name='نوع', choices=TYPE_CHOICES)
     status = models.SmallIntegerField(verbose_name='وضعیت', choices=STATUS_CHOICES, default=2)
     amount = models.BigIntegerField(verbose_name='مبلغ')
-    final_amount = models.BigIntegerField(blank=True, default=0, verbose_name='مبلغ با احتساب پورسانت')
     price_without_offer = models.BigIntegerField(verbose_name='مبلغ بدون نخفیف', null=True, blank=True)
     datetime = models.DateTimeField(verbose_name='تاریخ ایجاد', auto_now_add=True)
     customer = models.CharField(null=True, blank=True, max_length=150, verbose_name='خریدار')
@@ -48,10 +47,6 @@ class Transaction(models.Model):
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         self.full_clean()
-        if self.type == 1:
-            self.final_amount = self.amount - self.commission
-        elif self.type == 2:
-            self.final_amount = self.amount
         return super().save(force_insert, force_update, using,
                             update_fields)
 
