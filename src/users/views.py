@@ -13,6 +13,8 @@ from src.users.serializers import CreateUserSerializer, UserSerializer, SignInSe
 from rest_framework import pagination
 from django.utils.crypto import get_random_string
 
+from src.users.sms_function import SmsCenter, LOGIN_BODY_ID
+
 
 class UserViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
     """
@@ -54,9 +56,8 @@ class UserSignInView(APIView):
                 user = user.first()
             sms_code = get_random_string(length=4, allowed_chars='1234567890')
             user.sms_code = sms_code
-            # user.sms_code = make_password(sms_code)
             user.save()
-            # send_sms(user.phone, sms_code)
+            SmsCenter(sms_template_id=LOGIN_BODY_ID, sms_body=sms_code, receivers=user.phone).send_sms()
             return Response(status=status.HTTP_200_OK)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
