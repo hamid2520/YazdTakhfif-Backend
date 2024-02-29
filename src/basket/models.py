@@ -28,11 +28,13 @@ class BaseBasketDetail(models.Model):
     payment_price_with_offer = models.PositiveIntegerField(blank=True, default=0, verbose_name="قیمت تمام شده با تخفیف")
     total_price = models.PositiveIntegerField(blank=True, default=0, verbose_name="قیمت کل")
     total_price_with_offer = models.PositiveIntegerField(blank=True, default=0, verbose_name="قیمت کل با تخفیف")
+    total_commission = models.PositiveIntegerField(default=0, verbose_name="پورسانت کل")
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         if self.slug is None:
             self.slug = f"{self.__class__.__name__.lower()}-{uuid.uuid4()}"
+        self.total_commission = self.line_coupon.commission * self.count
         return super().save(force_insert, force_update, using,
                             update_fields)
 

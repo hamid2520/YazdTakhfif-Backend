@@ -158,6 +158,10 @@ class CouponCreateSerializer(serializers.ModelSerializer):
 class LineCouponSerializer(serializers.ModelSerializer):
     coupon = serializers.SlugRelatedField(slug_field="slug", queryset=Coupon.objects.all())
 
+    def validate(self, attrs):
+        if attrs["commission"] >= attrs["price_with_offer"]:
+            raise ValidationError({"commission": "Commission must be lower than price with offer!"})
+
     def save(self, **kwargs):
         try:
             return super().save(**kwargs)
@@ -169,7 +173,7 @@ class LineCouponSerializer(serializers.ModelSerializer):
     class Meta:
         model = LineCoupon
         fields = ["slug", "title", "coupon", "is_main", "count", "price", "offer_percent", "price_with_offer",
-                  "sell_count"]
+                  "sell_count", "commission"]
         read_only_fields = ["slug", "offer_percent", "sell_count"]
 
 
@@ -221,7 +225,7 @@ class LineCouponShowSerializer(serializers.ModelSerializer):
                 return 0
             else:
                 basket_detail = BasketDetail.objects.filter(line_coupon_id=obj.id,
-                                                                          basket__user=self.context['request'].user).first()
+                                                            basket__user=self.context['request'].user).first()
                 return basket_detail.count
         except:
             return 0
@@ -229,7 +233,8 @@ class LineCouponShowSerializer(serializers.ModelSerializer):
     class Meta:
         model = LineCoupon
         fields = ["slug", "title", "coupon", "is_main", "count", "price", "offer_percent", "price_with_offer",
-                  "sell_count", "basket_detail_count", "in_stock", "max", "line_coupon_count", "days_left"]
+                  "sell_count", "basket_detail_count", "in_stock", "max", "line_coupon_count", "days_left",
+                  "commission"]
         read_only_fields = ["slug", "price_with_offer", "sell_count"]
 
 
