@@ -22,7 +22,7 @@ class BasketDetailAdmin(admin.ModelAdmin):
     search_fields = ["line_coupon__title", "line_coupon__coupon__title"]
     autocomplete_fields = ["line_coupon", ]
     readonly_fields = ["slug", "payment_price", "payment_offer_percent", "payment_price_with_offer", "total_price",
-                       "total_price_with_offer", ]
+                       "total_price_with_offer", "total_commission"]
 
 
 @admin.register(ClosedBasket)
@@ -45,7 +45,7 @@ class ClosedBasketDetailAdmin(admin.ModelAdmin):
     search_fields = ["line_coupon__title", "line_coupon__coupon__title"]
     autocomplete_fields = ["line_coupon", ]
     readonly_fields = ["slug", "payment_price", "payment_offer_percent", "payment_price_with_offer", "total_price",
-                       "total_price_with_offer", ]
+                       "total_price_with_offer", "total_commission"]
 
 
 #

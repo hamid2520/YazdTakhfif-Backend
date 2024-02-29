@@ -22,7 +22,7 @@ class BasketDetailSerializer(serializers.ModelSerializer):
         model = BasketDetail
         exclude = ["id", ]
         read_only_fields = ["slug", "payment_price", "payment_offer_percent", "payment_price_with_offer", "total_price",
-                            "total_price_with_offer"]
+                            "total_price_with_offer", "total_commission"]
 
 
 class BasketDetailShowSerializer(serializers.ModelSerializer):
@@ -72,7 +72,7 @@ class BasketDetailShowSerializer(serializers.ModelSerializer):
         exclude = ["id", "payment_price", "payment_price_with_offer", "payment_offer_percent", "total_price",
                    "total_price_with_offer"]
         read_only_fields = ["slug", "payment_price", "payment_offer_percent", "payment_price_with_offer", "total_price",
-                            "total_price_with_offer", ]
+                            "total_price_with_offer", "total_commission"]
 
 
 class BasketSerializer(serializers.ModelSerializer):

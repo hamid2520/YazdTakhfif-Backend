@@ -102,6 +102,7 @@ class LineCoupon(models.Model):
     offer_percent = models.PositiveSmallIntegerField(blank=True, default=0, verbose_name="درصد تخفیف")
     price_with_offer = models.PositiveIntegerField(verbose_name="قیمت با تخفیف")
     sell_count = models.PositiveIntegerField(blank=True, default=0, verbose_name="تعداد فروخته شده")
+    commission = models.PositiveIntegerField(default=0, verbose_name="پورسانت")
 
     def validate_unique(self, exclude=None):
         if self.is_main:
