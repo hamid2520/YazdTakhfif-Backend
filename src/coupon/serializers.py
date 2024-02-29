@@ -140,11 +140,12 @@ class CouponCreateSerializer(serializers.ModelSerializer):
 
     def save(self, **kwargs):
         user_id = self.context.get('request').user.id
-        business = Business.objects.filter(admin_id=user_id)
-        if not business.exists():
-            raise ValidationError({"business": "Business not found!"})
-        business = business.first()
-        self.validated_data["business"] = business
+        if 'business' not in self.validated_data:
+            business = Business.objects.filter(admin_id=user_id)
+            if not business.exists():
+                raise ValidationError({"business": "Business not found!"})
+            business = business.first()
+            self.validated_data["business"] = business
         return super().save(**kwargs)
 
     class Meta:
