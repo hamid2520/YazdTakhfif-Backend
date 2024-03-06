@@ -52,6 +52,16 @@ class SignInSerializer(serializers.Serializer):
     phone = serializers.CharField()
 
 
+class SignUpSerializer(serializers.Serializer):
+    phone = serializers.CharField()
+    sms_code = serializers.CharField(allow_null=True)
+    password = serializers.CharField(allow_null=True)
+
+
+
 class LoginSerializer(serializers.Serializer):
     phone = serializers.CharField()
     sms_code = serializers.CharField()
+    signin_type = serializers.CharField()
+
+

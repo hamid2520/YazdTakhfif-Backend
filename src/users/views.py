@@ -13,7 +13,8 @@ from src.business.models import Business
 from src.business.serializers import BusinessSerializer
 from src.users.models import User
 from src.users.permissions import IsUserOrReadOnly
-from src.users.serializers import CreateUserSerializer, UserSerializer, SignInSerializer, LoginSerializer
+from src.users.serializers import CreateUserSerializer, UserSerializer, SignInSerializer, LoginSerializer, \
+    SignUpSerializer
 from rest_framework import pagination
 from django.utils.crypto import get_random_string
 
@@ -48,14 +49,14 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.Cre
         return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
-class UserSignInView(APIView):
+class SignInSmsView(APIView):
     def post(self, request: Request):
         serializer = SignInSerializer(data=request.data)
         if serializer.is_valid():
             phone = serializer.validated_data['phone']
             user = User.objects.filter(phone=phone)
             if not user.exists():
-                user = User.objects.create_user(username=phone, phone=phone, email='')
+                return Response(status=404)
             else:
                 user = user.first()
             sms_code = get_random_string(length=4, allowed_chars='1234567890')
@@ -67,24 +68,69 @@ class UserSignInView(APIView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserLogingView(APIView):
+class UserLoginView(APIView):
     def post(self, request: Request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             phone = serializer.validated_data['phone']
             sms_code = serializer.validated_data['sms_code']
             user = User.objects.filter(phone=phone)
-            # if user.exists() and check_password(user.first().sms_code, sms_code):
-            if user.exists() and user.first().sms_code == sms_code:
-                refresh = RefreshToken.for_user(user.first())
-                return Response(status=status.HTTP_200_OK,
-                                data={'refresh': str(refresh), 'access': str(refresh.access_token)})
+            if user.exists():
+                if serializer.validated_data['signin_type'] == 'sms' and user.first().sms_code == sms_code:
+                    refresh = RefreshToken.for_user(user.first())
+                    return Response(status=status.HTTP_200_OK,
+                                    data={'refresh': str(refresh), 'access': str(refresh.access_token)})
+                elif serializer.validated_data['signin_type'] == 'pass' and check_password(sms_code, user.first().password):
+                    refresh = RefreshToken.for_user(user.first())
+                    return Response(status=status.HTTP_200_OK,
+                                    data={'refresh': str(refresh), 'access': str(refresh.access_token)})
             else:
                 return Response(status=status.HTTP_404_NOT_FOUND)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
+class UserSignUpView(APIView):
+    def post(self, request: Request):
+        serializer = SignInSerializer(data=request.data)
+        if serializer.is_valid():
+            phone = serializer.validated_data['phone']
+            user = User.objects.filter(phone=phone)
+            if user.exists():
+                user = user.first()
+            else:
+                user = User.objects.create_user(username=phone, phone=phone, email='')
+
+            sms_code = get_random_string(length=4, allowed_chars='1234567890')
+            user.sms_code = sms_code
+            user.save()
+            SmsCenter(sms_template_id=LOGIN_BODY_ID, sms_body=sms_code, receivers=user.phone).send_sms()
+            return Response(status=status.HTTP_200_OK)
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserSignUpConfirmView(APIView):
+    def post(self, request: Request):
+        serializer = SignUpSerializer(data=request.data)
+        if serializer.is_valid():
+            phone = serializer.validated_data['phone']
+            user = User.objects.filter(phone=phone)
+            if user.exists():
+                user = user.first()
+                if user.sms_code == serializer.validated_data['sms_code']:
+                    user.password = make_password(serializer.validated_data['password'])
+                    user.save()
+                    refresh = RefreshToken.for_user(user)
+                    return Response(status=status.HTTP_200_OK,
+                                    data={'refresh': str(refresh),
+                                          'access': str(refresh.access_token)})
+                else:
+                    return Response(status=400)
+            else:
+                return Response(status=400)
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 class UserBusiness(ListAPIView):
     serializer_class = BusinessSerializer
 
