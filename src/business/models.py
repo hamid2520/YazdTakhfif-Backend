@@ -23,3 +23,32 @@ class Business(models.Model):
     class Meta:
         verbose_name = "کسب و کار"
         verbose_name_plural = "کسب و کار ها"
+
+
+DepositStatus = [('درحال انتظار', 0), ("تسویه شده", 1), ("رد شده", 2)]
+
+
+class DepositRequest(models.Model):
+    requested_date = models.DateField(verbose_name='تاریخ درخواست شده')
+    requested_price = models.IntegerField(verbose_name='مبلغ درخواست')
+    status = models.IntegerField(default=0, null=True, blank=True, choices=DepositStatus, verbose_name='وضعیت')
+    deposit_date = models.DateField(null=True, blank=True, verbose_name='تاریخ تسویه')
+    document = models.ImageField(null=True, blank=True, verbose_name='مستندات تسویه')
+    sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='ارسال کننده')
+
+    class Meta:
+        verbose_name = "درخواست تسویه"
+        verbose_name_plural = "درخواست های تسویه"
+        ordering = ['-requested_date']
+
+
+class CorporateRequest(models.Model):
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=24)
+    description = models.CharField(max_length=512)
+    field = models.CharField(max_length=255)
+
+    class Meta:
+        verbose_name = "درخواست همکاری"
+        verbose_name_plural = "درخواست های همکاری"
