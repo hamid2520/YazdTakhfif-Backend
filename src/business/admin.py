@@ -1,8 +1,16 @@
 from django.contrib import admin
 from django.db.models import Sum
 
-from src.business.models import Business
+from src.business.models import Business, DepositRequest
 from src.wallet.models import Transaction
+
+
+@admin.register(DepositRequest)
+class BusinessAdmin(admin.ModelAdmin):
+    list_display = ["requested_date", "requested_price", "sender"]
+    search_fields = ["sender__first_name", "sender__last_name", "sender__phone"]
+    autocomplete_fields = ["sender"]
+    list_filter = ['status', "sender"]
 
 
 @admin.register(Business)

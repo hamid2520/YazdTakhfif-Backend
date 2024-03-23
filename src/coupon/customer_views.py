@@ -1,3 +1,4 @@
+from django.utils.timezone import now
 from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
@@ -18,7 +19,7 @@ class CategoryAPIView(ListAPIView):
 
 
 class CouponAPIView(ListRetrieveAPIView):
-    queryset = Coupon.objects.all()
+    queryset = Coupon.objects.filter(is_active=True, active_date__lte=now())
     serializer_class = CouponSerializer
     lookup_field = "slug"
     lookup_url_kwarg = "slug"

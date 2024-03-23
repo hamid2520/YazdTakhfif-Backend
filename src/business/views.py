@@ -1,11 +1,29 @@
+from rest_framework.generics import CreateAPIView
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.filters import SearchFilter
 from rest_framework import pagination
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .models import Business
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from .models import Business, DepositRequest, CorporateRequest
 from .filters import IsOwnerOrSuperUser
-from .serializers import BusinessSerializer
+from .serializers import BusinessSerializer, DepositSerializer, CorporateSerializer
+
+
+class DepositViewSet(ModelViewSet):
+    serializer_class = DepositSerializer
+    permission_classes = [IsAuthenticated, ]
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return DepositRequest.objects.all()
+        else:
+            return DepositRequest.objects.first(sender=self.request.user)
+
+
+class CorporateViewSet(CreateAPIView):
+    serializer_class = CorporateSerializer
+    permission_classes = []
+    queryset = CorporateRequest.objects.all()
 
 
 class BusinessViewSet(ModelViewSet):

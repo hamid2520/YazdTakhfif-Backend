@@ -53,6 +53,8 @@ class Coupon(models.Model):
     business = models.ForeignKey(to=Business, on_delete=models.CASCADE, verbose_name="کسب و کار")
     created = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد کوپن")
     expire_date = models.DateField(null=True, blank=True, verbose_name="تاریخ انقضا")
+    active_date = models.DateField(null=True, blank=True, verbose_name="تاریخ فعال سازی")
+    is_active = models.BooleanField(default=False, null=True, blank=True, verbose_name='فعال/غیرفعال')
     category = models.ManyToManyField(to=Category, verbose_name="دسته بندی")
     description = models.CharField(max_length=1000, blank=True, null=True, verbose_name="توضیحات")
     terms_of_use = models.TextField(blank=True, null=True, verbose_name="شرایط استفاده")
@@ -66,6 +68,8 @@ class Coupon(models.Model):
                 self.slug += generate_random_code()
         if not self.expire_date:
             self.expire_date = timezone.now() + timedelta(days=10)
+        if not self.active_date:
+            self.active_date = timezone.now()
         return super().save(force_insert, force_update, using, update_fields)
 
     def get_main_line_coupon(self):

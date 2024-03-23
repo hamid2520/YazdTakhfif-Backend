@@ -2,6 +2,7 @@ from itertools import chain
 
 from django.db.models import F
 from django.db.models import Value, CharField
+from django.utils.timezone import now
 from rest_framework import status
 from rest_framework.decorators import APIView
 from rest_framework.request import Request
@@ -19,7 +20,7 @@ class SearchEngineListApiView(APIView):
         category_search_data = Category.objects.filter(title__icontains=text,
                                                        parent__isnull=False).values('title', 'slug').annotate(
             model_name=Value('category', output_field=CharField()))
-        coupon_search_data = Coupon.objects.filter(title__icontains=text).values('title', 'slug').annotate(
+        coupon_search_data = Coupon.objects.filter(is_active=True, active_date__lte=now()).filter(title__icontains=text).values('title', 'slug').annotate(
             model_name=Value('coupon', output_field=CharField()))
         line_coupon_search_data = LineCoupon.objects.filter(title__icontains=text).values('title',
                                                                                           'coupon__slug').annotate(

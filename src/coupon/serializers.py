@@ -58,9 +58,9 @@ class CouponSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coupon
         fields = [
-            "title", "slug", "business", "created", "expire_date", "category", "description", "terms_of_use",
+            "title", "slug", "business", "created", "expire_date", "active_date", "category", "description", "terms_of_use",
             "coupon_rate", "rate_count", "rates_list", "images", "list_data", "comment_list", "formatted_created",
-            "formatted_expire_date", "available_coupon_count"]
+            "formatted_expire_date", "formatted_active_date", "available_coupon_count"]
 
     def get_formatted_created(self, obj):
         datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created)
@@ -68,6 +68,10 @@ class CouponSerializer(serializers.ModelSerializer):
 
     def get_formatted_expire_date(self, obj):
         datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.expire_date)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
+
+    def get_formatted_active_date(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.active_date)
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
     def get_rates_list(self, obj: Coupon):
@@ -132,6 +136,10 @@ class CouponCreateSerializer(serializers.ModelSerializer):
         datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.expire_date)
         return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
 
+    def get_formatted_active_date(self, obj):
+        datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.active_date)
+        return datetime_field.strftime("%Y/%m/%d %H:%M:%S")
+
     def validate_category(self, value):
         for category in value:
             if not category.parent:
@@ -150,9 +158,8 @@ class CouponCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Coupon
-        fields = ["slug", "title", "business", "expire_date", "category", "description", "terms_of_use",
-                  "formatted_created",
-                  "formatted_expire_date"]
+        fields = ["slug", "title", "business", "expire_date", "active_date", "category", "description", "terms_of_use",
+                  "formatted_created", "formatted_expire_date", "formatted_active_date"]
         read_only_fields = ['slug', ]
 
 

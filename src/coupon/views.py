@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.utils.timezone import now
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import pagination
 from rest_framework import status
@@ -33,7 +34,7 @@ class CategoryViewSet(ModelViewSet):
 
 
 class CouponViewSet(ModelViewSet):
-    queryset = Coupon.objects.all()
+    queryset = Coupon.objects.filter(is_active=True, active_date__lte=now())
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
     permission_classes = [IsAuthenticated, ]

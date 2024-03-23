@@ -29,8 +29,8 @@ class ImageInline(admin.TabularInline):
 
 @admin.register(Coupon)
 class CouponAdmin(admin.ModelAdmin):
-    list_display = ["title", "business", "created", "expire_date"]
-    list_filter = ["category", "created", "expire_date", "coupon_rate"]
+    list_display = ["title", "business", "created", "expire_date", "active_date"]
+    list_filter = ["is_active", "category", "created", "expire_date", "active_date", "coupon_rate"]
     search_fields = ["title", "business__admin__username"]
     autocomplete_fields = ["business", "category"]
     readonly_fields = ["slug", "rate_count"]
