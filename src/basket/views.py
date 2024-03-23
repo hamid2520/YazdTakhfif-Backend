@@ -326,13 +326,17 @@ class VerifyQRCode(View):
         if code.exists():
             code = code.first()
             if not code.used:
-                serializer = QRCodeGetSerializer(instance=code)
-                code.used = True
-                code.save()
-                return render(request, template_name="basket/validationpage.html", context={
-                    "status_code": 200,
-                    "text": "!وضعیت کد تخفیف به استفاده شده تغییر کرد",
-                })
+                if request.GET.get('use_all', False):
+                    ProductValidationCode.objects.filter(closed_basket=code.closed_basket,
+                                                         product_id=code.product.id).update(**{'used': True})
+                else:
+                    serializer = QRCodeGetSerializer(instance=code)
+                    code.used = True
+                    code.save()
+                    return render(request, template_name="basket/validationpage.html", context={
+                        "status_code": 200,
+                        "text": "!وضعیت کد تخفیف به استفاده شده تغییر کرد",
+                    })
             return render(request, template_name="basket/validationpage.html", context={
                 "status_code": 400,
                 "text": "!کد تخفیف قبلا استفاده شده است",

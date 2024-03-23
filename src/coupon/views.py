@@ -163,8 +163,13 @@ class LineCouponViewSet(ModelViewSet):
                 expire_date = code_object.product.coupon.expire_date
                 if expire_date < time_now:
                     return Response(data={"error": "!کد تخفیف منقضی شده است"}, status=status.HTTP_400_BAD_REQUEST)
-                code_object.used = True
-                code_object.save()
+
+                if request.data.get('use_all', False):
+                    ProductValidationCode.objects.filter(closed_basket=code_object.closed_basket,
+                                                         product_id=code_object.product.id).update(**{'used': True})
+                else:
+                    code_object.used = True
+                    code_object.save()
             else:
                 return Response(status=status.HTTP_403_FORBIDDEN)
         data = ProductValidationCodeShowSerializer(instance=code_object).data
