@@ -53,6 +53,7 @@ class CouponSerializer(serializers.ModelSerializer):
     comment_list = serializers.SerializerMethodField()
     formatted_created = serializers.SerializerMethodField()
     formatted_expire_date = serializers.SerializerMethodField()
+    formatted_active_date = serializers.SerializerMethodField()
     available_coupon_count = serializers.SerializerMethodField()
 
     class Meta:
@@ -126,6 +127,7 @@ class CouponCreateSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(slug_field="slug", queryset=Category.objects.all(), many=True)
     formatted_created = serializers.SerializerMethodField()
     formatted_expire_date = serializers.SerializerMethodField()
+    formatted_active_date = serializers.SerializerMethodField()
     expire_date = serializers.DateField()
 
     def get_formatted_created(self, obj):
