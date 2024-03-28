@@ -18,7 +18,7 @@ from .permissions import IsOwnerOrSuperUser
 from ..basket.models import Basket
 from ..basket.serializers import BasketShowSerializer, ClosedBasketShowSerializer
 
-HostUrl = 'http://158.255.74.252:3000'
+HostUrl = 'http://yazdbon.ir'
 GATEWAY_STATUS_TOKEN_INVALID = 1
 GATEWAY_STATUS_PROBLEM_CONNECT_GATEWAY = 2
 GATEWAY_STATUS_SUCCESS = 3
