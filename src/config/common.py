@@ -356,10 +356,10 @@ AZ_IRANIAN_BANK_GATEWAYS = {
         #     'MERCHANT_CODE': '<YOUR MERCHANT CODE>',
         #     'TERMINAL_CODE': '<YOUR TERMINAL CODE>',
         # },
-        # 'ZARINPAL': {
-        #     'MERCHANT_CODE': '111111111111111111111111111111111111',
-        #     'SANDBOX': 1,  # 0 disable, 1 active
-        # },
+        'ZARINPAL': {
+            "MERCHANT_CODE": os.getenv('GATEWAY_ZARINPAL_ID'),
+            "SANDBOX": 0,  # 0 disable, 1 active
+        },
         # 'IDPAY': {
         #     'MERCHANT_CODE': '11f5e4e5-6711-45a8-81fe-59dd08481794',
         #     'METHOD': 'POST',  # GET or POST
@@ -382,7 +382,7 @@ AZ_IRANIAN_BANK_GATEWAYS = {
         # },
     },
     'IS_SAMPLE_FORM_ENABLE': False,  # اختیاری و پیش فرض غیر فعال است
-    'DEFAULT': 'IDPAY',
+    'DEFAULT': 'ZARINPAL',
     'CURRENCY': 'IRR',  # اختیاری
     'TRACKING_CODE_QUERY_PARAM': 'tc',  # اختیاری
     'TRACKING_CODE_LENGTH': 16,  # اختیاری

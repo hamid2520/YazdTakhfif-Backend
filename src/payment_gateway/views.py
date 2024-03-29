@@ -48,9 +48,8 @@ def go_to_gateway_view_v2(request, slug):
     basket_count_validation_status = basket.final_count_validation()
     if basket_count_validation_status:
         return redirect(reverse(viewname='final_count_validation', args=[basket.slug, ]))
-    gateway_name = request.GET.get("gateway")
     try:
-        gateway = Gateway.objects.get(name="MELLAT", active=True)
+        gateway = Gateway.objects.filter(active=True).last()
     except ObjectDoesNotExist:
         return redirect(f"{HostUrl}/factor?status={GATEWAY_NOT_VALID}")
     op = OnlinePayment.objects.exclude(status=OnlinePayment.STATUS_SUCCESS).filter(user__id=basket.user_id,
@@ -66,7 +65,7 @@ def go_to_gateway_view_v2(request, slug):
     client_callback_url = reverse(viewname='callback-gateway-v2', args=[op.token])
     factory = bankfactories.BankFactory()
     try:
-        bank = factory.create(bank_type="MELLAT")
+        bank = factory.create(bank_type=gateway.gateway)
         bank.set_request(request)
         bank.set_amount(amount * 10)
         bank.set_client_callback_url(client_callback_url)
