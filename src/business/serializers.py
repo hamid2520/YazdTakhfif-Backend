@@ -7,7 +7,7 @@ from .models import Business, DepositRequest, CorporateRequest
 class BusinessSerializer(serializers.ModelSerializer):
     class Meta:
         model = Business
-        fields = ["title", "slug", "admin", "description", "address"]
+        fields = ["title", "slug", "admin", "description", "address", "lat_map", "lang_map"]
         read_only_fields = ["slug", ]
 
 

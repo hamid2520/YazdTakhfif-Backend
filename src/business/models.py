@@ -12,6 +12,8 @@ class Business(models.Model):
     description = models.TextField(blank=True, null=True, verbose_name="توضیحات")
     address = models.TextField(blank=True, null=True, verbose_name="آدرس")
     phone_number = models.CharField(max_length=11, blank=True, verbose_name="شماره تماس")
+    lat_map = models.DecimalField(max_digits=8, decimal_places=3, null=True, verbose_name='عرض موقعیت مکانی')
+    lang_map = models.DecimalField(max_digits=8, decimal_places=3, null=True, verbose_name='طول موقعیت مکانی')
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.slug = slugify(self.title, allow_unicode=True)
