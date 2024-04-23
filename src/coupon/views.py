@@ -34,7 +34,6 @@ class CategoryViewSet(ModelViewSet):
 
 
 class CouponViewSet(ModelViewSet):
-    queryset = Coupon.objects.filter(is_active=True, active_date__lte=now())
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
     permission_classes = [IsAuthenticated, ]
@@ -42,6 +41,12 @@ class CouponViewSet(ModelViewSet):
                                                               OfferFilter, RateFilter, BusinessFilter, CategoryFilter]
     search_fields = ['title', "linecoupon__title"]
     pagination_class = pagination.LimitOffsetPagination
+
+    def get_queryset(self):
+        if str(self.request.GET.get('all', '0')) == '1':
+            return Coupon.objects.filter(is_active=True, active_date__lte=now())
+        else:
+            return Coupon.objects.all()
 
     def get_serializer_class(self):
         if self.request.method == "GET":
