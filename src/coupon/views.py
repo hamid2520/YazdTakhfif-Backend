@@ -43,7 +43,7 @@ class CouponViewSet(ModelViewSet):
     pagination_class = pagination.LimitOffsetPagination
 
     def get_queryset(self):
-        if str(self.request.GET.get('all', '0')) == '1' or self.action == "retrieve":
+        if str(self.request.GET.get('all', '0')) == '1' or self.action in ["retrieve",'update']:
             return Coupon.objects.all()
         else:
             return Coupon.objects.filter(is_active=True, active_date__lte=now())
