@@ -44,9 +44,9 @@ class CouponViewSet(ModelViewSet):
 
     def get_queryset(self):
         if str(self.request.GET.get('all', '0')) == '1':
-            return Coupon.objects.filter(is_active=True, active_date__lte=now())
-        else:
             return Coupon.objects.all()
+        else:
+            return Coupon.objects.filter(is_active=True, active_date__lte=now())
 
     def get_serializer_class(self):
         if self.request.method == "GET":
