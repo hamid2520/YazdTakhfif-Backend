@@ -172,28 +172,31 @@ class BasketViewSet(ModelViewSet):
             serializer_class=BasketSerializer)
     def set_user_anonymous_basket(self, request):
         basket_slug = request.data.get("basket_slug")
-        basket = get_object_or_404(Basket, slug=basket_slug)
-        user_basket = Basket.objects.filter(user_id=request.user.id)
-        if not user_basket.exists():
-            basket.user_id = request.user.id
-            basket.save()
-            serializer = BasketShowSerializer(instance=basket)
+        basket = Basket.objects.filter(slug=basket_slug)
+        if basket.count() != 0:
+            user_basket = Basket.objects.filter(user_id=request.user.id)
+            if not user_basket.exists():
+                basket.user_id = request.user.id
+                basket.save()
+                serializer = BasketShowSerializer(instance=basket)
+                return Response(data=serializer.data, status=status.HTTP_200_OK)
+            user_basket = user_basket.first()
+            for product in basket.product.all():
+                user_basket_product = user_basket.product.filter(line_coupon_id=product.line_coupon_id)
+                if user_basket_product.exists():
+                    user_basket_product = user_basket_product.first()
+                    user_basket_product.count += product.count
+                    user_basket_product.save()
+                else:
+                    user_basket.product.add(product)
+                basket.product.remove(product)
+            user_basket.update_basket()
+            user_basket.save()
+            basket.delete()
+            serializer = BasketShowSerializer(instance=user_basket)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
-        user_basket = user_basket.first()
-        for product in basket.product.all():
-            user_basket_product = user_basket.product.filter(line_coupon_id=product.line_coupon_id)
-            if user_basket_product.exists():
-                user_basket_product = user_basket_product.first()
-                user_basket_product.count += product.count
-                user_basket_product.save()
-            else:
-                user_basket.product.add(product)
-            basket.product.remove(product)
-        user_basket.update_basket()
-        user_basket.save()
-        basket.delete()
-        serializer = BasketShowSerializer(instance=user_basket)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(data={}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["GET"], url_path="get-anonymous-basket-count", url_name="get_anonymous_basket_count",
             permission_classes=[])
