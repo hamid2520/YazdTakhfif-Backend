@@ -18,7 +18,10 @@ class SellerDashboardAPIView(APIView):
 
     def get(self, request):
         if request.user.is_superuser:
-            businesses, created = Business.objects.get_or_create(admin_id=request.user.id, title="یزد تخفیف")
+            try:
+                businesses = Business.objects.get(title="یزد تخفیف")
+            except:
+                businesses = Business.objects.create(admin_id=request.user.id, title="یزد تخفیف")
         else:
             businesses = Business.objects.filter(admin_id=request.user.id)
             if not businesses.exists():
