@@ -136,7 +136,7 @@ class UserBusiness(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser:
-            return Business.objects.all()
+            return Business.objects.exclude(title='یزد تخفیف')
         else:
             return Business.objects.filter(admin=self.request.user)
 
