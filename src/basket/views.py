@@ -174,6 +174,7 @@ class BasketViewSet(ModelViewSet):
         basket_slug = request.data.get("basket_slug")
         basket = Basket.objects.filter(slug=basket_slug)
         if basket.count() != 0:
+            basket = basket.first()
             user_basket = Basket.objects.filter(user_id=request.user.id)
             if not user_basket.exists():
                 basket.user_id = request.user.id

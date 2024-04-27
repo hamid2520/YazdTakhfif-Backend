@@ -89,7 +89,7 @@ class BusinessFilter(filters.BaseFilterBackend):
 class CategoryFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         if request.GET.get('category', None):
-            queryset = queryset.filter(category__slug=str(request.GET.get('category'))).distinct()
+            queryset = queryset.filter(Q(category__slug=str(request.GET.get('category'))) | Q(category__parent__slug=str(request.GET.get('category')))).distinct()
             return queryset
         return queryset
 
