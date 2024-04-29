@@ -98,14 +98,19 @@ class UserSignUpView(APIView):
             user = User.objects.filter(phone=phone)
             if user.exists():
                 user = user.first()
+                created = False
             else:
                 user = User.objects.create_user(username=phone, phone=phone, email='')
+                created = True
 
             sms_code = get_random_string(length=4, allowed_chars='1234567890')
             user.sms_code = sms_code
             user.save()
-            SmsCenter(sms_template_id=LOGIN_BODY_ID, sms_body=sms_code, receivers=user.phone).send_sms()
-            return Response(status=status.HTTP_200_OK)
+            try:
+                SmsCenter(sms_template_id=LOGIN_BODY_ID, sms_body=sms_code, receivers=user.phone).send_sms()
+            except:
+                pass
+            return Response(data={"user_created": created}, status=status.HTTP_200_OK)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
 

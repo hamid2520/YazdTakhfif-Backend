@@ -6,6 +6,18 @@ from src.common.serializers import ThumbnailerJSONSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(allow_blank=True, write_only=True)
+
+    def update(self, instance, validated_data):
+        temp_pass = instance.password
+        new_instance = super(UserSerializer, self).update(instance, validated_data)
+        if 'password' in validated_data and validated_data.get('password', ''):
+            new_instance.set_password(validated_data['password'])
+        else:
+            new_instance.password = temp_pass
+        new_instance.save()
+        return new_instance
+
     class Meta:
         model = User
         fields = (
@@ -15,7 +27,8 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'email',
             'address',
-            'phone'
+            'phone',
+            'password'
         )
         read_only_fields = ('username',)
 
