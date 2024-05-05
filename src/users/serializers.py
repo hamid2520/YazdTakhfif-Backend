@@ -78,3 +78,25 @@ class LoginSerializer(serializers.Serializer):
     signin_type = serializers.CharField()
 
 
+class AdminUserSerializer(UserSerializer):
+    has_business = serializers.SerializerMethodField()
+
+    def get_has_business(self, obj):
+        from src.business.models import Business
+        return Business.objects.filter(admin__username=obj.username).count() > 0
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_staff',
+            'email',
+            'address',
+            'phone',
+            'has_business',
+            'password'
+        )
+        read_only_fields = ('username', 'is_staff', )

@@ -14,7 +14,7 @@ from src.business.serializers import BusinessSerializer
 from src.users.models import User
 from src.users.permissions import IsUserOrReadOnly
 from src.users.serializers import CreateUserSerializer, UserSerializer, SignInSerializer, LoginSerializer, \
-    SignUpSerializer
+    SignUpSerializer, AdminUserSerializer
 from rest_framework import pagination
 from django.utils.crypto import get_random_string
 
@@ -43,6 +43,16 @@ class UserViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.Cre
         if self.request.user.is_authenticated:
             try:
                 return Response(UserSerializer(self.request.user, context={'request': self.request}).data,
+                                status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({'error': 'Wrong auth token' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    @action(detail=False, methods=['get'], url_path='isadmin', url_name='isadmin')
+    def get_admin_user_data(self, instance):
+        if self.request.user.is_authenticated:
+            try:
+                return Response(AdminUserSerializer(self.request.user, context={'request': self.request}).data,
                                 status=status.HTTP_200_OK)
             except Exception as e:
                 return Response({'error': 'Wrong auth token' + str(e)}, status=status.HTTP_400_BAD_REQUEST)
