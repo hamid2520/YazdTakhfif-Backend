@@ -39,7 +39,7 @@ class User(AbstractUser):
     address = models.CharField(max_length=512, null=True, blank=True, verbose_name="آدرس")
     
     def save(self, *args, **kwargs):
-        if self.id is None and self.phone is None:
+        if self.phone is None or self.phone == '':
             self.phone = self.username
         return super(User, self).save(*args, **kwargs)
             
