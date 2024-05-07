@@ -37,7 +37,12 @@ class User(AbstractUser):
     profile_picture = ThumbnailerImageField(verbose_name='عکس پروفایل', upload_to='profile_pictures/', blank=True,
                                             null=True, )
     address = models.CharField(max_length=512, null=True, blank=True, verbose_name="آدرس")
-
+    
+    def save(self, *args, **kwargs):
+        if self.id is None and self.phone is None:
+            self.phone = self.username
+        return super(User, self).save(*args, **kwargs)
+            
     def get_tokens(self):
         refresh = RefreshToken.for_user(self)
 
