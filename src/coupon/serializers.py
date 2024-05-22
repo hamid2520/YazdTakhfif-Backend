@@ -129,6 +129,7 @@ class CouponCreateSerializer(serializers.ModelSerializer):
     formatted_expire_date = serializers.SerializerMethodField()
     formatted_active_date = serializers.SerializerMethodField()
     expire_date = serializers.DateField()
+    is_active = serializers.BooleanField(required=False)
 
     def get_formatted_created(self, obj):
         datetime_field = jdatetime.datetime.fromgregorian(datetime=obj.created)
@@ -156,12 +157,13 @@ class CouponCreateSerializer(serializers.ModelSerializer):
                 raise ValidationError({"business": "Business not found!"})
             business = business.first()
             self.validated_data["business"] = business
+        self.validated_data["is_active"] = False
         return super().save(**kwargs)
 
     class Meta:
         model = Coupon
         fields = ["slug", "title", "business", "expire_date", "active_date", "category", "description", "terms_of_use",
-                  "formatted_created", "formatted_expire_date", "formatted_active_date"]
+                  "formatted_created", "formatted_expire_date", "formatted_active_date", "is_active"]
         read_only_fields = ['slug', ]
 
 
