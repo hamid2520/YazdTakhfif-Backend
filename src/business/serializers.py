@@ -5,9 +5,11 @@ from .models import Business, DepositRequest, CorporateRequest
 
 
 class BusinessSerializer(serializers.ModelSerializer):
+    phone_number = serializers.CharField(allow_blank=True, default='')
+
     class Meta:
         model = Business
-        fields = ["title", "slug", "admin", "description", "address", "lat_map", "lang_map"]
+        fields = ["title", "slug", "admin", "description", "address", "lat_map", "lang_map", "phone_number"]
         read_only_fields = ["slug", ]
 
 
