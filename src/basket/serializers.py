@@ -48,7 +48,7 @@ class BasketDetailShowSerializer(serializers.ModelSerializer):
         return True if available_count > 0 else False
 
     def get_imagesrc(self, obj: BasketDetail):
-        image: CouponImage = CouponImage.objects.filter(coupon_id=obj.line_coupon.coupon.id).first()
+        image: CouponImage = CouponImage.objects.filter(coupon_id=obj.line_coupon.coupon.id).last()
         if image:
             return image.image.url
         return ""
@@ -194,7 +194,7 @@ class ClosedBasketDetailShowSerializer(serializers.ModelSerializer):
         return True if available_count > 0 else False
 
     def get_imagesrc(self, obj: BasketDetail):
-        image: CouponImage = CouponImage.objects.filter(coupon_id=obj.line_coupon.coupon.id).first()
+        image: CouponImage = CouponImage.objects.filter(coupon_id=obj.line_coupon.coupon.id).last()
         if image:
             return image.image.url
         return ""
