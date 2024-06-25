@@ -24,6 +24,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # 'jet',
+    'django_non_dark_admin',
     'django.contrib.admin',
     # Third party apps
     'rest_framework',  # utilities for rest apis
@@ -391,3 +392,4 @@ AZ_IRANIAN_BANK_GATEWAYS = {
     'IS_SAFE_GET_GATEWAY_PAYMENT': False,  # اختیاری، بهتر است True بزارید.
     'CUSTOM_APP': None,  # اختیاری
 }
+DISABLE_DARK_MODE = True

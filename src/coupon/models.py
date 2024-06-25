@@ -56,8 +56,8 @@ class Coupon(models.Model):
     active_date = models.DateField(null=True, blank=True, verbose_name="تاریخ فعال سازی")
     is_active = models.BooleanField(default=False, null=True, blank=True, verbose_name='فعال/غیرفعال')
     category = models.ManyToManyField(to=Category, verbose_name="دسته بندی")
-    description = models.CharField(max_length=1000, blank=True, null=True, verbose_name="توضیحات")
-    terms_of_use = models.TextField(blank=True, null=True, verbose_name="شرایط استفاده")
+    description = models.TextField(max_length=104857600, blank=True, null=True, verbose_name="توضیحات")
+    terms_of_use = models.TextField(max_length=104857600, blank=True, null=True, verbose_name="شرایط استفاده")
     coupon_rate = models.DecimalField(default=0, blank=True, max_digits=2, decimal_places=1, verbose_name="امتیاز کوپن")
     rate_count = models.PositiveIntegerField(default=0, blank=True, verbose_name="تعداد رای دهندگان")
 
