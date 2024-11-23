@@ -218,18 +218,8 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'propagate': True,
+            'level': 'DEBUG'
         },
-        'django.server': {
-            'handlers': ['django.server'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'django.request': {
-            'handlers': ['mail_admins', 'console'],
-            'level': 'ERROR',
-            'propagate': False,
-        },
-        'django.db.backends': {'handlers': ['console'], 'level': 'INFO'},
     },
 }
 

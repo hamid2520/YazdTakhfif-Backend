@@ -1,4 +1,3 @@
-from django.utils.timezone import now
 from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
@@ -9,6 +8,8 @@ from .serializers import CategorySerializer, CouponSerializer, LineCouponSeriali
     LineCouponShowSerializer
 from .filters import PriceFilter, OfferFilter, RateFilter, BusinessFilter, CategoryFilter, IsAvailableFilter, \
     HotSellsFilter, PriceQueryFilter
+from django.utils import timezone
+import pytz
 
 
 class CategoryAPIView(ListAPIView):
@@ -19,7 +20,8 @@ class CategoryAPIView(ListAPIView):
 
 
 class CouponAPIView(ListRetrieveAPIView):
-    queryset = Coupon.objects.filter(is_active=True, active_date__lte=now().date())
+    queryset = Coupon.objects.filter(is_active=True,
+                                     active_date__lte=timezone.now().astimezone(pytz.timezone('Asia/Tehran')))
     serializer_class = CouponSerializer
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
