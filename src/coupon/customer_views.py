@@ -19,9 +19,10 @@ class CategoryAPIView(ListAPIView):
     search_fields = ['title', ]
 
 
+
 class CouponAPIView(ListRetrieveAPIView):
-    queryset = Coupon.objects.filter(is_active=True,
-                                     active_date__lte=timezone.now().astimezone(pytz.timezone('Asia/Tehran')))
+#    queryset = Coupon.objects.filter(is_active=True,
+#                                     active_date__lte=timezone.now().astimezone(pytz.timezone('Asia/Tehran')))
     serializer_class = CouponSerializer
     lookup_field = "slug"
     lookup_url_kwarg = "slug"
@@ -30,6 +31,10 @@ class CouponAPIView(ListRetrieveAPIView):
                                                               HotSellsFilter, PriceQueryFilter]
     search_fields = ['title', "linecoupon__title"]
     ordering_fields = ['linecoupon__offer_percent', 'linecoupon__price', 'created', 'coupon_rate']
+
+    def get_queryset(self):
+        current_date = timezone.now().astimezone(pytz.timezone('Asia/Tehran'))
+        return Coupon.objects.filter(is_active=True, active_date__lte=current_date)
 
     def get(self, request, *args, **kwargs):
         if kwargs.get("slug"):

@@ -17,7 +17,7 @@ from src.users.serializers import CreateUserSerializer, UserSerializer, SignInSe
     SignUpSerializer, AdminUserSerializer
 from rest_framework import pagination
 from django.utils.crypto import get_random_string
-
+from rest_framework import pagination
 from src.users.sms_function import SmsCenter, LOGIN_BODY_ID
 
 
@@ -146,9 +146,16 @@ class UserSignUpConfirmView(APIView):
                 return Response(status=400)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+class CustomLimitOffsetPagination(pagination.LimitOffsetPagination):
+    default_limit = 200
+    max_limit = 100
+    limit = 200
+
+
 class UserBusiness(ListAPIView):
     serializer_class = BusinessSerializer
-
+    pagination_class = CustomLimitOffsetPagination
     def get_queryset(self):
         if self.request.user.is_superuser:
             return Business.objects.exclude(title='یزد تخفیف')
