@@ -1,12 +1,13 @@
 from django.contrib import admin
 from django import forms
 from django.core.exceptions import ValidationError
+from unfold.admin import ModelAdmin
 
 from .models import Category, Coupon, CouponImage, LineCoupon, FAQ, Rate, Comment
 
 
 @admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(ModelAdmin):
     list_display = ["title", "parent"]
     list_editable = ["parent", ]
     search_fields = ["title", ]
@@ -16,7 +17,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 @admin.register(FAQ)
-class FAQAdmin(admin.ModelAdmin):
+class FAQAdmin(ModelAdmin):
     list_display = ["title", "category"]
     list_filter = ["category", ]
     search_fields = ["title", "answer", "category__title"]
@@ -28,7 +29,7 @@ class ImageInline(admin.TabularInline):
 
 
 @admin.register(Coupon)
-class CouponAdmin(admin.ModelAdmin):
+class CouponAdmin(ModelAdmin):
     list_display = ["title", "business", "created", "expire_date", "active_date"]
     list_filter = ["is_active", "category", "created", "expire_date", "active_date", "coupon_rate"]
     search_fields = ["title", "business__admin__username"]
@@ -38,14 +39,14 @@ class CouponAdmin(admin.ModelAdmin):
 
 
 @admin.register(CouponImage)
-class CouponImageAdmin(admin.ModelAdmin):
+class CouponImageAdmin(ModelAdmin):
     list_display = ["id", "coupon"]
     search_fields = ["coupon__title"]
     autocomplete_fields = ["coupon"]
 
 
 @admin.register(LineCoupon)
-class LineCouponAdmin(admin.ModelAdmin):
+class LineCouponAdmin(ModelAdmin):
     list_display = ["title", "coupon", "is_main", "count", "price", "offer_percent", "price_with_offer", "sell_count"]
     list_editable = ["is_main", "price", "offer_percent", "count", "sell_count"]
     list_filter = ["is_main", ]
@@ -55,7 +56,7 @@ class LineCouponAdmin(admin.ModelAdmin):
 
 
 @admin.register(Rate)
-class RateAdmin(admin.ModelAdmin):
+class RateAdmin(ModelAdmin):
     list_display = ["coupon", "user", "rate"]
     list_editable = ["rate", ]
     list_filter = ["rate", ]
@@ -64,7 +65,7 @@ class RateAdmin(admin.ModelAdmin):
 
 
 @admin.register(Comment)
-class CommentAdmin(admin.ModelAdmin):
+class CommentAdmin(ModelAdmin):
     list_display = ["coupon", "user", "parent", "created_at", "verified"]
     list_editable = ["verified", ]
     list_filter = ["created_at", "verified"]

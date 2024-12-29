@@ -1,12 +1,13 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
+from unfold.admin import ModelAdmin
 
 from src.users.models import User
 
 
 @admin.register(User)
-class UserAdmin(UserAdmin):
+class UserAdmin(UserAdmin, ModelAdmin):
     list_display = ["username", "first_name", "last_name", "is_superuser", "date_joined"]
     fieldsets = (
         (None, {'fields': ('username', 'password')}),

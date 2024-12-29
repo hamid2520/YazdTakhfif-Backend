@@ -1,10 +1,11 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 
 from src.payment.models import Payment
 
 
 @admin.register(Payment)
-class PaymentAdmin(admin.ModelAdmin):
+class PaymentAdmin(ModelAdmin):
     list_display = ["user", "basket", "total_price", "total_price_with_offer", "created_at", ]
     list_filter = ["created_at", ]
     search_fields = ["user__username", "basket__product__line_coupon__title",

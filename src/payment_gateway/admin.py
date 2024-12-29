@@ -1,10 +1,11 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 
 from .models import Gateway, OnlinePayment
 
 
 @admin.register(Gateway)
-class GatewayAdmin(admin.ModelAdmin):
+class GatewayAdmin(ModelAdmin):
     list_display = ["name", "gateway", "active", ]
     list_editable = ["active", ]
     list_filter = ["active", "gateway"]
@@ -12,7 +13,7 @@ class GatewayAdmin(admin.ModelAdmin):
 
 
 @admin.register(OnlinePayment)
-class OnlinePaymentAdmin(admin.ModelAdmin):
+class OnlinePaymentAdmin(ModelAdmin):
     list_display = ["user", "status", "gateway", "payment", "paid_at", "token", "ref_id"]
     list_filter = ["status", "gateway", "paid_at", ]
     search_fields = ["user__username", "payment__user__username", "token__contains", "ref_id__contains"]

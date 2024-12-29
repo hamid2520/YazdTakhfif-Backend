@@ -1,12 +1,12 @@
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.forms import Form
-
+from unfold.admin import ModelAdmin
 from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, ProductValidationCode
 
 
 @admin.register(Basket)
-class BasketAdmin(admin.ModelAdmin):
+class BasketAdmin(ModelAdmin):
     list_display = ["user", "created_at", "total_price", "total_offer_percent", "total_price_with_offer"]
     list_filter = ["created_at"]
     search_fields = ["user__username", "user__email", "total_price", "total_price_with_offer"]
@@ -16,7 +16,7 @@ class BasketAdmin(admin.ModelAdmin):
 
 
 @admin.register(BasketDetail)
-class BasketDetailAdmin(admin.ModelAdmin):
+class BasketDetailAdmin(ModelAdmin):
     list_display = ["line_coupon", "count", "total_price", "total_price_with_offer", ]
     list_editable = ["count", ]
     search_fields = ["line_coupon__title", "line_coupon__coupon__title"]
@@ -26,7 +26,7 @@ class BasketDetailAdmin(admin.ModelAdmin):
 
 
 @admin.register(ClosedBasket)
-class ClosedBasketAdmin(admin.ModelAdmin):
+class ClosedBasketAdmin(ModelAdmin):
     list_display = ["user", "created_at", "payment_datetime", "status", "total_price", "total_offer_percent",
                     "total_price_with_offer"]
     list_editable = ["status", ]
@@ -38,7 +38,7 @@ class ClosedBasketAdmin(admin.ModelAdmin):
 
 
 @admin.register(ClosedBasketDetail)
-class ClosedBasketDetailAdmin(admin.ModelAdmin):
+class ClosedBasketDetailAdmin(ModelAdmin):
     list_display = ["line_coupon", "status", "count", "total_price", "total_price_with_offer", ]
     list_editable = ["count", "status"]
     list_filter = ["status", ]
@@ -50,7 +50,7 @@ class ClosedBasketDetailAdmin(admin.ModelAdmin):
 
 #
 @admin.register(ProductValidationCode)
-class ProductValidationCodeAdmin(admin.ModelAdmin):
+class ProductValidationCodeAdmin(ModelAdmin):
     list_display = ["product", "code", "used", "closed_basket"]
     list_editable = ["used", "closed_basket"]
     list_filter = ["used", ]

@@ -3,10 +3,11 @@ from django.db.models import Sum
 
 from src.business.models import Business, DepositRequest
 from src.wallet.models import Transaction
+from unfold.admin import ModelAdmin
 
 
 @admin.register(DepositRequest)
-class BusinessAdmin(admin.ModelAdmin):
+class BusinessAdmin(ModelAdmin):
     list_display = ["requested_date", "requested_price", "sender"]
     search_fields = ["sender__first_name", "sender__last_name", "sender__phone"]
     autocomplete_fields = ["sender"]
@@ -14,7 +15,7 @@ class BusinessAdmin(admin.ModelAdmin):
 
 
 @admin.register(Business)
-class BusinessAdmin(admin.ModelAdmin):
+class BusinessAdmin(ModelAdmin):
     list_display = ["title", "admin", "deposit", "withdraw", "balance"]
     search_fields = ["title", "admin__username"]
     autocomplete_fields = ["admin"]
