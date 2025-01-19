@@ -93,7 +93,14 @@ def callback_gateway_view_v2(request, token):
         except bank_models.Bank.DoesNotExist:
             logging.debug("این لینک معتبر نیست.")
             return redirect(f"{HostUrl}/factor?status={INVOICE_NOT_FOUND}")
-        # در این قسمت باید از طریق داده هایی که در بانک رکورد وجود دارد، رکورد متناظر یا هر اقدام مقتضی دیگر را انجام دهیم
+        try:
+            gateway = Gateway.objects.filter(active=True).last()
+            factory = bankfactories.BankFactory()
+            bank = factory.create(bank_type=gateway.gateway)
+            bank.verify(tracking_code)
+        except:
+            pass
+
         if bank_record.is_success:
             response = {"pre_confirm": {"Status": "OK", "Authority": ""}, "post_confirm": {
                 "RefID": bank_record.reference_number, "Status": bank_record.status}}
