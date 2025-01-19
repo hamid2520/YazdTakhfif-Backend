@@ -34,7 +34,7 @@ class CouponAPIView(ListRetrieveAPIView):
 
     def get_queryset(self):
         current_date = timezone.now().astimezone(pytz.timezone('Asia/Tehran'))
-        return Coupon.objects.filter(is_active=True, active_date__lte=current_date)
+        return Coupon.objects.filter(is_active=True, active_date__lte=current_date).distinct()
 
     def get(self, request, *args, **kwargs):
         if kwargs.get("slug"):
@@ -42,7 +42,7 @@ class CouponAPIView(ListRetrieveAPIView):
         return self.list(request, *args, **kwargs)
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset()).distinct()
+        queryset = self.filter_queryset(self.get_queryset())
 
         page = self.paginate_queryset(queryset)
         if page is not None:

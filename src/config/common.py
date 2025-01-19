@@ -394,7 +394,7 @@ UNFOLD = {
     "SITE_URL": "https://yazdbon.ir/",
     "THEME": "dark",
     "LOGIN": {
-        "image": lambda request: static("admin_panel/login_bg2.png"),
+        "image": lambda request: static("admin_panel/login.jpg"),
     },
     "COLORS": {
         "primary": {
