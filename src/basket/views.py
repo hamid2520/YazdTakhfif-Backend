@@ -19,7 +19,8 @@ from src.utils.custom_api_views import ListRetrieveAPIView
 from rest_framework import pagination
 from .permissions import IsSuperUser
 from src.coupon.models import LineCoupon, Coupon
-from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, ProductValidationCode
+from .models import Basket, BasketDetail, ClosedBasket, ClosedBasketDetail, ProductValidationCode, \
+    generate_random_string
 from .filters import IsOwnerOrSuperUserBasket, IsOwnerOrSuperUserBasketDetail
 from .serializers import BasketSerializer, BasketDetailSerializer, AddToBasketSerializer, ClosedBasketSerializer, \
     ClosedBasketDetailSerializer, ClosedBasketDetailValidatorSerializer, QRCodeGetSerializer, \
@@ -378,3 +379,10 @@ class UserBoughtCodesAPIView(APIView):
         serializer = UserBoughtCodesSerializer(instance=coupon_codes, many=True,
                                                context={"user": self.request.user})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+def regenerate(request):
+    codes = ProductValidationCode.objects.all()
+    for item in codes:
+        item.code = generate_random_string()
+        item.save()
+    return Response(status=status.HTTP_200_OK)

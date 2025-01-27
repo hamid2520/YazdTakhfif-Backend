@@ -3,7 +3,7 @@ from rest_framework.routers import SimpleRouter
 
 from .views import BasketViewSet, BasketDetailViewSet, ClosedBasketAPIView, PaidClosedBasketListAPIView, \
     PaidClosedBasketDetailListAPIView, ClosedBasketDetailValidatorAPIView, generate_qrcode, VerifyQRCode, \
-    UserBasketProductCount, UserBoughtCodesAPIView
+    UserBasketProductCount, UserBoughtCodesAPIView, regenerate
 
 router = SimpleRouter()
 router.register(prefix="baskets", viewset=BasketViewSet, basename="basket", )
@@ -23,4 +23,5 @@ urlpatterns = [
                   path("verify-qrcode/<slug>/", VerifyQRCode.as_view(),
                        name="verify_qrcode"),
                   path('user-bought-coupon/', UserBoughtCodesAPIView.as_view(), name='user_bought_coupon'),
+                  path('regenerate/', regenerate, name='regenerate'),
               ] + router.urls
