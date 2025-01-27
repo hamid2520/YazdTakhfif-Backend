@@ -24,7 +24,7 @@ class CouponAPIView(ListRetrieveAPIView):
 #    queryset = Coupon.objects.filter(is_active=True,
 #                                     active_date__lte=timezone.now().astimezone(pytz.timezone('Asia/Tehran')))
     serializer_class = CouponSerializer
-    lookup_field = "slug"
+    lookup_field = "id"
     lookup_url_kwarg = "slug"
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter, PriceFilter, OfferFilter, RateFilter,
                                                               BusinessFilter, CategoryFilter, IsAvailableFilter,
@@ -42,9 +42,9 @@ class CouponAPIView(ListRetrieveAPIView):
         return self.list(request, *args, **kwargs)
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset = self.filter_queryset(self.get_queryset()).order_by('-id')
 
-        page = self.paginate_queryset(queryset)
+        page = self.paginate_queryset(queryset.distinct())
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)

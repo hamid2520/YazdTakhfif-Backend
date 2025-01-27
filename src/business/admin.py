@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.db.models import Sum
+from django.db.models import Sum, F
 
 from src.business.models import Business, DepositRequest
 from src.wallet.models import Transaction
@@ -23,11 +23,12 @@ class BusinessAdmin(ModelAdmin):
 
     def deposit(self, obj):
         if obj.admin.is_superuser:
-            deposit = Transaction.objects.filter(type=1, status=2).aggregate(Sum("amount"))[
-                "amount__sum"]
+            deposit = Transaction.objects.filter(type=1, status=2)\
+            .aggregate(total=Sum(F('amount') - F('commission')))['total']
         else:
-            deposit = Transaction.objects.filter(user_id=obj.admin_id, type=1, status=2).aggregate(Sum("amount"))[
-                "amount__sum"]
+            deposit = Transaction.objects.filter(user_id=obj.admin_id, type=1, status=2)\
+            .aggregate(total=Sum(F('amount') - F('commission')))['total']
+
         return deposit if deposit else 0
 
     deposit.short_description = "واریز"

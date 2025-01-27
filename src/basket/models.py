@@ -13,7 +13,9 @@ from src.users.models import User
 
 def generate_random_string(prefix="", length=8):
     characters = list(string.ascii_letters + string.digits)
-    return prefix + "".join(random.choice(characters) for _ in range(length))
+    return (prefix
+            + "".join(random.choice(characters) for _ in range(length - 5))
+            + "".join(random.choice(list(string.digits)) for _ in range(5)))
 
 
 # Basket Products
