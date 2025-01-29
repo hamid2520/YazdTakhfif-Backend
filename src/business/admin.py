@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.db.models import Sum, F
 
-from src.business.models import Business, DepositRequest
+from src.business.models import Business, DepositRequest, CorporateRequest
 from src.wallet.models import Transaction
 from unfold.admin import ModelAdmin
 
