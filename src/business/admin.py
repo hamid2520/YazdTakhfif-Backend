@@ -13,6 +13,11 @@ class BusinessAdmin(ModelAdmin):
     autocomplete_fields = ["sender"]
     list_filter = ['status', "sender"]
 
+@admin.register(CorporateRequest)
+class CorporateRequestAdmin(ModelAdmin):
+    list_display = ["first_name", "last_name", "phone_number"]
+    search_fields = ["first_name", "last_name", "phone_number"]
+
 
 @admin.register(Business)
 class BusinessAdmin(ModelAdmin):

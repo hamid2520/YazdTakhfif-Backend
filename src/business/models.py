@@ -45,11 +45,11 @@ class DepositRequest(models.Model):
 
 
 class CorporateRequest(models.Model):
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=24)
-    description = models.CharField(max_length=512)
-    field = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=255, verbose_name='نام')
+    last_name = models.CharField(max_length=255, verbose_name='نام خانوادگی')
+    phone_number = models.CharField(max_length=24, verbose_name='شماره موبایل')
+    description = models.CharField(max_length=512, verbose_name='توضیحات')
+    field = models.CharField(max_length=255, verbose_name='زمینه کاری')
 
     class Meta:
         verbose_name = "درخواست همکاری"
