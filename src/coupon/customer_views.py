@@ -24,7 +24,7 @@ class CouponAPIView(ListRetrieveAPIView):
 #    queryset = Coupon.objects.filter(is_active=True,
 #                                     active_date__lte=timezone.now().astimezone(pytz.timezone('Asia/Tehran')))
     serializer_class = CouponSerializer
-    lookup_field = "id"
+    lookup_field = "slug"
     lookup_url_kwarg = "slug"
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter, PriceFilter, OfferFilter, RateFilter,
                                                               BusinessFilter, CategoryFilter, IsAvailableFilter,
