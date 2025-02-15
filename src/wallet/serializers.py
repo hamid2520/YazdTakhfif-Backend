@@ -130,7 +130,7 @@ class WalletSerializer(serializers.ModelSerializer):
             query = Transaction.objects.filter(type=1, status=2)
         else:
             query = Transaction.objects.filter(user_id=obj.admin_id, type=1, status=2)
-        if with_commission:
+        if not with_commission:
             deposit_amount = query.aggregate(sum=Sum("amount"))["sum"]
         else:
             deposit_amount = query.aggregate(sum=Sum(F("amount") - F('commission')))["sum"]
