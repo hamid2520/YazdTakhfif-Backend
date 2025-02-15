@@ -133,7 +133,7 @@ class WalletSerializer(serializers.ModelSerializer):
         if with_commission:
             deposit_amount = query.aggregate(sum=Sum("amount"))["sum"]
         else:
-            deposit_amount = query.aggregate(sum=Sum(F("amount") - F('commission')))["sum"]
+            deposit_amount = query.aggregate(sum=Sum(F("amount") - F('closed_basket__total_commission')))["sum"]
         return deposit_amount if deposit_amount else 0
 
     def get_total_withdraw(self, obj: Business):
