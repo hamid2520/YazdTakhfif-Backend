@@ -133,7 +133,7 @@ class WalletSerializer(serializers.ModelSerializer):
         if with_commission:
             deposit_amount = query.aggregate(sum=Sum("amount"))["sum"]
         else:
-            deposit_amount = query.aggregate(sum=Sum("amount"))["sum"] - query.aggregate(sum_comission=Sum('commission'))['sum_comission']
+            deposit_amount = query.aggregate(sum=Sum(F("amount") - F('commission')))["sum"]
         return deposit_amount if deposit_amount else 0
 
     def get_total_withdraw(self, obj: Business):
@@ -146,8 +146,8 @@ class WalletSerializer(serializers.ModelSerializer):
         return withdraw_amount if withdraw_amount else 0
 
     def get_balance(self, obj: Business):
-        requested_deposits = DepositRequest.objects.filter(sender__id=self.context['user_id'], status=1)\
-                                                                .aggregate(amount=Sum('requested_price', 0))['amount']
+        requested_deposits = DepositRequest.objects.filter(sender__id=self.context['user_id'], status=1) \
+            .aggregate(amount=Sum('requested_price'))['amount']
         return self.get_total_sell(obj, with_commission=True) - self.get_total_withdraw(obj) - requested_deposits
 
     class Meta:
