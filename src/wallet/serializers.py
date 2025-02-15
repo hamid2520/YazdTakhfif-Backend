@@ -1,4 +1,5 @@
-from django.db.models import Sum, F
+from django.db.models import Sum, F, ExpressionWrapper
+from django.forms import IntegerField
 from django.utils import timezone
 from jdatetime import datetime
 from rest_framework import serializers
@@ -133,7 +134,7 @@ class WalletSerializer(serializers.ModelSerializer):
         if with_commission:
             deposit_amount = query.aggregate(sum=Sum("amount"))["sum"]
         else:
-            deposit_amount = query.aggregate(sum=Sum(F('amount') - F('commission')))['sum']
+            deposit_amount = query.aggregate(sum=Sum(ExpressionWrapper(F('amount') - F('commission'), output_field=IntegerField())))['sum']
         return deposit_amount if deposit_amount else 0
 
     def get_total_withdraw(self, obj: Business):
