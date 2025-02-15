@@ -43,7 +43,7 @@ class CouponAPIView(ListRetrieveAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        if not self.query_params.get("special_order",False):
+        if not request.query_params.get("special_order",False) and not request.query_params.get("ordering",False):
             queryset = queryset.order_by('-id')
         page = self.paginate_queryset(queryset.distinct())
         if page is not None:
