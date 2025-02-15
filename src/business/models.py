@@ -27,7 +27,7 @@ class Business(models.Model):
         verbose_name_plural = "کسب و کار ها"
 
 
-DepositStatus = [('درحال انتظار', 0), ("تسویه شده", 1), ("رد شده", 2)]
+DepositStatus = [(0, 'درحال انتظار'), (1, "تسویه شده"), (2, "رد شده")]
 
 
 class DepositRequest(models.Model):

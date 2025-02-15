@@ -7,7 +7,7 @@ from .models import Category, Coupon
 from .serializers import CategorySerializer, CouponSerializer, LineCouponSerializer, CustomerCategorySerializer, \
     LineCouponShowSerializer
 from .filters import PriceFilter, OfferFilter, RateFilter, BusinessFilter, CategoryFilter, IsAvailableFilter, \
-    HotSellsFilter, PriceQueryFilter
+    HotSellsFilter, PriceQueryFilter, SpecialOrderFilter
 from django.utils import timezone
 import pytz
 
@@ -28,9 +28,9 @@ class CouponAPIView(ListRetrieveAPIView):
     lookup_url_kwarg = "slug"
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter, PriceFilter, OfferFilter, RateFilter,
                                                               BusinessFilter, CategoryFilter, IsAvailableFilter,
-                                                              HotSellsFilter, PriceQueryFilter]
+                                                              HotSellsFilter, PriceQueryFilter, SpecialOrderFilter]
     search_fields = ['title', "linecoupon__title"]
-    ordering_fields = ['linecoupon__offer_percent', 'linecoupon__price', 'created', 'coupon_rate']
+    ordering_fields = ['linecoupon__offer_percent', 'linecoupon__price', 'created', 'coupon_rate', 'special_order']
 
     def get_queryset(self):
         current_date = timezone.now().astimezone(pytz.timezone('Asia/Tehran'))

@@ -1,4 +1,4 @@
-from django.db.models import Sum
+from django.db.models import Sum, F
 from django.utils import timezone
 from jdatetime import datetime
 from rest_framework import serializers
@@ -6,7 +6,7 @@ from rest_framework import serializers
 from .models import *
 from ..basket.models import ProductValidationCode, ClosedBasketDetail
 from ..basket.serializers import ProductValidationCodeSerializer
-from ..business.models import Business
+from ..business.models import Business, DepositRequest
 from ..coupon.models import LineCoupon, Coupon
 from ..utils.get_bool import get_boolean
 from .filters import CustomTimeFilter
@@ -125,13 +125,15 @@ class WalletSerializer(serializers.ModelSerializer):
     total_withdraw = serializers.SerializerMethodField()
     balance = serializers.SerializerMethodField()
 
-    def get_total_sell(self, obj: Business):
+    def get_total_sell(self, obj: Business, with_commission=False):
         if self.context["superuser"]:
-            deposit_amount = \
-                Transaction.objects.filter(type=1, status=2).aggregate(sum=Sum("amount"))["sum"]
+            query = Transaction.objects.filter(type=1, status=2)
         else:
-            deposit_amount = \
-                Transaction.objects.filter(user_id=obj.admin_id, type=1, status=2).aggregate(sum=Sum("amount"))["sum"]
+            query = Transaction.objects.filter(user_id=obj.admin_id, type=1, status=2)
+        if with_commission:
+            deposit_amount = query.aggregate(sum=Sum("amount"))["sum"]
+        else:
+            deposit_amount = query.aggregate(sum=Sum(F('amount') - F('commission')))['sum']
         return deposit_amount if deposit_amount else 0
 
     def get_total_withdraw(self, obj: Business):
@@ -144,7 +146,9 @@ class WalletSerializer(serializers.ModelSerializer):
         return withdraw_amount if withdraw_amount else 0
 
     def get_balance(self, obj: Business):
-        return self.get_total_sell(obj) - self.get_total_withdraw(obj)
+        requested_deposits = DepositRequest.objects.filter(sender__id=self.context['request'].user.id, status=1)\
+                                                                .aggregate(amount=Sum('requested_price', 0))['amount']
+        return self.get_total_sell(obj, with_commission=True) - self.get_total_withdraw(obj) - requested_deposits
 
     class Meta:
         model = Business

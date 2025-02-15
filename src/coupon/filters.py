@@ -105,6 +105,17 @@ class IsAvailableFilter(filters.BaseFilterBackend):
         return queryset
 
 
+class SpecialOrderFilter(filters.BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        special_order = request.query_params.get("special_order")
+        if special_order and queryset.exists():
+            if get_boolean(special_order):
+                return queryset.filter(special_order__gte=0).distinct()
+            else:
+                return queryset.filter(special_order__lte=-1).distinct()
+        return queryset
+
+
 class HotSellsFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         ordering = request.query_params.get("ordering")

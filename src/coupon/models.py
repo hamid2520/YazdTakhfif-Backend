@@ -60,6 +60,7 @@ class Coupon(models.Model):
     terms_of_use = models.TextField(max_length=104857600, blank=True, null=True, verbose_name="شرایط استفاده")
     coupon_rate = models.DecimalField(default=0, blank=True, max_digits=2, decimal_places=1, verbose_name="امتیاز کوپن")
     rate_count = models.PositiveIntegerField(default=0, blank=True, verbose_name="تعداد رای دهندگان")
+    special_order = models.SmallIntegerField(default=-1, blank=True, verbose_name="ترتیب در شگفت انگیزان")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if not self.slug:
