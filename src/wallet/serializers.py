@@ -1,5 +1,4 @@
-from django.db.models import Sum, F, ExpressionWrapper
-from django.forms import IntegerField
+from django.db.models import Sum, F, ExpressionWrapper, IntegerField
 from django.utils import timezone
 from jdatetime import datetime
 from rest_framework import serializers
