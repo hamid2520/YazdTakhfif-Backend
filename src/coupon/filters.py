@@ -110,7 +110,7 @@ class SpecialOrderFilter(filters.BaseFilterBackend):
         special_order = request.query_params.get("special_order")
         if special_order and queryset.exists():
             if get_boolean(special_order):
-                return queryset.filter(special_order__gte=0).distinct()
+                return queryset.filter(special_order__gte=0).order('-spcial_order').distinct()
             else:
                 return queryset.filter(special_order__lte=-1).distinct()
         return queryset
