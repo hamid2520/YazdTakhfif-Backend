@@ -46,8 +46,8 @@ class DepositRequest(models.Model):
         from src.wallet.models import Transaction
         deposit = Transaction.objects.filter(user_id=self.sender.id, type=1, status=2).aggregate(Sum("amount"))[
                       "amount__sum"] or 0
-        already_requested = DepositRequest.objects.filter(sender=self.sender, status=0).aggregate(Sum("amount"))[
-                                'amount__sum'] or 0
+        already_requested = DepositRequest.objects.filter(sender=self.sender, status=0).aggregate(Sum("requested_price"))[
+                                'requested_price__sum'] or 0
         withdraw = Transaction.objects.filter(user_id=self.sender.id, type=2, status=2).aggregate(Sum("amount"))[
                        "amount__sum"] or 0
         if deposit < withdraw + self.requested_price + already_requested:
