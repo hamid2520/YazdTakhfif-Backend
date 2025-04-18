@@ -14,8 +14,8 @@ class GatewayAdmin(ModelAdmin):
 
 @admin.register(OnlinePayment)
 class OnlinePaymentAdmin(ModelAdmin):
-    list_display = ["user", "status", "gateway", "payment", "paid_at", "token", "ref_id"]
+    list_display = ["user", "status", "gateway", "payment", "paid_at"]
     list_filter = ["status", "gateway", "paid_at", ]
-    search_fields = ["user__username", "payment__user__username", "token__contains", "ref_id__contains"]
+    search_fields = ["user__username", "user__phone", "payment__user__username", "token", "ref_id", "user__first_name", "user__last_name"]
     autocomplete_fields = ["user", "gateway", "payment"]
     readonly_fields = ["user", "status", "token", "gateway", "extra_data", "response", "ref_id", "payment", "paid_at", ]

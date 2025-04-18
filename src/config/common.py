@@ -1,10 +1,10 @@
 import os
-import sentry_sdk
+# import sentry_sdk
 import sys
 import dotenv
 
 from datetime import timedelta
-from sentry_sdk.integrations.django import DjangoIntegration
+# from sentry_sdk.integrations.django import DjangoIntegration
 from os.path import join
 
 TESTING = sys.argv[1:2] == ['test']
@@ -98,7 +98,7 @@ CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379')
 ADMINS = ()
 
 # Sentry
-sentry_sdk.init(dsn=os.getenv('SENTRY_DSN', ''), integrations=[DjangoIntegration()])
+# sentry_sdk.init(dsn=os.getenv('SENTRY_DSN', ''), integrations=[DjangoIntegration()])
 
 # CORS
 CORS_ORIGIN_ALLOW_ALL = True
@@ -215,13 +215,13 @@ LOGGING = {
         'console': {'level': 'DEBUG', 'class': 'logging.StreamHandler', 'formatter': 'simple'},
         'mail_admins': {'level': 'ERROR', 'class': 'django.utils.log.AdminEmailHandler'},
     },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'propagate': True,
-            'level': 'DEBUG'
-        },
-    },
+    # 'loggers': {
+    #     'django': {
+    #         'handlers': ['console'],
+    #         'propagate': True,
+    #         'level': 'DEBUG'
+    #     },
+    # },
 }
 
 # Custom user app

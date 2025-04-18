@@ -11,7 +11,9 @@ def make_transaction_for_each_product(sender, **kwargs):
     if not Transaction.objects.filter(closed_basket=closed_basket).exists():
         if closed_basket.status == 3:
             for product in closed_basket.product.all():
-                transaction = Transaction(user=product.line_coupon.coupon.business.admin,
+                from src.users.models import User
+                super_user = User.objects.filter(is_superuser=True).first()
+                transaction = Transaction(user=super_user,
                                           amount=product.total_price_with_offer,
                                           price_without_offer=product.total_price,
                                           customer=closed_basket.user.username,

@@ -169,6 +169,23 @@ class ProductValidationCode(models.Model):
     closed_basket = models.ForeignKey(ClosedBasket, on_delete=models.SET_NULL, null=True, blank=True,
                                       verbose_name="سبد خرید بسته شده")
 
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        super(ProductValidationCode, self).save(force_insert, force_update, using, update_fields)
+        if self.used:
+            from src.wallet.models import Transaction
+            product = self.product
+            transaction = Transaction(user=product.coupon.business.admin,
+                                      amount=product.price_with_offer,
+                                      price_without_offer=product.price,
+                                      customer=self.closed_basket.user.username,
+                                      closed_basket_id=self.closed_basket.id,
+                                      coupon_id=product.coupon_id,
+                                      line_coupon_id=product.id,
+                                      type=1,
+                                      commission=product.commission)
+            transaction.save()
+
     def __str__(self):
         return f"{self.product.title}({self.pk})"
 

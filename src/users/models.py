@@ -37,7 +37,11 @@ class User(AbstractUser):
     profile_picture = ThumbnailerImageField(verbose_name='عکس پروفایل', upload_to='profile_pictures/', blank=True,
                                             null=True, )
     address = models.CharField(max_length=512, null=True, blank=True, verbose_name="آدرس")
-    
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
     def save(self, *args, **kwargs):
         if self.phone is None or self.phone == '':
             self.phone = self.username
@@ -52,7 +56,7 @@ class User(AbstractUser):
         }
 
     def __str__(self):
-        return self.username
+        return f'{self.first_name} {self.last_name} ({self.username})'
 
 
 saved_file.connect(generate_aliases_global)

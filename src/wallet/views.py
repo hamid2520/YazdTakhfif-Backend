@@ -1,3 +1,4 @@
+from django.db.models.functions import Concat
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,6 +12,7 @@ from rest_framework.generics import ListAPIView
 # from core.util.mixin import IsAuthenticatedPermission
 from . import serializers
 from . import models
+from django.db.models import Value as V
 # from accounting.models import Payment, OnlinePayment, Gateway
 import logging
 from django.http import Http404
@@ -53,7 +55,7 @@ class WalletCouponsView(ListAPIView):
     serializer_class = UserBoughtCodesSerializer
     permission_classes = [IsAuthenticated, ]
     filter_backends = api_settings.DEFAULT_FILTER_BACKENDS + [SearchFilter, TimeFilter]
-    search_fields = ['business__title', 'category__title', 'linecoupon__title', 'title', 'user_phone']
+    search_fields = ['business__title', 'category__title', 'linecoupon__title', 'title', 'user_phone', 'user_full_name']
 
     def get_queryset(self):
         user = self.request.user
@@ -68,7 +70,8 @@ class WalletCouponsView(ListAPIView):
                 user_first_name=F('linecoupon__closedbasketdetail__closedbasket__user__first_name'),
                 user_last_name=F('linecoupon__closedbasketdetail__closedbasket__user__last_name'),
                 user_phone=F('linecoupon__closedbasketdetail__closedbasket__user__phone'),
-                status=F('linecoupon__closedbasketdetail__closedbasket__is_paid')
+                status=F('linecoupon__closedbasketdetail__closedbasket__is_paid'),
+                user_full_name=Concat("linecoupon__closedbasketdetail__closedbasket__user__first_name", V(" "), "linecoupon__closedbasketdetail__closedbasket__user__last_name")
             ))
         return sold_coupons
 
