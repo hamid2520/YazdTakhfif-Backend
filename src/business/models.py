@@ -51,7 +51,7 @@ class DepositRequest(models.Model):
         withdraw = Transaction.objects.filter(user_id=self.sender.id, type=2, status=2).aggregate(Sum("amount"))[
                        "amount__sum"] or 0
         if deposit < withdraw + self.requested_price + already_requested:
-            raise APIException("موجودی کسب و کار جهت برداشت کافی نیست!")
+            raise ValidationError({"requested_price": "موجودی کسب و کار جهت برداشت کافی نیست!"})
         super(DepositRequest, self).save_base()
 
     class Meta:
