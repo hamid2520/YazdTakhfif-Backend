@@ -146,9 +146,7 @@ class WalletSerializer(serializers.ModelSerializer):
         return withdraw_amount if withdraw_amount else 0
 
     def get_balance(self, obj: Business):
-        requested_deposits = DepositRequest.objects.filter(sender_id=obj.admin_id, status=0) \
-            .aggregate(amount=Sum('requested_price'))['amount']
-        requested_deposits = requested_deposits if requested_deposits else 0
+        requested_deposits = DepositRequest.objects.filter(sender_id=obj.admin_id, status=0).aggregate(amount=Sum('requested_price'))['amount'] or 0
         return self.get_total_sell(obj, with_commission=True) - self.get_total_withdraw(obj) - requested_deposits
 
     class Meta:

@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, F
 from django.utils.text import slugify
 from rest_framework.exceptions import APIException, ValidationError
 
@@ -44,14 +44,14 @@ class DepositRequest(models.Model):
 
     def save_base(self, raw=False, force_insert=False, force_update=False, using=None, update_fields=None):
         from src.wallet.models import Transaction
-        deposit = Transaction.objects.filter(user_id=self.sender.id, type=1, status=2).aggregate(Sum("amount"))[
-                      "amount__sum"] or 0
-        already_requested = DepositRequest.objects.filter(sender=self.sender, status=0).aggregate(Sum("requested_price"))[
-                                'requested_price__sum'] or 0
-        withdraw = Transaction.objects.filter(user_id=self.sender.id, type=2, status=2).aggregate(Sum("amount"))[
-                       "amount__sum"] or 0
+        deposit = Transaction.objects.filter(user_id=self.sender.id, type=1, status=2) \
+                      .aggregate(amount_sum=Sum(F("amount") - F('commission')))["amount_sum"] or 0
+        already_requested = DepositRequest.objects.filter(sender=self.sender, status=0) \
+                                .aggregate(Sum("requested_price"))['requested_price__sum'] or 0
+        withdraw = Transaction.objects.filter(user_id=self.sender.id, type=2, status=2) \
+                       .aggregate(Sum("amount"))["amount__sum"] or 0
         if deposit < withdraw + self.requested_price + already_requested:
-            raise ValidationError({"requested_price": "موجودی کسب و کار جهت برداشت کافی نیست!"})
+            raise ValidationError("موجودی کسب و کار جهت برداشت کافی نیست!")
         super(DepositRequest, self).save_base()
 
     class Meta:
