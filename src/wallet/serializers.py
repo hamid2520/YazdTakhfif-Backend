@@ -126,10 +126,7 @@ class WalletSerializer(serializers.ModelSerializer):
     balance = serializers.SerializerMethodField()
 
     def get_total_sell(self, obj: Business, with_commission=False):
-        if self.context["superuser"]:
-            query = Transaction.objects.filter(type=1, status=2)
-        else:
-            query = Transaction.objects.filter(user_id=obj.admin_id, type=1, status=2)
+        query = Transaction.objects.filter(user_id=obj.admin_id, type=1, status=2)
         if not with_commission:
             deposit_amount = query.aggregate(sum=Sum("amount"))["sum"]
         else:
@@ -137,12 +134,7 @@ class WalletSerializer(serializers.ModelSerializer):
         return deposit_amount if deposit_amount else 0
 
     def get_total_withdraw(self, obj: Business):
-        if self.context["superuser"]:
-            withdraw_amount = \
-                Transaction.objects.filter(type=2, status=2).aggregate(sum=Sum("amount"))["sum"]
-        else:
-            withdraw_amount = \
-                Transaction.objects.filter(user_id=obj.admin_id, type=2, status=2).aggregate(sum=Sum("amount"))["sum"]
+        withdraw_amount = Transaction.objects.filter(user_id=obj.admin_id, type=2, status=2).aggregate(sum=Sum("amount"))["sum"]
         return withdraw_amount if withdraw_amount else 0
 
     def get_balance(self, obj: Business):
