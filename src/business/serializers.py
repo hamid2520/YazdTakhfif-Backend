@@ -20,6 +20,10 @@ class DepositSerializer(serializers.ModelSerializer):
     def validate_sender(self):
         return self.context['request'].user
 
+    def create(self, validated_data):
+        validated_data['sender'] = self.context['request'].user
+        return super().create(validated_data)
+
     class Meta:
         model = DepositRequest
         fields = ['requested_date', 'requested_price', 'status', 'deposit_date', 'document', 'sender',
