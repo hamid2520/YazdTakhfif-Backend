@@ -52,8 +52,9 @@ class DepositRequest(models.Model):
                        .aggregate(Sum("amount"))["amount__sum"] or 0
         if self.sender.is_superuser:
             raise ValidationError("امکان ثبت درخواست برداشت برای ادمین اصلی وجود ندارد")
-        if deposit < withdraw + self.requested_price + already_requested:
-            raise ValidationError("موجودی کسب و کار جهت برداشت کافی نیست!")
+        if self.id is None:
+            if deposit < withdraw + self.requested_price + already_requested:
+                raise ValidationError("موجودی کسب و کار جهت برداشت کافی نیست!")
         super(DepositRequest, self).save_base()
 
     class Meta:

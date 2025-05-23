@@ -381,8 +381,20 @@ class UserBoughtCodesAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 def regenerate(request):
-    codes = ProductValidationCode.objects.all()
+    from time import sleep
+    codes = ProductValidationCode.objects.all()[30000:]
+
     for item in codes:
-        item.code = generate_random_string()
-        item.save()
+        success = False
+        while not success:
+            try:
+                item.code = generate_random_string()
+                item.save()
+                success = True  # If save is successful, exit the loop
+            except Exception as e:
+                # Optionally log the error or handle it as needed
+                print(f"Error occurred: {e}. Retrying...")
+                sleep(1)  # Optional: wait before retrying
+
     return Response(status=status.HTTP_200_OK)
+

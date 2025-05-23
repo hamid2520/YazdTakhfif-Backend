@@ -17,7 +17,7 @@ class DepositViewSet(ModelViewSet):
         if self.request.user.is_superuser:
             return DepositRequest.objects.all()
         else:
-            return DepositRequest.objects.first(sender=self.request.user)
+            return DepositRequest.objects.filter(sender=self.request.user)
 
 
 class CorporateViewSet(CreateAPIView):

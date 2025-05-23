@@ -23,5 +23,5 @@ urlpatterns = [
                   path("verify-qrcode/<slug>/", VerifyQRCode.as_view(),
                        name="verify_qrcode"),
                   path('user-bought-coupon/', UserBoughtCodesAPIView.as_view(), name='user_bought_coupon'),
-                  path('regenerate/', regenerate, name='regenerate'),
+#                  path('regenerate/', regenerate, name='regenerate'),
               ] + router.urls
